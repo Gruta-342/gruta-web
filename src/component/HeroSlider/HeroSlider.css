@@ -1,0 +1,26 @@
+.hero-slider {
+  position: relative;
+  height: 400px;
+  background: linear-gradient(90deg, #d3b860 0%, #e0ca79 50%, #c4a94f 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+}
+
+.arrow {
+  color: white;
+  font-size: 40px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+.arrow:hover {
+  background: rgba(0, 0, 0, 0.5);
+}

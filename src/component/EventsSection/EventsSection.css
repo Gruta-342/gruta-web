@@ -1,0 +1,27 @@
+.events-section {
+  padding-top: 40px;
+}
+
+.section-title {
+  padding: 0 40px;
+  font-size: 32px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+.events-background {
+  background-color: #0a4f78; /* Faixa azul mais clara */
+  padding: 40px;
+}
+
+.events-grid {
+  display: flex;
+  gap: 30px;
+  overflow-x: auto;
+  padding-bottom: 15px; /* Para não cortar a sombra */
+}
+
+/* Esconde scrollbar, mantendo a rolagem em telas menores */
+.events-grid::-webkit-scrollbar {
+  display: none;
+}
