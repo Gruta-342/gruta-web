@@ -1,28 +1,64 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./Header.css";
-import logoGruta from "../src/assets/Gruta Simplificado - Fundo Escuro.png";
+import logoGruta from "../../assets/logo.png";
 
 export default function Header() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  
+  // Esse estado guarda qual botão está selecionado. 
+  // O número 0 representa o primeiro botão ("HOME").
+  const [activeTab, setActiveTab] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 120) {
+        setIsScrolled(true);
+      } else if (window.scrollY < 20) {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Lista dos botões do seu menu
+  const navItems = ["HOME", "CALENDÁRIO", "GALERIA", "GALERIA", "SOBRE"];
+
   return (
-    <header className="header-container">
+    <header className={`header-container ${isScrolled ? "scrolled" : ""}`}>
       <div className="top-bar">
-        <button className="menu-btn">☰ MENU</button>
-        <div className="logo">
-          {/* Substitua pela imagem real depois */}
-          <h2>GRUTA</h2>
+        
+        <div className="menu-container">
+          <button className="menu-btn">☰ MENU</button>
         </div>
+        
+        <div className="logo-container">
+          <img src={logoGruta} alt="Logo Gruta" className="logo-img" />
+        </div>
+
         <div className="user-actions">
           <button>🔍</button>
           <button>👤</button>
         </div>
+
       </div>
+      
+      {/* Aqui entra a linha fina divisória */}
+      <div className="separator"></div>
+
       <nav className="bottom-nav">
         <ul>
-          <li className="active">HOME</li>
-          <li>CALENDÁRIO</li>
-          <li>GALERIA</li>
-          <li>GALERIA</li>
-          <li>SOBRE</li>
+          {/* O map desenha todos os botões e testa se ele é o ativo para mudar a cor */}
+          {navItems.map((item, index) => (
+            <li 
+              key={index} 
+              className={activeTab === index ? "active" : ""}
+              onClick={() => setActiveTab(index)}
+            >
+              {item}
+            </li>
+          ))}
         </ul>
       </nav>
     </header>

@@ -1,17 +1,36 @@
 .hero-slider {
   position: relative;
   height: 400px;
-  background: linear-gradient(90deg, #d3b860 0%, #e0ca79 50%, #c4a94f 100%);
+  background-color: #0b1b36; /* Fundo escuro de fallback */
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 40px;
+  overflow: hidden; /* Garante que a imagem não vaze das bordas */
+}
+
+/* O container da imagem ocupa 100% do espaço de forma absoluta */
+.slider-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; /* Mantém a imagem no fundo */
+}
+
+/* A imagem em si preenche o container sem distorcer */
+.slide-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 .arrow {
   color: white;
   font-size: 40px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.4); /* Deixei um pouco mais escuro para destacar na imagem */
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -19,8 +38,11 @@
   align-items: center;
   justify-content: center;
   transition: background 0.3s;
+  z-index: 2; /* Garante que as setas fiquem por cima da foto */
+  cursor: pointer;
+  border: none;
 }
 
 .arrow:hover {
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.8);
 }
