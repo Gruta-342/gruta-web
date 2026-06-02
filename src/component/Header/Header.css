@@ -43,6 +43,29 @@
   gap: 15px;
 }
 
+.profile-btn {
+  background: none;
+  border: none;
+  color: white; 
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+/* Tamanho do ícone SVG */
+.profile-btn svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* Efeito Hover acendendo o botão */
+.profile-btn:hover {
+  color: #00d2ff; /* Acende com o mesmo azul vivo dos menus */
+  transform: scale(1.1);
+}
+
 .menu-btn, .user-actions button {
   color: white;
   font-weight: bold;

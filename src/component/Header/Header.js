@@ -30,7 +30,6 @@ export default function Header() {
       <div className="top-bar">
         
         <div className="menu-container">
-          <button className="menu-btn">☰ MENU</button>
         </div>
         
         <div className="logo-container">
@@ -38,8 +37,17 @@ export default function Header() {
         </div>
 
         <div className="user-actions">
-          <button>🔍</button>
-          <button>👤</button>
+          {/* Botão de Perfil em SVG*/}
+          <button className="profile-btn" title="Perfil (Em Breve)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {/* Círculo externo */}
+              <circle cx="12" cy="12" r="10"></circle>
+              {/* Ombros (arco que toca exatamente na borda do círculo) */}
+              <path d="M18 20a6 6 0 0 0-12 0"></path>
+              {/* Cabeça */}
+              <circle cx="12" cy="10" r="4"></circle>
+            </svg>
+          </button>
         </div>
 
       </div>

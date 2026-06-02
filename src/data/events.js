@@ -10,7 +10,7 @@ export const eventsData = [
     id: 5,
     title: "ESCAPE THE BACKROOMS",
     tags: ["CINEMA", "GAMEPLAY"],
-    description: "Após horas de angústia em gameplay foi lançado o filme para que a gente pudesse se angustiar assistindo também.",
+    description: "Após horas de angústia em gameplay, foi lançado o filme para que a gente pudesse se angustiar assistindo também.",
     image: escapeImg
   },
   {

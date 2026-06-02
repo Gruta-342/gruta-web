@@ -1,0 +1,50 @@
+.floating-socials {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  display: flex;
+  flex-direction: column; /* Empilha um botão sobre o outro */
+  gap: 15px; /* Distância entre os dois */
+  z-index: 9999; /* Garante que ficarão acima de TUDO no site */
+}
+
+.social-btn {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background-color: #004b75; /* O azul da base dos seus menus */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white; /* Cor do ícone */
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Sombra para dar o efeito de flutuar */
+  transition: all 0.3s ease;
+}
+
+.social-btn svg {
+  width: 26px;
+  height: 26px;
+  transition: transform 0.3s ease;
+}
+
+/* --- EFEITOS DE HOVER MÁGICOS --- */
+
+/* Hover do Discord - Cor original "Blurple" e sobe um pouquinho */
+.social-btn.discord:hover {
+  background-color: #5865F2; 
+  transform: translateY(-5px) scale(1.1);
+  box-shadow: 0 8px 20px rgba(88, 101, 242, 0.4);
+}
+
+/* Hover do Instagram - Gradiente original e sobe um pouquinho */
+.social-btn.instagram:hover {
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+  transform: translateY(-5px) scale(1.1);
+  box-shadow: 0 8px 20px rgba(214, 36, 159, 0.4);
+}
+
+/* O ícone dentro do botão também dá uma leve crescida */
+.social-btn:hover svg {
+  transform: scale(1.15);
+}
