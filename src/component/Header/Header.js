@@ -30,6 +30,10 @@ export default function Header() {
       <div className="top-bar">
         
         <div className="menu-container">
+          <p className="header-slogan">
+            Onde o caos vira história<br />
+            e a zoeira é tradição.
+          </p>
         </div>
         
         <div className="logo-container">

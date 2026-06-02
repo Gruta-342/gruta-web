@@ -6,6 +6,17 @@
   transition: all 0.3s ease;
 }
 
+/* Slogan do Cabeçalho */
+.header-slogan {
+  color: #4a8aa8; /* Um azul mais suave para não ofuscar o logo */
+  font-size: 13px;
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1.4; /* Espaçamento confortável entre as duas linhas */
+  margin: 0;
+  text-align: left;
+}
+
 .top-bar {
   display: flex;
   justify-content: space-between;

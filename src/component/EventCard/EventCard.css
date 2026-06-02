@@ -13,14 +13,41 @@
   transform: translateY(-5px);
 }
 
-.card-image-container {
-  flex: 0 0 180px; /* Largura fixa para a imagem */
+/* O container que ancora a data e limita a largura da imagem */
+.event-image-wrapper {
+  position: relative; /* ISSO PRENDE A DATA! */
+  flex: 0 0 180px; 
 }
 
-.card-image {
+.event-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* A data com posicionamento absoluto em relação ao wrapper */
+.event-date {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  /* Branco com 80% de opacidade para ver a imagem de fundo */
+  background-color: rgba(110, 110, 110, 0.75); 
+  color: #ffffff; /* Texto bem escuro para manter a leitura em cima do branco */
+  font-weight: bold;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  z-index: 2; 
+  text-transform: uppercase;
+  /* Garante que a transição de cor seja bem suave */
+  transition: all 0.3s ease; 
+}
+
+.event-card:hover .event-date {
+  background-color: #00d2ff; /* Volta para o azul vivo da Gruta */
+  color: #051329;
+  box-shadow: 0 4px 10px rgba(0, 210, 255, 0.4); /* Opcional: A sombra também ganha um tom azulado */
 }
 
 .card-content {
@@ -32,12 +59,14 @@
 .card-title {
   font-size: 20px;
   margin-bottom: 10px;
+  color: white; /* Garantindo que o título apareça no fundo escuro */
 }
 
 .tags {
   display: flex;
   gap: 8px;
   margin-bottom: 15px;
+  flex-wrap: wrap; /* Caso tenha muitas tags, elas caem para a linha de baixo sem quebrar */
 }
 
 .tag {
