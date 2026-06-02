@@ -1,27 +1,99 @@
 .events-section {
-  padding-top: 40px;
+  padding: 40px 60px;
+  background-color: #051329; /* Mesma cor base do site */
 }
 
 .section-title {
-  padding: 0 40px;
-  font-size: 32px;
-  margin-bottom: 20px;
+  color: white;
+  font-size: 28px;
+  margin-bottom: 30px;
   text-transform: uppercase;
 }
 
-.events-background {
-  background-color: #0a4f78; /* Faixa azul mais clara */
-  padding: 40px;
-}
-
-.events-grid {
+.carousel-wrapper {
+  position: relative;
   display: flex;
-  gap: 30px;
-  overflow-x: auto;
-  padding-bottom: 15px; /* Para não cortar a sombra */
+  align-items: center;
 }
 
-/* Esconde scrollbar, mantendo a rolagem em telas menores */
-.events-grid::-webkit-scrollbar {
-  display: none;
+.events-carousel {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 20px 0; 
+  
+  /* Escondendo a barra de rolagem (Scrollbar) */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Edge */
+}
+
+.events-carousel::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+/* As Setas Navegadoras */
+.carousel-arrow {
+  background-color: #004b75;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  z-index: 10;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.carousel-arrow:hover {
+  background-color: #00d2ff;
+  color: #051329;
+  transform: scale(1.1);
+}
+
+/* Posicionamento absoluto das setas para ficarem nas pontas */
+.carousel-arrow.left { left: -25px; }
+.carousel-arrow.right { right: -25px; }
+
+/* O Card do VER TODOS */
+.view-all-card {
+  min-width: 280px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 75, 117, 0.1);
+  border: 2px dashed #004b75;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  /* Garante que ele não vai encolher no Flexbox */
+  flex-shrink: 0; 
+}
+
+.view-all-card:hover {
+  background-color: rgba(0, 75, 117, 0.3);
+  border-color: #00d2ff;
+}
+
+.view-all-btn {
+  background: none;
+  border: none;
+  color: #00d2ff;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.plus-icon {
+  font-size: 36px;
 }

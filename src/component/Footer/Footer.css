@@ -1,0 +1,44 @@
+.footer-container {
+  background-color: #051329; /*Cor do fundo do rodapé*/
+  border-top: 2px solid #004b75; /* Linha de separação do resto do site */
+  padding: 50px 20px 20px; /* Bastante espaço no topo para respirar */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 60px; /* Empurra o rodapé para baixo, separando do conteúdo */
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.footer-logo {
+  height: 70px; /* Um pouco maior que no cabeçalho para dar destaque */
+  object-fit: contain;
+  margin-bottom: 15px;
+ 
+}
+
+.footer-slogan {
+  color: #00d2ff; /* Azul vivo para o slogan */
+  font-size: 18px;
+  font-style: normal;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.footer-bottom {
+  width: 100%;
+  max-width: 800px;
+  border-top: 1px solid #002b44; /* Linha sutil separando o copyright */
+  padding-top: 20px;
+}
+
+.footer-bottom p {
+  color: #4a8aa8; /* Azul apagado para não chamar muita atenção */
+  font-size: 14px;
+}
