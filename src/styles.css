@@ -16,3 +16,34 @@ button {
   border: none;
   background: none;
 }
+
+/* Empurra o conteúdo principal para baixo, evitando que fique escondido atrás do Header fixo */
+.main-content {
+  min-height: 70vh; /* Garante que a página tenha uma altura mínima antes do rodapé */
+}
+
+/* Estilo da Página em Construção */
+.construction-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  text-align: center;
+  padding: 20px;
+}
+
+.construction-title {
+  color: #00d2ff;
+  font-size: 32px;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.construction-text {
+  color: #a0aab5;
+  font-size: 18px;
+  max-width: 500px;
+  line-height: 1.5;
+}

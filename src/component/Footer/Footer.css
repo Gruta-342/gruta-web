@@ -1,5 +1,5 @@
 .footer-container {
-  background-color: #051329; /*Cor do fundo do rodapé*/
+  background-color: #001936; /*Cor do fundo do rodapé*/
   border-top: 2px solid #004b75; /* Linha de separação do resto do site */
   padding: 50px 20px 20px; /* Bastante espaço no topo para respirar */
   display: flex;
@@ -9,6 +9,15 @@
   margin-top: 60px; /* Empurra o rodapé para baixo, separando do conteúdo */
 }
 
+.footer-landscape {
+  width: 100%;
+  max-width: 350px; /* Largura base, você pode aumentar ou diminuir se precisar */
+  height: auto; /* Deixa a altura crescer proporcionalmente */
+  object-fit: contain;
+  margin-bottom: 20px;
+  /* Removi o drop-shadow do logo antigo, já que a paisagem tem seu próprio contraste */
+}
+
 .footer-content {
   display: flex;
   flex-direction: column;
@@ -16,17 +25,10 @@
   margin-bottom: 30px;
 }
 
-.footer-logo {
-  height: 70px; /* Um pouco maior que no cabeçalho para dar destaque */
-  object-fit: contain;
-  margin-bottom: 15px;
- 
-}
-
 .footer-slogan {
-  color: #00d2ff; /* Azul vivo para o slogan */
+  color: #5bc0eb; /* Um tom de azul levemente mais claro que vi no seu mockup */
   font-size: 18px;
-  font-style: normal;
+  font-style: normal; /* Removendo o itálico */
   font-weight: bold;
   letter-spacing: 1px;
 }

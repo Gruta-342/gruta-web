@@ -1,20 +1,12 @@
+/* ======================================================== */
+/* 1. BASE DO CABEÇALHO (GLOBAL)                            */
+/* ======================================================== */
 .header-container {
-  background-color: #051329; /* Cor unificada do fundo */
+  background-color: #051329; 
   position: sticky;
   top: 0;
   z-index: 1000;
-  transition: all 0.3s ease;
-}
-
-/* Slogan do Cabeçalho */
-.header-slogan {
-  color: #4a8aa8; /* Um azul mais suave para não ofuscar o logo */
-  font-size: 13px;
-  font-style: italic;
-  font-weight: 600;
-  line-height: 1.4; /* Espaçamento confortável entre as duas linhas */
-  margin: 0;
-  text-align: left;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .top-bar {
@@ -24,37 +16,17 @@
   padding: 15px 40px;
 }
 
-/* --- LINHA DIVISÓRIA --- */
-.separator {
-  height: 2px;
-  background-color: #004b75; /* Azul da linha fina */
-  margin: 0 40px; /* Faz a linha acompanhar o padding da tela */
-}
-
-/* --- TOPO --- */
-.menu-container, 
-.logo-container,
-.user-actions {
+.left-section, .center-section, .right-section {
   flex: 1; 
-}
-
-.menu-container {
   display: flex;
-  justify-content: flex-start;
 }
 
-.logo-container {
-  display: flex;
-  justify-content: center;
-}
+.left-section { justify-content: flex-start; align-items: center; }
+.center-section { justify-content: center; align-items: center; flex-direction: column; }
+.right-section { justify-content: flex-end; align-items: center; gap: 15px; }
 
-.user-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 15px;
-}
-
-.profile-btn {
+/* Estilos base de botões */
+.profile-btn, .hamburger-btn {
   background: none;
   border: none;
   color: white; 
@@ -65,86 +37,242 @@
   transition: all 0.3s ease;
 }
 
-/* Tamanho do ícone SVG */
-.profile-btn svg {
+.profile-btn svg, .hamburger-btn svg {
   width: 26px;
   height: 26px;
 }
 
-/* Efeito Hover acendendo o botão */
-.profile-btn:hover {
-  color: #00d2ff; /* Acende com o mesmo azul vivo dos menus */
+.profile-btn:hover, .hamburger-btn:hover {
+  color: #00d2ff; 
   transform: scale(1.1);
 }
 
-.menu-btn, .user-actions button {
-  color: white;
-  font-weight: bold;
-  font-size: 16px;
+/* Linha divisória */
+.separator {
+  height: 2px;
+  background-color: #004b75; 
+  margin: 0 40px; 
 }
 
-.logo-img {
+/* Slogan Desktop */
+.header-slogan {
+  color: #4a8aa8; 
+  font-size: 13px;
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1.4; 
+  margin: 0;
+}
+.desktop-slogan { text-align: left; }
+
+.desktop-logo {
   height: 55px;
   object-fit: contain;
 }
 
-/* --- BARRA SECUNDÁRIA --- */
-.bottom-nav {
-  display: flex;
-  justify-content: center;
-  background-color: transparent; 
-  overflow: hidden; 
-  max-height: 70px; 
-  opacity: 1;
-  transition: max-height 0.4s ease, opacity 0.3s ease;
+/* ======================================================== */
+/* 2. FORÇAR ELEMENTOS MOBILE A SUMIREM NO PC               */
+/* ======================================================== */
+.mobile-logo, 
+.mobile-slogan, 
+.hamburger-btn, 
+.mobile-profile-item {
+  display: none !important; /* O !important garante que NUNCA apareçam no PC */
+}
+.mobile-profile-left { /* <--- Nova classe adicionada aqui! */
+  display: none !important; 
 }
 
-/* 1. O bloco que estava faltando para ESCONDER ao rolar */
-.header-container.scrolled .bottom-nav {
-  max-height: 0;
-  opacity: 0;
+
+/* ======================================================== */
+/* 3. MENU INFERIOR - SOMENTE COMPUTADOR (ACIMA DE 769px)   */
+/* ======================================================== */
+@media (min-width: 769px) {
+  .bottom-nav {
+    display: flex;
+    justify-content: center;
+    background-color: transparent; 
+    overflow: hidden; 
+    max-height: 100px; /* Um limite seguro para caber a fonte e os espaços */
+    opacity: 1;
+    padding-top: 5px;
+    padding-bottom: 0;
+    /* Agora o padding encolhe e cresce junto com a altura! */
+    transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.4s ease;
+  }
+
+  /* Esconder menu ao rolar no PC */
+  .header-container.scrolled .bottom-nav {
+    max-height: 0;
+    opacity: 0;
+    /* ZERANDO o espaço vazio interno */
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  /* Mostrar ao passar o mouse */
+  .header-container:hover .bottom-nav {
+    max-height: 100px; 
+    opacity: 1;
+    padding-top: 5px;
+    padding-bottom: 0;
+  }
+
+  .bottom-nav ul {
+    display: flex;
+    list-style: none;
+    gap: 20px; 
+    padding-bottom: 20px; 
+    padding-top: 5px; 
+  }
+
+  .bottom-nav li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 140px; 
+    height: 55px;
+    color: #005a8a; 
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-bottom: 6px solid #003b5c; 
+    transition: all 0.2s ease; 
+  }
+
+  .bottom-nav li:not(.active):hover {
+    font-size: 16px;
+    color: #0081c2;
+    border-bottom: 6px solid #0081c2; 
+  }
+
+  .bottom-nav li.active {
+    color: white;
+    font-size: 18px; 
+    border-bottom: 8px solid #00d2ff; 
+  }
 }
 
-/* 2. Apenas UM bloco de hover com a altura correta (100px) */
-.header-container:hover .bottom-nav {
-  max-height: 70px; 
-  opacity: 1;
-}
+/* ======================================================== */
+/* 4. MEDIA QUERIES - SOMENTE CELULAR (ATÉ 768px)           */
+/* ======================================================== */
+@media (max-width: 768px) {
+  
+  .top-bar { padding: 15px 20px; }
+  
+  /* Inverte a Visibilidade: Desliga PC, Liga Mobile */
+  .desktop-slogan, .desktop-logo, .desktop-profile {
+    display: none !important; 
+  }
 
-.bottom-nav ul {
-  display: flex;
-  list-style: none;
-  gap: 20px; /* Distância entre os botões (alterado de 10px para 20px) */
-  padding-bottom: 20px; /* O espaço exato da base do botão até o fim do menu */
-  padding-top: 5px; /* Um pequeno respiro em cima para manter equilibrado */
-}
+  .mobile-logo {
+    display: block !important; 
+    height: 40px; 
+    object-fit: contain;
+  }
 
-/* --- BOTÕES DO MENU (A grande mudança de alinhamento) --- */
-.bottom-nav li {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 140px; /* Base fixa! Nenhuma palavra empurra a outra */
-  height: 55px;
-  color: #005a8a; /* Azul escuro do texto inativo */
-  font-weight: bold;
-  font-size: 14px;
-  text-transform: uppercase;
-  cursor: pointer;
-  border-bottom: 6px solid #003b5c; /* Linha de base escura */
-  transition: all 0.2s ease; /* Deixa o aumento da fonte suave */
-}
+  .mobile-slogan {
+    display: block !important; 
+    font-size: 10px; 
+    text-align: left;
+    margin-top: 5px;
+    font-style: normal;
+    color: #4a8aa8;
+  }
 
-/* Hover: Aumenta a fonte e muda a cor do texto E da base */
-.bottom-nav li:not(.active):hover {
-  font-size: 16px;
-  color: #0081c2;
-  border-bottom: 6px solid #0081c2; /* Faz a base acompanhar a cor do texto */
-}
+  .hamburger-btn {
+    display: flex !important; 
+  }
 
-/* Botão Selecionado (Ativo) */
-.bottom-nav li.active {
-  color: white;
-  font-size: 18px; /* Fonte levemente maior no botão ativo */
-  border-bottom: 8px solid #00d2ff; /* Linha de base azul viva */
+  .separator { display: none; }
+
+  /* --- MENU MOBILE RESPONSIVO --- */
+  .bottom-nav {
+    display: none; /* Inicia completamente morto/oculto */
+    width: 100%;
+    padding: 10px 0 20px;
+    border-top: 1px solid rgba(0, 210, 255, 0.2);
+    background-color: #051329;
+  }
+
+  /* Só aparece de verdade quando ganha a classe .open */
+  .bottom-nav.open { display: block; }
+  
+  .bottom-nav ul {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 0;
+    list-style: none;
+  }
+
+  /* Blocos do menu Mobile */
+  .bottom-nav li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: auto;
+    padding: 15px 0;
+    border-bottom: none !important; 
+    font-size: 16px;
+    color: #a0aab5; 
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .bottom-nav li.active {
+    color: #00d2ff;
+    font-size: 18px;
+    background-color: rgba(0, 210, 255, 0.05); 
+  }
+
+  .bottom-nav li:not(.active):hover {
+    color: #ffffff; 
+  }
+
+  /* Botão de Perfil extra no menu */
+  .mobile-profile-item {
+    display: flex !important; 
+    justify-content: center;
+    width: 80%;
+    margin-top: 10px;
+    padding-top: 20px !important;
+    border-top: 1px dashed rgba(255, 255, 255, 0.2);
+  }
+
+  .profile-menu-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #00d2ff;
+    font-size: 14px;
+    font-weight: bold;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .profile-menu-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+  /* Inverte a Visibilidade: Desliga PC, Liga Mobile */
+  .desktop-slogan, .desktop-logo, .desktop-profile {
+    display: none !important; 
+  }
+
+  .mobile-logo {
+    display: block !important; 
+    height: 40px; 
+    object-fit: contain;
+  }
+
+  /* Nova regra ligando o botão de perfil na esquerda */
+  .mobile-profile-left {
+    display: flex !important;
+  }
 }
