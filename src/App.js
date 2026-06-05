@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import About from "./component/About/About";
 import Header from "./component/Header/Header";
 import HeroSlider from "./component/HeroSlider/HeroSlider";
 import EventsSection from "./component/EventsSection/EventsSection";
@@ -24,8 +25,11 @@ export default function App() {
             <HeroSlider />
             <EventsSection />
           </>
+        ) : activeTab === 4 ? (
+          // ABA 4: SOBRE
+          <About />
         ) : (
-          // O que aparece nas outras abas (1, 2, 3...)
+          // ABAS 1, 2, 3: EM CONSTRUÇÃO
           <div className="construction-container">
             <h2 className="construction-title">ÁREA EM CONSTRUÇÃO</h2>
             <p className="construction-text">
