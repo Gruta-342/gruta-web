@@ -50,6 +50,10 @@
   line-height: 1.2;
 }
 
+.mobile-only-title {
+  display: none;
+}
+
 .about-text-container p {
   margin-bottom: 15px;
 }
@@ -147,22 +151,70 @@
   line-height: 1.5;
 }
 
-/* --- RESPONSIVIDADE MOBILE --- */
+/* ======================================================== */
+/* --- RESPONSIVIDADE MOBILE ---                            */
+/* ======================================================== */
 @media (max-width: 768px) {
-  .about-hero {
-    flex-direction: column; /* Empilha o texto em cima e a foto embaixo */
-    gap: 40px;
+  
+  .about-section {
+    /* Adicionamos 90px de padding no final para o conteúdo não ficar escondido atrás dos botões flutuantes! */
+    padding: 30px 15px 90px; 
   }
 
-  .about-title {
-    font-size: 32px;
+  /* --- 1. MÁGICA DA INTRODUÇÃO MOBILE --- */
+  
+  /* Esconde o título de dentro da caixa */
+  .desktop-only-title {
+    display: none !important;
+  }
+
+  /* Liga o título centralizado do topo */
+  .mobile-only-title {
+    display: block !important;
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 25px;
+  }
+
+  .about-hero {
+    /* Continua invertendo a ordem para a foto ficar acima dos parágrafos */
+    flex-direction: column-reverse; 
+    gap: 25px;
+    margin-bottom: 40px;
   }
   
   .about-text-container {
-    text-align: center; /* No celular, centralizado costuma ler melhor, mas se quiser pode por 'left' */
+    text-align: left; /* Parágrafos elegantes alinhados à esquerda */
+    font-size: 16px; 
+    line-height: 1.5;
   }
 
-  .about-section {
-    padding: 40px 15px;
+  .highlight-text {
+    font-size: 18px;
+  }
+
+  /* --- 2. CARDS DOS MEMBROS DE 2 EM 2 --- */
+  .members-grid {
+    grid-template-columns: repeat(2, 1fr); /* Força exatamente 2 colunas de larguras iguais */
+    gap: 15px; /* Reduz o espaço entre os cards para caber bonitinho na tela */
+  }
+  
+  /* Ajuste no espaçamento dos títulos para o celular */
+  .section-subtitle {
+    font-size: 24px;
+  }
+
+  .section-tagline {
+    font-size: 16px;
+    margin-bottom: 30px;
+  }
+
+  /* --- 3. O QUE FAZEMOS --- */
+  .activities-grid {
+    gap: 15px; /* Reduzimos o gap geral para economizar espaço de tela */
+  }
+
+  .activity-card {
+    padding: 20px 15px; /* Card ligeiramente mais fino nas laterais */
   }
 }

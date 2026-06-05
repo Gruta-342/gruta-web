@@ -58,32 +58,35 @@ export default function About() {
   return (
     <section className="about-section">
       
+      {/* NOVO: Título que aparece SÓ no celular, acima de tudo */}
+      <h1 className="about-title mobile-only-title">
+        Entre, jogue um dado e aceite o seu destino.
+      </h1>
+
       {/* 1. INTRODUÇÃO */}
       <div className="about-hero">
         
         {/* Lado Esquerdo: Textos */}
         <div className="about-text-container">
-          <h1 className="about-title">
-            Entre, jogue um dado e aceite seu destino.
+          {/* Título original que aparece SÓ no PC */}
+          <h1 className="about-title desktop-only-title">
+            Entre, jogue um dado e aceite o seu destino.
           </h1>
           <p>
-            A Gruta é onde a gente discute teorias, resolve mistério, inventa história, 
+            A Gruta é onde a gente discute teorias, resolve mistério, inventa história,<br/> 
             joga conversa fora e ri alto sem medo de ser feliz.
           </p>
           <p className="highlight-text">
             Aqui a gente leva a zoeira a sério — mas só ela mesmo.
           </p>
           <p>
-            Na Gruta, nada é planejado... mas tudo faz parte do plano, as vezes <br/>do B, do C ou do D.
+            Na Gruta, nada é planejado... mas tudo faz parte do plano, as vezes do B, do C ou do D.
           </p>
         </div>
 
         {/* Lado Direito: Mídia (Foto/Vídeo) */}
         <div className="about-media-container">
           <img src={aboutImg} alt="Sobre a Gruta" className="about-media" />
-          {/* DICA: Futuramente, você só precisará trocar a tag <img> acima por:
-              <video src={seuVideo} className="about-media" autoPlay loop muted playsInline /> 
-          */}
         </div>
 
       </div>
