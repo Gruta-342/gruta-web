@@ -1,49 +1,61 @@
 import React, { useRef, useState, useEffect } from "react";
 import EventCard from "../EventCard/EventCard";
-import { eventsData } from "../../data/events";
+// Certifique-se de que o caminho do seu data está correto!
+import { eventsData } from "../../data/events"; 
 import "./EventsSection.css";
 
 export default function EventsSection() {
   const carouselRef = useRef(null);
   
-  // Estados para controlar a visibilidade das setas
-  const [isAtStart, setIsAtStart] = useState(true); // Começa verdadeiro, pois inicia no topo
+  const [isAtStart, setIsAtStart] = useState(true); 
   const [isAtEnd, setIsAtEnd] = useState(false);
 
   const recentEvents = eventsData.slice(0, 5);
 
-  // Função que monitora a rolagem para esconder/mostrar as setas
   const handleScroll = () => {
     if (!carouselRef.current) return;
     
     const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
     
-    // Se a rolagem for 0, bateu na esquerda
     setIsAtStart(scrollLeft <= 0);
-    
-    // Se a rolagem atual + o tamanho da tela for igual ao tamanho total, bateu na direita
-    // Usamos Math.ceil para evitar bugs de casas decimais em alguns navegadores
     setIsAtEnd(Math.ceil(scrollLeft + clientWidth) >= scrollWidth);
   };
 
-  // Garante que o cálculo seja feito assim que a tela carregar
   useEffect(() => {
     handleScroll();
   }, []);
 
-  const getScrollAmount = () => {
+  // Função simplificada: calcula apenas a largura de 1 card + o gap (para o mobile)
+  const getCardScrollAmount = () => {
     if (!carouselRef.current) return 0;
     const cardWidth = carouselRef.current.children[0].offsetWidth;
     const gap = 20; 
-    return ((cardWidth + gap) * 2) - 60;
+    return cardWidth + gap;
   };
 
+  // --- LÓGICA INTELIGENTE DE ROLAGEM ---
   const scrollLeftBtn = () => {
-    carouselRef.current.scrollBy({ left: -getScrollAmount(), behavior: "smooth" });
+    if (!carouselRef.current) return;
+    
+    if (window.innerWidth > 768) {
+      // DESKTOP: Rola tudo para a posição 0 (início absoluto)
+      carouselRef.current.scrollTo({ left: 0, behavior: "smooth" });
+    } else {
+      // MOBILE: Volta a largura exata de 1 card
+      carouselRef.current.scrollBy({ left: -getCardScrollAmount(), behavior: "smooth" });
+    }
   };
 
   const scrollRightBtn = () => {
-    carouselRef.current.scrollBy({ left: getScrollAmount(), behavior: "smooth" });
+    if (!carouselRef.current) return;
+    
+    if (window.innerWidth > 768) {
+      // DESKTOP: Rola tudo para o tamanho máximo da caixa (final absoluto)
+      carouselRef.current.scrollTo({ left: carouselRef.current.scrollWidth, behavior: "smooth" });
+    } else {
+      // MOBILE: Avança a largura exata de 1 card
+      carouselRef.current.scrollBy({ left: getCardScrollAmount(), behavior: "smooth" });
+    }
   };
 
   return (
@@ -52,12 +64,10 @@ export default function EventsSection() {
       
       <div className="carousel-wrapper">
         
-        {/* Renderiza a seta esquerda APENAS se não estiver no começo */}
         {!isAtStart && (
           <button className="carousel-arrow left" onClick={scrollLeftBtn}>❮</button>
         )}
         
-        {/* Adicionamos o evento onScroll aqui para escutar o movimento */}
         <div className="events-carousel" ref={carouselRef} onScroll={handleScroll}>
           
           {recentEvents.map(event => (
@@ -73,7 +83,6 @@ export default function EventsSection() {
 
         </div>
 
-        {/* Renderiza a seta direita APENAS se não estiver no final */}
         {!isAtEnd && (
           <button className="carousel-arrow right" onClick={scrollRightBtn}>❯</button>
         )}

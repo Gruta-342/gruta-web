@@ -1,85 +1,102 @@
-.event-card {
-  display: flex;
-  background-color: #05162e;
+/* --- BASE DO CARD VERTICAL --- */
+.event-card-vertical {
+  min-width: 300px;
+  width: 300px;
+  background-color: #0b1b36; /* Fundo um tom acima do site para destacar */
   border-radius: 12px;
+  overflow: hidden; /* Garante que a imagem respeite as bordas arredondadas */
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0; /* Impede o carrossel de esmagar o card */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.event-card-vertical:hover {
+  transform: translateY(-8px); /* Card "pula" levemente ao passar o mouse */
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+  border-color: rgba(0, 210, 255, 0.3);
+}
+
+/* --- IMAGEM 4:3 --- */
+.card-image-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
-  min-width: 450px;
-  max-width: 500px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-  transition: transform 0.3s ease;
 }
 
-.event-card:hover {
-  transform: translateY(-5px);
-}
-
-/* O container que ancora a data e limita a largura da imagem */
-.event-image-wrapper {
-  position: relative; /* ISSO PRENDE A DATA! */
-  flex: 0 0 180px; 
-}
-
-.event-image {
+.card-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.5s ease;
 }
 
-/* A data com posicionamento absoluto em relação ao wrapper */
-.event-date {
+/* Efeito de zoom sutil na imagem ao passar o mouse no card */
+.event-card-vertical:hover .card-image {
+  transform: scale(1.05);
+}
+
+/* --- DATA FLUTUANTE --- */
+.floating-date {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  /* Branco com 80% de opacidade para ver a imagem de fundo */
-  background-color: rgba(110, 110, 110, 0.75); 
-  color: #ffffff; /* Texto bem escuro para manter a leitura em cima do branco */
-  font-weight: bold;
-  font-size: 11px;
-  padding: 4px 8px;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  z-index: 2; 
-  text-transform: uppercase;
-  /* Garante que a transição de cor seja bem suave */
-  transition: all 0.3s ease; 
-}
-
-.event-card:hover .event-date {
-  background-color: #00d2ff; /* Volta para o azul vivo da Gruta */
+  top: 15px;
+  left: 15px;
+  background-color: #00d2ff;
   color: #051329;
-  box-shadow: 0 4px 10px rgba(0, 210, 255, 0.4); /* Opcional: A sombra também ganha um tom azulado */
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 900;
+  font-size: 14px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  z-index: 2;
 }
 
+/* --- TEXTOS E TAGS --- */
 .card-content {
   padding: 20px;
   display: flex;
   flex-direction: column;
+  flex-grow: 1; /* Preenche o espaço restante caso a descrição seja curta */
 }
 
 .card-title {
+  color: white;
   font-size: 20px;
-  margin-bottom: 10px;
-  color: white; /* Garantindo que o título apareça no fundo escuro */
+  margin: 0 0 12px 0;
+  line-height: 1.3;
 }
 
-.tags {
+.card-tags {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 15px;
-  flex-wrap: wrap; /* Caso tenha muitas tags, elas caem para a linha de baixo sem quebrar */
 }
 
 .tag {
-  background-color: #5bc0eb;
-  color: #05162e;
-  font-size: 10px;
-  font-weight: bold;
-  padding: 3px 8px;
+  background-color: rgba(0, 210, 255, 0.1);
+  color: #00d2ff;
+  padding: 4px 10px;
   border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .card-description {
-  font-size: 12px;
   color: #a0aab5;
+  font-size: 14px;
   line-height: 1.5;
+  margin: 0;
+  
+  /* Truque mágico para limitar a descrição a 3 linhas com "..." no final */
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

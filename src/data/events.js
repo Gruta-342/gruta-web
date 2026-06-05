@@ -27,7 +27,7 @@ export const eventsData = [
     title: "DECEPTION",
     date: "19 DEZ 2025",
     tags: ["BOARDGAME", "INVESTIGAÇÃO"],
-    description: "O assassino monta a cena do crime, o mediador tenta induzir os detetives à solução do caso e Samuel sempre é suspeito",
+    description: "O assassino monta a cena do crime, o mediador tenta induzir os detetives à solução do caso e Samuel sempre é suspeito.",
     image: deceptionImg
   },
   {
@@ -35,7 +35,7 @@ export const eventsData = [
     title: "DETECTIVE NIGHT",
     date: "12 DEZ 2025",
     tags: ["INVESTIGAÇÃO", "RPG"],
-    description: "Nossa equipe de detetives precisou investigar o caso de João Picadinho, mas talvez nós não tivéssemos todas as informações",
+    description: "Nossa equipe de detetives precisou investigar o caso de João Picadinho, mas talvez nós não tivéssemos todas as informações.",
     image: joaoImg
   },
   {

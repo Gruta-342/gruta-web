@@ -56,7 +56,7 @@
 
 /* Slogan Desktop */
 .header-slogan {
-  color: #4a8aa8; 
+  color: #00AEFF; 
   font-size: 13px;
   font-style: italic;
   font-weight: 600;
@@ -122,7 +122,7 @@
     display: flex;
     list-style: none;
     gap: 20px; 
-    padding-bottom: 20px; 
+    padding-bottom: 10px; 
     padding-top: 5px; 
   }
 
@@ -150,7 +150,7 @@
   .bottom-nav li.active {
     color: white;
     font-size: 18px; 
-    border-bottom: 8px solid #00d2ff; 
+    border-bottom: 8px solid #00AEFF; 
   }
 }
 
@@ -189,11 +189,16 @@
 
   /* --- MENU MOBILE RESPONSIVO --- */
   .bottom-nav {
-    display: none; /* Inicia completamente morto/oculto */
+    display: none; /* Inicia oculto */
     width: 100%;
     padding: 10px 0 20px;
     border-top: 1px solid rgba(0, 210, 255, 0.2);
     background-color: #051329;
+    position: absolute; /* Tira o menu do fluxo normal do site */
+    top: 100%; /* Faz o menu nascer exatamente colado no limite inferior da barra do topo */
+    left: 0;
+    z-index: 1000; /* Garante que ele fique por cima do banner e de qualquer outro elemento */
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6); /* Sombra para dar profundidade e separar do fundo */
   }
 
   /* Só aparece de verdade quando ganha a classe .open */

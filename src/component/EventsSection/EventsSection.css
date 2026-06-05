@@ -63,7 +63,7 @@
 
 /* O Card do VER TODOS */
 .view-all-card {
-  min-width: 280px; 
+  min-width: 300px; 
   display: flex;
   align-items: center;
   justify-content: center;
