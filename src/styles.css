@@ -17,9 +17,9 @@ button {
   background: none;
 }
 
-/* Empurra o conteúdo principal para baixo, evitando que fique escondido atrás do Header fixo */
 .main-content {
-  min-height: 70vh; /* Garante que a página tenha uma altura mínima antes do rodapé */
+  min-height: 70vh; 
+  padding-top: 170px; 
 }
 
 /* Estilo da Página em Construção */

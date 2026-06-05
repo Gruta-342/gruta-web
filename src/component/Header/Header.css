@@ -3,8 +3,10 @@
 /* ======================================================== */
 .header-container {
   background-color: #051329; 
-  position: sticky;
+  position: fixed; /* <-- Altere de sticky para fixed */
   top: 0;
+  left: 0; /* <-- Adicione esta linha */
+  width: 100%; /* <-- Adicione esta linha */
   z-index: 1000;
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
