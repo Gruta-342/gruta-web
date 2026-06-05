@@ -1,38 +1,41 @@
 import React, { useState, useEffect } from "react";
+// Importamos o NavLink do router
+import { NavLink } from "react-router-dom"; 
 import "./Header.css";
 import logoGruta from "../../assets/logo.png";
 
-export default function Header({ activeTab, setActiveTab }) {
+export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 120) {
-        setIsScrolled(true);
-      } else if (window.scrollY < 20) {
-        setIsScrolled(false);
-      }
+      setIsScrolled(window.scrollY > 120);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const navItems = ["HOME", "CALENDÁRIO", "JOGOS", "GALERIA", "SOBRE"];
+  // Agora nosso array de menu tem o nome E o caminho do link!
+  const navItems = [
+    { name: "HOME", path: "/" },
+    { name: "CALENDÁRIO", path: "/calendario" },
+    { name: "JOGOS", path: "/jogos" },
+    { name: "GALERIA", path: "/galeria" },
+    { name: "SOBRE", path: "/sobre" }
+  ];
 
   return (
     <header className={`header-container ${isScrolled ? "scrolled" : ""}`}>
       <div className="top-bar">
         
-        {/* ESQUERDA: Slogan no PC / Logo no Celular */}
+        {/* ESQUERDA: Slogan no PC / Perfil no Celular */}
         <div className="left-section">
           <p className="header-slogan desktop-slogan">
             Onde o caos vira história<br />
             e a zoeira é tradição.
           </p>
-          {/* Novo Botão de Perfil exclusivo para o Mobile */}
-          <button className="profile-btn mobile-profile-left" title="Perfil (Em Breve)">
+          <button className="profile-btn mobile-profile-left" title="Perfil">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M18 20a6 6 0 0 0-12 0"></path>
@@ -41,7 +44,7 @@ export default function Header({ activeTab, setActiveTab }) {
           </button>
         </div>
         
-        {/* CENTRO: Logo no PC / Slogan em 2 linhas no Celular */}
+        {/* CENTRO: Logo */}
         <div className="center-section">
           <img src={logoGruta} alt="Logo Gruta" className="desktop-logo" />
           <img src={logoGruta} alt="Logo Gruta" className="mobile-logo" />
@@ -49,7 +52,7 @@ export default function Header({ activeTab, setActiveTab }) {
 
         {/* DIREITA: Perfil no PC / Hambúrguer no Celular */}
         <div className="right-section">
-          <button className="profile-btn desktop-profile" title="Perfil (Em Breve)">
+          <button className="profile-btn desktop-profile" title="Perfil">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
               <path d="M18 20a6 6 0 0 0-12 0"></path>
@@ -77,29 +80,17 @@ export default function Header({ activeTab, setActiveTab }) {
       <nav className={`bottom-nav ${isMobileMenuOpen ? "open" : ""}`}>
         <ul>
           {navItems.map((item, index) => (
-            <li 
-              key={index} 
-              className={activeTab === index ? "active" : ""}
-              onClick={() => {
-                setActiveTab(index);
-                setIsMobileMenuOpen(false); // Fecha o menu ao clicar
-              }}
-            >
-              {item}
+            <li key={index}>
+              {/* O NavLink substitui o evento de clique manual */}
+              <NavLink 
+                to={item.path} 
+                className={({ isActive }) => isActive ? "active" : ""}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {item.name}
+              </NavLink>
             </li>
           ))}
-          
-          {/* Item extra de perfil que aparece apenas no menu mobile */}
-          <li className="mobile-profile-item">
-            <button className="profile-menu-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M18 20a6 6 0 0 0-12 0"></path>
-                <circle cx="12" cy="10" r="4"></circle>
-              </svg>
-              MEU PERFIL
-            </button>
-          </li>
         </ul>
       </nav>
     </header>
