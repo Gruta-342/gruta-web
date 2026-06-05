@@ -81,9 +81,10 @@ export default function Header() {
         <ul>
           {navItems.map((item, index) => (
             <li key={index}>
-              {/* O NavLink substitui o evento de clique manual */}
               <NavLink 
                 to={item.path} 
+                /* NOVA LINHA AQUI: Garante que a Home só acenda na rota exata "/" */
+                end={item.path === "/"} 
                 className={({ isActive }) => isActive ? "active" : ""}
                 onClick={() => setIsMobileMenuOpen(false)}
               >

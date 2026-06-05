@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Header from "./component/Header/Header";
 import HeroSlider from "./component/HeroSlider/HeroSlider";
 import EventsSection from "./component/EventsSection/EventsSection";
@@ -16,24 +16,16 @@ export default function App() {
         <Header />
 
         <main className="main-content">
-          {/* As Routes definem o que aparece dependendo do link na barra do navegador */}
           <Routes>
             
-            {/* Rota Principal (Home) */}
-            <Route path="/" element={
-              <>
-                <HeroSlider />
-                <EventsSection />
-              </>
-            } />
-
-            {/* Rota do Sobre */}
+            <Route path="/" element={<><HeroSlider /><EventsSection /></>} />
             <Route path="/sobre" element={<About />} />
-
-            {/* Rotas das áreas em construção */}
             <Route path="/calendario" element={<EmConstrucao />} />
             <Route path="/jogos" element={<EmConstrucao />} />
             <Route path="/galeria" element={<EmConstrucao />} />
+            
+            {/* 2. ADICIONE ESTA NOVA ROTA AQUI NO FINAL */}
+            <Route path="*" element={<Navigate to="/" replace />} />
             
           </Routes>
         </main>
