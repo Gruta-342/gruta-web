@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Header from "./component/Header/Header";
 import HeroSlider from "./component/HeroSlider/HeroSlider";
 import EventsSection from "./component/EventsSection/EventsSection";
