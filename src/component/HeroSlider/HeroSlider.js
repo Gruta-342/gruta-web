@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import "./HeroSlider.css";
 
-import scapeImg from "../../assets/scape.jpg";
-import scapeMobImg from "../../assets/scape-mob.jpg";
+import mafiaImg from "../../assets/mafia.jpg";
+import mafiaMobImg from "../../assets/mafia-mob.jpg";
+import copaImg from "../../assets/copa.jpg";
+import copaMobImg from "../../assets/copa-mob.jpg";
+import copa2Img from "../../assets/copa2.jpg";
+import copaMob2Img from "../../assets/copa2-mob.jpg";
 
 export default function HeroSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -17,15 +21,21 @@ export default function HeroSlider() {
   const slides = [
     {
       id: 1,
-      desktopImg: scapeImg,
-      mobileImg: scapeMobImg,
-      alt: "Banner Escape the Backrooms"
+      desktopImg: copaImg,
+      mobileImg: copaMobImg,
+      alt: "Brasil vs. Marrocos"
     },
     {
       id: 2,
-      desktopImg: scapeImg, 
-      mobileImg: scapeMobImg,
-      alt: "Banner Misterioso 2"
+      desktopImg: mafiaImg, 
+      mobileImg: mafiaMobImg,
+      alt: "Grotta Nostra"
+    },
+    {
+      id: 3,
+      desktopImg: copa2Img,
+      mobileImg: copaMob2Img,
+      alt: "Brasil vs. Haiti"
     }
   ];
 

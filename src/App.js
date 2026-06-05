@@ -6,6 +6,7 @@ import EventsSection from "./component/EventsSection/EventsSection";
 import About from "./component/About/About";
 import Footer from "./component/Footer/Footer";
 import FloatingSocials from "./component/FloatingSocials/FloatingSocials";
+import Calendar from "./component/Calendar/Calendar";
 import "./styles.css"; 
 
 export default function App() {
@@ -20,7 +21,7 @@ export default function App() {
             
             <Route path="/" element={<><HeroSlider /><EventsSection /></>} />
             <Route path="/sobre" element={<About />} />
-            <Route path="/calendario" element={<EmConstrucao />} />
+            <Route path="/calendario" element={<Calendar />} />
             <Route path="/jogos" element={<EmConstrucao />} />
             <Route path="/galeria" element={<EmConstrucao />} />
             

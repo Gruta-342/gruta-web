@@ -97,3 +97,35 @@
 .plus-icon {
   font-size: 36px;
 }
+
+/* ======================================================== */
+/* --- RESPONSIVIDADE MOBILE ---                            */
+/* ======================================================== */
+@media (max-width: 768px) {
+  
+  .events-section {
+    /* Reduz a margem lateral gigante de 60px para 15px no celular */
+    padding: 40px 15px; 
+  }
+
+  .events-carousel {
+    /* Ajusta o gap para manter a harmonia em telas menores */
+    gap: 15px;
+  }
+
+  /* --- AJUSTE DAS SETAS NO MOBILE --- */
+  .carousel-arrow {
+    width: 38px;  /* Seta levemente menor para não tampar a tela */
+    height: 38px;
+    font-size: 16px;
+  }
+
+  /* Traz as setas um pouco mais para dentro para não vazarem da tela do celular */
+  .carousel-arrow.left { 
+    left: -10px; 
+  }
+  
+  .carousel-arrow.right { 
+    right: -10px; 
+  }
+}
