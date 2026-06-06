@@ -1,0 +1,118 @@
+.jogos-page {
+  padding: 40px 20px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: white;
+}
+
+.jogos-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.jogos-main-title {
+  font-size: 36px;
+  color: #00d2ff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.jogos-intro {
+  color: #a0aab5;
+  font-size: 18px;
+}
+
+.jogos-separator {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.3), transparent);
+  margin: 60px 0;
+}
+
+.game-category-section {
+  margin-bottom: 40px;
+}
+
+/* O Segredo da Prateleira: CSS Grid com colunas responsivas */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.game-card {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #0a2147;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.game-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 25px rgba(0, 210, 255, 0.2);
+  border-color: rgba(0, 210, 255, 0.4);
+}
+
+.game-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.game-card:hover .game-cover {
+  transform: scale(1.05);
+}
+
+/* Gradiente escuro que sobe de baixo pra cima para dar leitura ao texto */
+.game-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 40px 15px 15px;
+  background: linear-gradient(to top, rgba(5, 19, 41, 1) 0%, rgba(5, 19, 41, 0) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.game-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: white;
+  margin: 0;
+  line-height: 1.2;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.game-badge {
+  background-color: #00d2ff;
+  color: #051329;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 3px 6px;
+  border-radius: 4px;
+  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+/* Responsividade Mobile */
+@media (max-width: 768px) {
+  .games-grid {
+    /* No celular, os cards ficam um pouco menores para caberem 2 ou 3 lado a lado */
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 15px;
+  }
+  
+  .game-title {
+    font-size: 14px;
+  }
+}
