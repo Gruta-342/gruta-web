@@ -1,12 +1,14 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
-// Importamos o NavLink do router
-import { NavLink } from "react-router-dom"; 
+import Link from "next/link"; 
+import { usePathname } from "next/navigation"; 
 import "./Header.css";
-import logoGruta from "../../assets/logo.png";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,7 +18,6 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Agora nosso array de menu tem o nome E o caminho do link!
   const navItems = [
     { name: "HOME", path: "/" },
     { name: "CALENDÁRIO", path: "/calendario" },
@@ -29,7 +30,6 @@ export default function Header() {
     <header className={`header-container ${isScrolled ? "scrolled" : ""}`}>
       <div className="top-bar">
         
-        {/* ESQUERDA: Slogan no PC / Perfil no Celular */}
         <div className="left-section">
           <p className="header-slogan desktop-slogan">
             Onde o caos vira história<br />
@@ -44,13 +44,11 @@ export default function Header() {
           </button>
         </div>
         
-        {/* CENTRO: Logo */}
         <div className="center-section">
-          <img src={logoGruta} alt="Logo Gruta" className="desktop-logo" />
-          <img src={logoGruta} alt="Logo Gruta" className="mobile-logo" />
+          <img src="/assets/logo.png" alt="Logo Gruta" className="desktop-logo" />
+          <img src="/assets/logo.png" alt="Logo Gruta" className="mobile-logo" />
         </div>
 
-        {/* DIREITA: Perfil no PC / Hambúrguer no Celular */}
         <div className="right-section">
           <button className="profile-btn desktop-profile" title="Perfil">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -76,20 +74,17 @@ export default function Header() {
       
       <div className="separator"></div>
 
-      {/* MENU NAVEGAÇÃO */}
       <nav className={`bottom-nav ${isMobileMenuOpen ? "open" : ""}`}>
         <ul>
           {navItems.map((item, index) => (
             <li key={index}>
-              <NavLink 
-                to={item.path} 
-                /* NOVA LINHA AQUI: Garante que a Home só acenda na rota exata "/" */
-                end={item.path === "/"} 
-                className={({ isActive }) => isActive ? "active" : ""}
+              <Link 
+                href={item.path} 
+                className={pathname === item.path ? "active" : ""}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {item.name}
-              </NavLink>
+              </Link>
             </li>
           ))}
         </ul>

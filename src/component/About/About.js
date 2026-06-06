@@ -1,27 +1,16 @@
 import React from "react";
 import "./About.css";
 
-import aboutImg from "../../assets/about.png";
-// Importando as artes dos membros
-import yasminImg from "../../assets/card-Yasmin.jpeg";
-import elmiImg from "../../assets/card-Elmi.jpeg";
-import guilhermeImg from "../../assets/card-Guilherme.jpeg";
-import jamillyImg from "../../assets/card-Jamilly.jpeg";
-import noronhaImg from "../../assets/card-Noronha.jpeg";
-import samuelImg from "../../assets/card-Samuel.jpeg";
-
 export default function About() {
-  // Array com as artes (já que o nome e classe já estão desenhados na própria imagem)
   const members = [
-    { id: 1, name: "Elmi - O Guardião", img: elmiImg },
-    { id: 2, name: "Guilherme - O Artesão", img: guilhermeImg },
-    { id: 3, name: "Jamilly - A Juíza", img: jamillyImg },
-    { id: 4, name: "Noronha - O Erudito", img: noronhaImg },
-    { id: 5, name: "Samuel - O Sonhador", img: samuelImg },
-    { id: 6, name: "Yasmin - A Naturalista", img: yasminImg },
+    { id: 1, name: "Elmi - O Guardião", img: "/assets/card-Elmi.jpeg" },
+    { id: 2, name: "Guilherme - O Artesão", img: "/assets/card-Guilherme.jpeg" },
+    { id: 3, name: "Jamilly - A Juíza", img: "/assets/card-Jamilly.jpeg" },
+    { id: 4, name: "Noronha - O Erudito", img: "/assets/card-Noronha.jpeg" },
+    { id: 5, name: "Samuel - O Sonhador", img: "/assets/card-Samuel.jpeg" },
+    { id: 6, name: "Yasmin - A Naturalista", img: "/assets/card-Yasmin.jpeg" },
   ];
 
-  // Array com as atividades da Gruta
   const activities = [
     {
       icon: "🕵️",
@@ -58,17 +47,13 @@ export default function About() {
   return (
     <section className="about-section">
       
-      {/* NOVO: Título que aparece SÓ no celular, acima de tudo */}
       <h1 className="about-title mobile-only-title">
         Entre, jogue um dado e aceite o seu destino.
       </h1>
 
-      {/* 1. INTRODUÇÃO */}
       <div className="about-hero">
         
-        {/* Lado Esquerdo: Textos */}
         <div className="about-text-container">
-          {/* Título original que aparece SÓ no PC */}
           <h1 className="about-title desktop-only-title">
             Entre, jogue um dado e aceite o seu destino.
           </h1>
@@ -84,16 +69,14 @@ export default function About() {
           </p>
         </div>
 
-        {/* Lado Direito: Mídia (Foto/Vídeo) */}
         <div className="about-media-container">
-          <img src={aboutImg} alt="Sobre a Gruta" className="about-media" />
+          <img src="/assets/about.png" alt="Sobre a Gruta" className="about-media" />
         </div>
 
       </div>
 
       <div className="about-separator"></div>
 
-      {/* 2. OS MEMBROS */}
       <div className="members-section">
         <h2 className="section-subtitle">Membros da Gruta</h2>
         <p className="section-tagline">As mentes brilhantes (e altamente questionáveis) por trás de cada história.</p>
@@ -108,7 +91,6 @@ export default function About() {
 
       <div className="about-separator"></div>
 
-      {/* 3. O QUE FAZEMOS */}
       <div className="activities-section">
         <h2 className="section-subtitle">O Que Fazemos</h2>
         <p className="section-tagline">Um brinde ao que deu certo. E outro ao que deu errado</p>

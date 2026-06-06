@@ -1,54 +1,47 @@
+"use client";
+
 import React, { useState } from "react";
 import "./Calendar.css";
 import EventCard from "../EventCard/EventCard";
+// O caminho do import de dados subiu um nível
 import { eventsData } from "../../data/events";
-import copaImg from "../../assets/copa-mob.jpg";
-import copa2Img from "../../assets/copa2-mob.jpg";
-import mafiaImg from "../../assets/mafia-mob.jpg";
-
-// Importe alguma imagem genérica sua para testar, ou as oficiais dos próximos eventos
-import aboutImg from "../../assets/about.png"; 
 
 export default function Calendar() {
-  // Array temporário de próximos eventos (depois você pode colocar no seu data/events.js)
   const upcomingEvents = [
     {
       id: "up-1",
       title: "Brasil x Marrocos",
       date: "13 JUN",
       description: "A abertura da Seleção Brasileira na Copa do Mundo de 2026 pede cerveja e bons amigos.",
-      image: copaImg 
+      image: "/assets/copa-mob.jpg" 
     },
     {
       id: "up-2",
       title: "Festa-temática: Mafia Italiana",
       date: "14 JUN",
       description: "Vista-se a caráter, e defenda a sua família! Falcones vs. Leones, qual família triunfará?.",
-      image: mafiaImg 
+      image: "/assets/mafia-mob.jpg" 
     },
     {
       id: "up-3",
       title: "Brasil x Haiti",
       date: "19 JUN",
       description: "O primeiro jogo já passou, mas ainda queremos cerveja e bons amigos. Tamo junto de novo!",
-      image: copa2Img 
+      image: "/assets/copa2-mob.jpg" 
     }
   ];
 
-  // Estado que controla qual evento está aparecendo no banner gigante (começa com o primeiro)
   const [activeEvent, setActiveEvent] = useState(upcomingEvents[0]);
 
   return (
     <section className="calendar-page">
       
-      {/* --- PARTE 1: PRÓXIMOS EVENTOS (LISTA + BANNER) --- */}
       <div className="upcoming-section">
         <h2 className="section-subtitle">Próximos Eventos</h2>
         <p className="section-tagline">Marque na agenda. Ou não, a gente te cobra no WhatsApp.</p>
         
         <div className="upcoming-layout">
           
-          {/* Lado Esquerdo: Lista Interativa */}
           <div className="upcoming-list">
             {upcomingEvents.map((event) => (
               <div 
@@ -65,13 +58,12 @@ export default function Calendar() {
             ))}
           </div>
 
-          {/* Lado Direito: Banner 4:3 do evento selecionado */}
           <div className="upcoming-banner-container">
             <img 
               src={activeEvent.image} 
               alt={activeEvent.title} 
               className="upcoming-banner-img fade-in" 
-              key={activeEvent.id} // O key força o React a re-renderizar a imagem, ativando a animação de fade
+              key={activeEvent.id} 
             />
             <div className="upcoming-banner-overlay">
               <span className="banner-badge">EM BREVE</span>
@@ -83,7 +75,6 @@ export default function Calendar() {
 
       <div className="calendar-separator"></div>
 
-      {/* --- PARTE 2: TODOS OS EVENTOS (GRID DOS CARDS) --- */}
       <div className="all-events-section">
         <h2 className="section-subtitle">Histórico da Gruta</h2>
         <p className="section-tagline">Tudo que já rolou (e sobrevivemos para contar).</p>

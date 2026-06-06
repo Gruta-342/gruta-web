@@ -1,6 +1,8 @@
+"use client";
+
 import React, { useRef, useState, useEffect } from "react";
 import EventCard from "../EventCard/EventCard";
-// Certifique-se de que o caminho do seu data está correto!
+// Ajuste no caminho do import para puxar da nova pasta src/data
 import { eventsData } from "../../data/events"; 
 import "./EventsSection.css";
 
@@ -25,7 +27,6 @@ export default function EventsSection() {
     handleScroll();
   }, []);
 
-  // Função simplificada: calcula apenas a largura de 1 card + o gap (para o mobile)
   const getCardScrollAmount = () => {
     if (!carouselRef.current) return 0;
     const cardWidth = carouselRef.current.children[0].offsetWidth;
@@ -33,15 +34,12 @@ export default function EventsSection() {
     return cardWidth + gap;
   };
 
-  // --- LÓGICA INTELIGENTE DE ROLAGEM ---
   const scrollLeftBtn = () => {
     if (!carouselRef.current) return;
     
     if (window.innerWidth > 768) {
-      // DESKTOP: Rola tudo para a posição 0 (início absoluto)
       carouselRef.current.scrollTo({ left: 0, behavior: "smooth" });
     } else {
-      // MOBILE: Volta a largura exata de 1 card
       carouselRef.current.scrollBy({ left: -getCardScrollAmount(), behavior: "smooth" });
     }
   };
@@ -50,10 +48,8 @@ export default function EventsSection() {
     if (!carouselRef.current) return;
     
     if (window.innerWidth > 768) {
-      // DESKTOP: Rola tudo para o tamanho máximo da caixa (final absoluto)
       carouselRef.current.scrollTo({ left: carouselRef.current.scrollWidth, behavior: "smooth" });
     } else {
-      // MOBILE: Avança a largura exata de 1 card
       carouselRef.current.scrollBy({ left: getCardScrollAmount(), behavior: "smooth" });
     }
   };
