@@ -55,7 +55,7 @@ export default function Jogos() {
         <div className="jogos-separator"></div>
 
         <GameGrid 
-        title="Desenvolvimento Próprio" 
+        title="Gruta Produções" 
         tagline="Código nosso, bugs nossos também." 
         games={proprios} 
       />

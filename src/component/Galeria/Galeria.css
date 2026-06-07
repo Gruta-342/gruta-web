@@ -1,0 +1,419 @@
+.galeria-page {
+  padding: 40px 20px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: white;
+}
+
+.galeria-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.galeria-main-title {
+  font-size: 36px;
+  color: #00d2ff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.galeria-intro {
+  color: #a0aab5;
+  font-size: 18px;
+}
+
+/* FILTROS (DROPDOWN + CHIPS) */
+.galeria-filters-modern {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 50px;
+  position: relative;
+  z-index: 10; 
+}
+
+.custom-dropdown {
+  position: relative;
+  width: 260px;
+  flex-shrink: 0;
+}
+
+/* Nome exclusivo para evitar conflitos */
+.galeria-dropdown-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.galeria-dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.dropdown-trigger {
+  width: 100%;
+  background: rgba(10, 33, 71, 0.8);
+  border: 1px solid rgba(0, 210, 255, 0.4);
+  color: #a0aab5;
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.dropdown-trigger:hover {
+  border-color: #00d2ff;
+  color: white;
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 115%;
+  left: 0;
+  width: 100%;
+  background: #051329;
+  border: 1px solid rgba(0, 210, 255, 0.3);
+  border-radius: 8px;
+  list-style: none;
+  padding: 10px 0;
+  margin: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.8);
+  scrollbar-width: thin;
+  scrollbar-color: #00d2ff transparent;
+}
+
+.dropdown-menu::-webkit-scrollbar { width: 6px; }
+.dropdown-menu::-webkit-scrollbar-thumb { background-color: #00d2ff; border-radius: 10px; }
+
+.dropdown-menu li {
+  padding: 12px 20px;
+  color: #a0aab5;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.dropdown-menu li:hover {
+  background: rgba(0, 210, 255, 0.1);
+  color: white;
+}
+
+/* ESTILOS DAS TAGS ATIVAS (CHIPS) */
+.active-filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-chip {
+  background: rgba(0, 210, 255, 0.1);
+  border: 1px solid #00d2ff;
+  color: white;
+  padding: 6px 12px 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(4px);
+  animation: chipIn 0.2s ease-out forwards;
+}
+
+.filter-chip-remove {
+  background: transparent;
+  border: none;
+  color: #00d2ff;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: color 0.2s;
+}
+
+.filter-chip-remove:hover {
+  color: #ff3366; 
+}
+
+.no-photos-message {
+  width: 100%;
+  text-align: center;
+  padding: 40px;
+  color: #a0aab5;
+  font-size: 16px;
+  background: rgba(10, 33, 71, 0.5);
+  border-radius: 8px;
+  border: 1px dashed rgba(0, 210, 255, 0.3);
+  margin-bottom: 40px;
+}
+
+@keyframes chipIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* MASONRY GRID (Com o novo efeito 'Moldura Neon' estável) */
+.masonry-grid {
+  column-count: 3;
+  column-gap: 20px;
+}
+
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 20px;
+  position: relative;
+  border-radius: 8px;
+  cursor: pointer;
+  background-color: #0a2147;
+  
+  /* Transição suave apenas para borda e brilho */
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  border: 2px solid transparent; /* Borda visível por padrão, mas transparente */
+  overflow: hidden; /* Garante que o zoom da imagem não saia da borda */
+}
+
+.masonry-img {
+  width: 100%;
+  display: block;
+  border-radius: 6px; 
+  transition: transform 0.5s ease; /* Transição lenta para o zoom interno */
+}
+
+/* O NOVO EFEITO HOVER */
+.masonry-item:hover {
+  /* REMOVIDO: transform: translateY(-5px) scale(1.02); */
+  /* Container fica estável no lugar */
+  
+  /* 1. Contorno em Azul Claro (Neon) */
+  border-color: #00d2ff;
+  
+  /* 2. Brilho Neon atrás (Drop Shadow) */
+  box-shadow: 0 0 20px rgba(0, 210, 255, 0.7), 
+              0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* 3. Leve Zoom Interno da Imagem */
+.masonry-item:hover .masonry-img {
+  transform: scale(1.03); /* Mantido: leve zoom interno */
+}
+
+/* Oculta o overlay antigo da lupa */
+.masonry-hover-overlay {
+  display: none;
+}
+
+.galeria-separator {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.3), transparent);
+  margin: 60px 0;
+}
+
+/* HALL DA FAMA */
+.hall-of-fame-grid {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 20px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #00d2ff #0a2147;
+}
+
+.hof-card {
+  flex: 0 0 250px;
+  height: 250px;
+  position: relative;
+  cursor: pointer;
+}
+
+.hof-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+  filter: sepia(0.3);
+  transition: filter 0.3s ease;
+}
+
+.hof-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 4px solid #d4af37;
+  border-radius: 5px;
+  box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+  pointer-events: none;
+}
+
+.hof-card:hover .hof-img {
+  filter: sepia(0);
+}
+
+/* LIGHTBOX (Modal da Foto com Carrossel) */
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(5, 19, 41, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+/* SETAS DE NAVEGAÇÃO */
+.lightbox-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(10, 33, 71, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: white;
+  transition: all 0.3s ease;
+  z-index: 1010; 
+  backdrop-filter: blur(5px);
+}
+
+.lightbox-nav-btn:hover {
+  background: rgba(0, 210, 255, 0.2);
+  border-color: #00d2ff;
+  box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+}
+
+.lightbox-nav-btn.prev { left: 40px; }
+.lightbox-nav-btn.next { right: 40px; }
+
+.close-lightbox {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 40px;
+  cursor: pointer;
+  transition: color 0.2s;
+  z-index: 1010;
+}
+
+.close-lightbox:hover {
+  color: #00d2ff;
+}
+
+.lightbox-content {
+  background: white;
+  padding: 15px 15px 25px 15px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content; 
+  max-width: 95vw;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+  animation: polaroidIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.lightbox-img-wrapper {
+  position: relative;
+  display: block; 
+  max-width: 100%;
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 75vh;
+  display: block;
+}
+
+.photo-date-stamp {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(2, 34, 71, 0.5); 
+  color: #ffffff;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 1px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px); 
+  pointer-events: none;
+  user-select: none;
+}
+
+.lightbox-caption {
+  margin-top: 20px;
+  color: #333;
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  font-size: 16px;
+  width: 0;
+  min-width: 100%;
+  word-wrap: break-word;
+  white-space: normal; 
+}
+
+@keyframes polaroidIn {
+  0% { transform: scale(0.8) translateY(50px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 768px) {
+  .galeria-filters-modern {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .custom-dropdown {
+    width: 100%;
+  }
+  .masonry-grid { 
+    column-count: 2; 
+  }
+  .lightbox-nav-btn {
+    width: 45px;
+    height: 45px;
+    background: rgba(10, 33, 71, 0.8);
+  }
+  .lightbox-nav-btn.prev { left: 15px; }
+  .lightbox-nav-btn.next { right: 15px; }
+  .lightbox-nav-btn svg { width: 18px; height: 18px; }
+  .photo-date-stamp { font-size: 12px; top: 10px; right: 10px; padding: 4px 8px; }
+}
+
+@media (max-width: 480px) {
+  .masonry-grid { 
+    column-count: 1; 
+  }
+  .lightbox-content { padding: 10px 10px 15px 10px; }
+  .lightbox-caption { font-size: 14px; margin-top: 12px; }
+}

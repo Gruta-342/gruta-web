@@ -1,10 +1,10 @@
-import EmConstrucao from "../../component/EmConstrucao/EmConstrucao";
+import Galeria from "../../component/Galeria/Galeria";
 
 export const metadata = {
   title: "Galeria da Gruta",
-  description: "Registros de momentos que talvez não devessem ser registrados.",
+  description: "O nosso mural de evidências, zoeiras e momentos históricos.",
 };
 
 export default function GaleriaPage() {
-  return <EmConstrucao />;
+  return <Galeria />;
 }

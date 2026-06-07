@@ -5,7 +5,7 @@ import Header from "../component/Header/Header";
 
 // Isso aqui é o SEO nativo do Next.js. O Google ama isso!
 export const metadata = {
-  title: "Gruta 342",
+  title: "Gruta",
   description: "Onde o caos vira história e a zoeira é tradição.",
 };
 
