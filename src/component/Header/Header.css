@@ -72,6 +72,19 @@
   object-fit: contain;
 }
 
+/* Efeito de clique e zoom no logo da Gruta */
+.header-logo-link {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.header-logo-link:hover {
+  transform: scale(1.05); /* Um pequeno zoom elegante ao passar o mouse */
+}
+
 /* ======================================================== */
 /* 2. FORÇAR ELEMENTOS MOBILE A SUMIREM NO PC               */
 /* ======================================================== */

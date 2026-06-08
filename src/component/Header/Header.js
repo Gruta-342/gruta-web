@@ -45,8 +45,10 @@ export default function Header() {
         </div>
         
         <div className="center-section">
-          <img src="/assets/logo.png" alt="Logo Gruta" className="desktop-logo" />
-          <img src="/assets/logo.png" alt="Logo Gruta" className="mobile-logo" />
+          <Link href="/" className="header-logo-link">
+            <img src="/assets/logo.png" alt="Logo Gruta" className="desktop-logo" />
+            <img src="/assets/logo.png" alt="Logo Gruta" className="mobile-logo" />
+          </Link>
         </div>
 
         <div className="right-section">

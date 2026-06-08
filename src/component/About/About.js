@@ -13,19 +13,14 @@ export default function About() {
 
   const activities = [
     {
-      icon: "🕵️",
-      title: "Noite do Detetive",
-      desc: "Onde ninguém sabe nada, mas alguém sempre acerta sem querer."
-    },
-    {
       icon: "🎲",
-      title: "Board Games",
-      desc: "Aqui o único objetivo é sobreviver. Mas a gente sabe que ninguém vai."
+      title: "Jogos de Tabuleiro",
+      desc: "De blefes absurdos a alianças duvidosas. A amizade é testada a cada rodada e a paz nunca é uma opção."
     },
     {
-      icon: "♣️",
-      title: "Cassino da Gruta",
-      desc: "Apostamos dinheiro? Não. Apostamos nossa dignidade."
+      icon: "🎮",
+      title: "Jogos Online",
+      desc: "Aqui o único objetivo é sobreviver. Mas a gente sabe que ninguém vai."
     },
     {
       icon: "🎉",
@@ -33,15 +28,36 @@ export default function About() {
       desc: "Uma desculpa perfeita pra usar roupas diferentes por uma noite."
     },
     {
+      icon: "🕵️",
+      title: "Detective Night",
+      desc: "Onde ninguém sabe nada, mas alguém sempre acerta sem querer."
+    },
+    {
+      icon: "♣️",
+      title: "Cassino da Gruta",
+      desc: "Apostamos dinheiro? Não. Apostamos nossa dignidade."
+    },
+    {
       icon: "🐉",
       title: "RPG & Campanhas",
       desc: "Todo mundo tem um plano... até o mestre começar a sorrir."
     },
     {
-      icon: "👻",
-      title: "Noite do Terror",
-      desc: "Filme de terror e aquele grito que vem do nada (às vezes é do filme)."
+      icon: "🍿",
+      title: "Noite do Cinema",
+      desc: "A gente escolhe o filme com a melhor das intenções, mas acabamos julgando roteiro, personagens e direção a sessão inteira."
+    },
+    {
+      icon: "🍺",
+      title: "Resenha da Gruta",
+      desc: "De debates filosóficos profundos às piadas mais quinta-série possíveis. Tudo resolvido em volta da mesa com uma cervejinha gelada."
+    },
+    {
+      icon: "💡",
+      title: "Projetos Infinitos",
+      desc: "Ideias geniais, várias linhas de código e artes refeitas. A gente está sempre criando algo incrível, só não perguntem quando vai ficar pronto."
     }
+    
   ];
 
   return (

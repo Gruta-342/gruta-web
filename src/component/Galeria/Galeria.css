@@ -1,6 +1,6 @@
 .galeria-page {
   padding: 40px 20px 80px;
-  max-width: 1200px;
+  max-width: 1300px; 
   margin: 0 auto;
   color: white;
 }
@@ -41,38 +41,51 @@
   flex-shrink: 0;
 }
 
-/* Nome exclusivo para evitar conflitos */
 .galeria-dropdown-arrow {
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.3s ease;
+  cursor: pointer;
 }
 
 .galeria-dropdown-arrow.open {
   transform: rotate(180deg);
 }
 
+/* O wrapper agora atua como fundo para o input */
 .dropdown-trigger {
   width: 100%;
   background: rgba(10, 33, 71, 0.8);
   border: 1px solid rgba(0, 210, 255, 0.4);
-  color: #a0aab5;
   padding: 14px 20px;
   border-radius: 8px;
-  font-size: 14px;
-  cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
   transition: all 0.3s ease;
   backdrop-filter: blur(5px);
+  cursor: text; /* Cursor de digitação */
 }
 
-.dropdown-trigger:hover {
+.dropdown-trigger:hover, .dropdown-trigger.focused {
   border-color: #00d2ff;
-  color: white;
   box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+}
+
+/* O novo input transparente */
+.dropdown-input {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  width: 100%;
+  font-family: inherit;
+}
+
+.dropdown-input::placeholder {
+  color: #a0aab5;
 }
 
 .dropdown-menu {
@@ -110,7 +123,6 @@
   color: white;
 }
 
-/* ESTILOS DAS TAGS ATIVAS (CHIPS) */
 .active-filters-container {
   display: flex;
   flex-wrap: wrap;
@@ -167,54 +179,63 @@
   to { opacity: 1; transform: scale(1); }
 }
 
-/* MASONRY GRID (Com o novo efeito 'Moldura Neon' estável) */
-.masonry-grid {
-  column-count: 3;
-  column-gap: 20px;
+/* MASONRY GRID */
+.masonry-grid-modern {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+}
+
+.masonry-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .masonry-item {
-  break-inside: avoid;
-  margin-bottom: 20px;
   position: relative;
   border-radius: 8px;
   cursor: pointer;
   background-color: #0a2147;
-  
-  /* Transição suave apenas para borda e brilho */
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
-  border: 2px solid transparent; /* Borda visível por padrão, mas transparente */
-  overflow: hidden; /* Garante que o zoom da imagem não saia da borda */
+  border: 2px solid transparent; 
+  overflow: hidden; 
 }
 
 .masonry-img {
   width: 100%;
   display: block;
   border-radius: 6px; 
-  transition: transform 0.5s ease; /* Transição lenta para o zoom interno */
+  transition: transform 0.5s ease; 
+  object-fit: cover;
 }
 
-/* O NOVO EFEITO HOVER */
 .masonry-item:hover {
-  /* REMOVIDO: transform: translateY(-5px) scale(1.02); */
-  /* Container fica estável no lugar */
-  
-  /* 1. Contorno em Azul Claro (Neon) */
   border-color: #00d2ff;
-  
-  /* 2. Brilho Neon atrás (Drop Shadow) */
   box-shadow: 0 0 20px rgba(0, 210, 255, 0.7), 
               0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* 3. Leve Zoom Interno da Imagem */
 .masonry-item:hover .masonry-img {
-  transform: scale(1.03); /* Mantido: leve zoom interno */
+  transform: scale(1.03); 
 }
 
-/* Oculta o overlay antigo da lupa */
-.masonry-hover-overlay {
-  display: none;
+.video-indicator {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 210, 255, 0.8);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
 }
 
 .galeria-separator {
@@ -265,7 +286,7 @@
   filter: sepia(0);
 }
 
-/* LIGHTBOX (Modal da Foto com Carrossel) */
+/* LIGHTBOX */
 .lightbox-overlay {
   position: fixed;
   top: 0;
@@ -280,7 +301,6 @@
   padding: 20px;
 }
 
-/* SETAS DE NAVEGAÇÃO */
 .lightbox-nav-btn {
   position: absolute;
   top: 50%;
@@ -387,7 +407,6 @@
   100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 
-/* RESPONSIVIDADE */
 @media (max-width: 768px) {
   .galeria-filters-modern {
     flex-direction: column;
@@ -396,8 +415,11 @@
   .custom-dropdown {
     width: 100%;
   }
-  .masonry-grid { 
-    column-count: 2; 
+  .masonry-grid-modern {
+    gap: 12px; 
+  }
+  .masonry-col {
+    gap: 12px; 
   }
   .lightbox-nav-btn {
     width: 45px;
@@ -411,8 +433,11 @@
 }
 
 @media (max-width: 480px) {
-  .masonry-grid { 
-    column-count: 1; 
+  .masonry-grid-modern {
+    gap: 8px; 
+  }
+  .masonry-col {
+    gap: 8px;
   }
   .lightbox-content { padding: 10px 10px 15px 10px; }
   .lightbox-caption { font-size: 14px; margin-top: 12px; }
