@@ -201,68 +201,122 @@
     display: flex !important; 
   }
 
-  .separator { display: none; }
-
-  /* --- MENU MOBILE RESPONSIVO --- */
-  .bottom-nav {
-    display: none; /* Inicia oculto */
-    width: 100%;
-    padding: 10px 0 20px;
-    border-top: 1px solid rgba(0, 210, 255, 0.2);
-    background-color: #051329;
-    position: absolute; /* Tira o menu do fluxo normal do site */
-    top: 100%; /* Faz o menu nascer exatamente colado no limite inferior da barra do topo */
-    left: 0;
-    z-index: 1000; /* Garante que ele fique por cima do banner e de qualquer outro elemento */
-    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6); /* Sombra para dar profundidade e separar do fundo */
+  /* LINHA DIVISÓRIA (Restaurada com efeito fade moderno) */
+  .separator { 
+    display: block !important; 
+    margin: 0; 
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, rgba(0, 210, 255, 0.8) 50%, transparent 100%);
   }
 
-  /* Só aparece de verdade quando ganha a classe .open */
-  .bottom-nav.open { display: block; }
+  /* --- O NOVO MENU MOBILE DINÂMICO --- */
+  .bottom-nav {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background-color: rgba(5, 19, 41, 0.98);
+    backdrop-filter: blur(10px);
+    position: absolute;
+    top: 100%; 
+    left: 0;
+    z-index: 1000;
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6);
+    
+    max-height: 0;
+    overflow: hidden;
+    padding: 0; 
+    transition: max-height 0.4s ease-in-out, padding 0.4s ease-in-out;
+  }
+
+  .bottom-nav.open { 
+    max-height: 450px; 
+    padding: 10px 0 20px;
+    /* Removido o border-top antigo, pois a linha divisória original voltou */
+  }
   
   .bottom-nav ul {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
-    padding-bottom: 0;
+    gap: 5px; 
+    padding: 0;
+    margin: 0;
     list-style: none;
+    width: 100%;
   }
 
-  /* Blocos do menu Mobile */
+  /* --- BOTÕES DO MENU BASE --- */
   .bottom-nav a {
+    position: relative; /* Necessário para ancorar os efeitos de luz */
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    height: auto;
-    padding: 15px 0;
-    border-bottom: none !important; 
+    width: 100%; 
+    height: 55px;
     font-size: 16px;
     color: #a0aab5; 
     font-weight: bold;
     text-transform: uppercase;
-    cursor: pointer;
+    text-decoration: none !important;
+    transition: color 0.3s ease;
+    background: transparent;
+    border: none;
+    z-index: 1; /* Garante que o texto fique acima do brilho */
   }
 
+  /* O fundo base transparente para receber o brilho (Tamanho Fixo) */
+  .bottom-nav a::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%); /* Centraliza perfeitamente */
+    width: 280px; /* TAMANHO PADRÃO FIXO (Aprox. dobro de CALENDÁRIO) */
+    height: 100%;
+    background: transparent;
+    transition: background 0.3s ease;
+    z-index: -1; /* Joga o brilho para trás do texto */
+  }
+
+  /* --- O ESTADO ATIVO --- */
   .bottom-nav a.active {
-    color: #00d2ff;
-    font-size: 18px;
-    background-color: rgba(0, 210, 255, 0.05); 
+    color: #ffffff;
   }
 
+  /* Brilho azul envolvendo o botão ativo */
+  .bottom-nav a.active::before {
+    background: linear-gradient(90deg, transparent 0%, rgba(0, 150, 255, 0.35) 50%, transparent 100%);
+  }
+
+  /* A linha azul clara vívida no centro do botão ativo */
+  .bottom-nav a.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px; /* MESMO TAMANHO PADRÃO FIXO DA LUZ */
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, #00d2ff 50%, transparent 100%);
+  }
+
+  /* --- O EFEITO HOVER (Passar o mouse - Sem a linha base) --- */
   .bottom-nav a:not(.active):hover {
     color: #ffffff; 
+  }
+
+  .bottom-nav a:not(.active):hover::before {
+    background: linear-gradient(90deg, transparent 0%, rgba(0, 150, 255, 0.15) 50%, transparent 100%);
   }
 
   /* Botão de Perfil extra no menu */
   .mobile-profile-item {
     display: flex !important; 
     justify-content: center;
-    width: 80%;
+    width: 100%;
     margin-top: 10px;
-    padding-top: 20px !important;
-    border-top: 1px dashed rgba(255, 255, 255, 0.2);
+    padding-top: 15px !important;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
   }
 
   .profile-menu-btn {
@@ -275,24 +329,14 @@
     background: none;
     border: none;
     cursor: pointer;
+    text-transform: uppercase;
   }
 
   .profile-menu-btn svg {
-    width: 24px;
-    height: 24px;
-  }
-  /* Inverte a Visibilidade: Desliga PC, Liga Mobile */
-  .desktop-slogan, .desktop-logo, .desktop-profile {
-    display: none !important; 
+    width: 22px;
+    height: 22px;
   }
 
-  .mobile-logo {
-    display: block !important; 
-    height: 40px; 
-    object-fit: contain;
-  }
-
-  /* Nova regra ligando o botão de perfil na esquerda */
   .mobile-profile-left {
     display: flex !important;
   }

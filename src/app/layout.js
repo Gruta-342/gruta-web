@@ -1,7 +1,7 @@
 import "./globals.css";
 import Header from "../component/Header/Header";
 // import Footer from "../component/Footer/Footer";
-// import FloatingSocials from "../component/FloatingSocials/FloatingSocials";
+import FloatingSocials from "../component/FloatingSocials/FloatingSocials";
 
 // Isso aqui é o SEO nativo do Next.js. O Google ama isso!
 export const metadata = {
@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
         </main>
 
         {/* <Footer /> */}
-        {/* <FloatingSocials /> */}
+        <FloatingSocials />
       </body>
     </html>
   );

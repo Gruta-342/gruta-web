@@ -17,9 +17,22 @@ button {
   background: none;
 }
 
+/* Garante que NENHUM link no site tenha aquele sublinhado feio do navegador */
+a {
+  text-decoration: none !important;
+}
+
+/* Espaçamento Padrão do Computador */
 .main-content {
   min-height: 70vh; 
-  padding-top: 170px; 
+  padding-top: 160px; /* Padronizado para o cabeçalho Desktop */
+}
+
+/* Ajuste Cirúrgico para o Celular */
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 85px; /* Tamanho exato do cabeçalho Mobile! Fim do buraco. */
+  }
 }
 
 /* Estilo da Página em Construção */

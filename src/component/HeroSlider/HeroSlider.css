@@ -9,32 +9,26 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 40px;
-  overflow: hidden; 
+  overflow: hidden; /* Corta o que estiver fora do bloco principal */
 }
 
+/* O TRILHO QUE SE MOVE */
 .slider-content {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  display: flex; /* Coloca os slides lado a lado */
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); /* Animação de deslize suave e natural */
   z-index: 1; 
 }
 
+/* CADA SLIDE INDIVIDUAL */
 .slide {
-  position: absolute;
-  top: 0;
-  left: 0;
+  flex: 0 0 100%; /* Cada slide ocupa exatos 100% da tela */
   width: 100%;
   height: 100%;
-  opacity: 0;
-  transition: opacity 0.6s ease-in-out; 
-  pointer-events: none; 
-}
-
-.slide.active {
-  opacity: 1;
-  pointer-events: auto;
 }
 
 .slide picture {
@@ -48,7 +42,6 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
-  /* Evita que o usuário tente "salvar a imagem" sem querer ao arrastar no celular */
   user-select: none; 
   -webkit-user-drag: none;
 }
@@ -56,7 +49,6 @@
 /* --- SETAS DE NAVEGAÇÃO --- */
 .arrow {
   color: white;
-  font-size: 40px;
   background: rgba(0, 0, 0, 0.4); 
   border-radius: 50%;
   width: 50px;
@@ -70,11 +62,16 @@
   border: none;
 }
 
+.arrow svg {
+  width: 28px;
+  height: 28px;
+}
+
 .arrow:hover {
   background: rgba(0, 0, 0, 0.8);
 }
 
-/* --- BOLINHAS (PAGINATION DOTS) COM FUNDO OBLONGO --- */
+/* --- BOLINHAS (PAGINATION DOTS) --- */
 .dots-container {
   position: absolute;
   bottom: 20px;
@@ -83,12 +80,10 @@
   display: flex;
   gap: 12px;
   z-index: 3; 
-  
-  /* Mágica do formato em pílula */
-  background-color: rgba(5, 19, 41, 0.6); /* Azul escuro transparente da Gruta */
-  padding: 8px 16px; /* Espaço ao redor das bolinhas */
-  border-radius: 30px; /* Borda bem redonda criando o oblongo */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Sombra para desgrudar do banner */
+  background-color: rgba(5, 19, 41, 0.6); 
+  padding: 8px 16px; 
+  border-radius: 30px; 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); 
 }
 
 .dot {
@@ -110,56 +105,43 @@
   transform: scale(1.3); 
 }
 
-/* --- SETAS DE NAVEGAÇÃO --- */
-.arrow {
-  color: white;
-  background: rgba(0, 0, 0, 0.4); 
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.3s;
-  z-index: 2; 
-  cursor: pointer;
-  border: none;
-}
-
-/* Controla o tamanho exato do ícone SVG dentro do botão */
-.arrow svg {
-  width: 28px;
-  height: 28px;
-}
-
-.arrow:hover {
-  background: rgba(0, 0, 0, 0.8);
-}
-
-/* ======================================================== */
-/* MEDIA QUERIES - SOMENTE CELULAR (ATÉ 768px)              */
-/* ======================================================== */
+/* ========================================== */
+/* Responsividade Tablet (Telas médias)       */
+/* ========================================== */
 @media (max-width: 768px) {
+  .games-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 15px;
+  }
   
-  .hero-slider {
-    height: auto; 
-    aspect-ratio: 4 / 3; 
-    padding: 0 15px; 
+  .game-title {
+    font-size: 14px;
+  }
+}
+
+/* ========================================== */
+/* Responsividade Celular (Mínimo 3 colunas)  */
+/* ========================================== */
+@media (max-width: 480px) {
+  .games-grid {
+    /* A Mágica: Força exatamente 3 colunas iguais no celular! */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px; /* Espaço menor entre os cards para aproveitar a tela */
+  }
+  
+  .game-overlay {
+    /* Reduz o padding para o texto não bater nas bordas do card */
+    padding: 20px 8px 10px; 
   }
 
-  /* Some com as setas para focar só no Swipe e não poluir a imagem pequena */
-  .arrow {
-    display: none;
+  .game-title {
+    font-size: 11px; /* Fonte refinada para caber no card de 3 colunas */
+    line-height: 1.1;
   }
 
-  .dots-container {
-    bottom: 15px;
-    gap: 10px;
-    padding: 6px 14px; /* Oblongo levemente mais fininho no mobile */
-  }
-
-  .dot {
-    width: 8px;
-    height: 8px;
+  .game-badge {
+    font-size: 8px;
+    padding: 2px 4px;
+    margin-top: 4px;
   }
 }
