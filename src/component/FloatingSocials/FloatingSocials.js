@@ -7,7 +7,7 @@ export default function FloatingSocials() {
       
       {/* Botão do Discord */}
       <a 
-        href="https://discord.gg/NCfE97BGa" 
+        href="https://discord.gg/QtKJwPNRah" 
         target="_blank" 
         rel="noopener noreferrer" 
         className="social-btn discord"
