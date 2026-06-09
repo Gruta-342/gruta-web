@@ -1,0 +1,199 @@
+.home-container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* CONTAINER SPLIT (LADO A LADO) */
+.home-hero-split {
+  display: flex;
+  gap: 30px;
+  align-items: stretch; 
+  margin-bottom: 60px;
+}
+
+/* COLUNA DO SLIDER */
+.home-slider-wrapper {
+  flex: 2;
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.home-slider-wrapper .hero-slider {
+  aspect-ratio: 2 / 1 !important;
+  height: 100% !important;
+  min-height: 420px; 
+  padding: 0; 
+}
+
+.home-slider-wrapper .hero-slider .arrow.left-arrow { margin-left: 20px; }
+.home-slider-wrapper .hero-slider .arrow.right-arrow { margin-right: 20px; }
+
+/* COLUNA DA LISTA LATERAL */
+.home-events-sidebar {
+  flex: 1;
+  background: rgba(10, 33, 71, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 25px;
+  border: 1px solid rgba(0, 210, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+
+.sidebar-title {
+  color: #00d2ff;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+  padding-bottom: 12px;
+}
+
+/* LISTA COM BARRA DE ROLAGEM CUSTOMIZADA */
+.sidebar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  overflow-y: auto;
+  overflow-x: hidden; 
+  padding-right: 10px; 
+  flex: 1;
+  
+  scrollbar-width: thin;
+  scrollbar-color: #004b75 transparent;
+}
+
+.sidebar-list::-webkit-scrollbar { width: 6px; }
+.sidebar-list::-webkit-scrollbar-thumb { background-color: #004b75; border-radius: 10px; }
+
+/* --- DESIGN DO CARD DE EVENTO --- */
+.sidebar-event-item {
+  display: flex;
+  flex-direction: row; 
+  align-items: center; /* CORREÇÃO: Garante o alinhamento perfeito da data no meio do eixo! */
+  gap: 20px; 
+  padding: 15px;
+  background: rgba(5, 19, 41, 0.5);
+  border-radius: 10px;
+  border-left: 4px solid #004b75;
+  transition: all 0.3s ease;
+  cursor: pointer; /* Feedback pro usuário saber que pode clicar */
+}
+
+/* CORREÇÃO: O estilo luminoso agora se aplica no mouse E quando a classe é .active */
+.sidebar-event-item:hover,
+.sidebar-event-item.active {
+  border-left-color: #00d2ff;
+  background: rgba(0, 210, 255, 0.05);
+  transform: translateX(5px);
+}
+
+/* Coluna da Esquerda (Data limpa e perfeitamente centrada) */
+.event-date-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; 
+  width: 45px; 
+  /* Todo o padding defeituoso daqui foi removido! */
+}
+
+.date-day {
+  font-size: 26px;
+  font-weight: 900;
+  color: white;
+  line-height: 1;
+}
+
+.date-month {
+  font-size: 12px;
+  font-weight: bold;
+  color: #00d2ff;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-top: 4px;
+}
+
+/* Coluna da Direita (Conteúdo Geral) */
+.event-content-col {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* O Cabeçalho (Título na esquerda, Hora na Direita) */
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.event-title {
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.2;
+  margin: 0;
+}
+
+/* O Retângulo da Hora (No canto superior direito) */
+.event-time {
+  background: rgba(0, 75, 117, 0.4);
+  color: #00d2ff;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  white-space: nowrap; 
+}
+
+.event-desc {
+  color: #a0aab5;
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* ======================================================== */
+/* RESPONSIVIDADE (TABLETS E LAPTOPS PEQUENOS)              */
+/* ======================================================== */
+@media (max-width: 1024px) {
+  .home-hero-split {
+    flex-direction: column; 
+    gap: 20px;
+  }
+  
+  .home-slider-wrapper .hero-slider {
+    aspect-ratio: 2 /1 !important; 
+    height: auto !important;
+    min-height: auto;
+  }
+}
+
+/* ======================================================== */
+/* RESPONSIVIDADE CELULAR                                   */
+/* ======================================================== */
+@media (max-width: 768px) {
+  .home-container {
+    padding: 10px;
+  }
+  
+  .home-slider-wrapper .hero-slider {
+    aspect-ratio: 4 / 3 !important; 
+    height: auto !important;
+  }
+  
+  .home-events-sidebar {
+    padding: 20px 15px;
+  }
+}

@@ -158,7 +158,7 @@ export const photosData = [
     img: "/assets/galeria/video18.mp4",
     caption: "Detective Night, caso de João Picadinho.",
     date: "12/12/2025",
-    tags: ["DETECTIVE", "GUILHERME", "ELMI", "SAMUEL", "YASMIN", "JAMILLY", "TABULEIRO", "CERVEJA"],
+    tags: ["DETECTIVE", "GUILHERME", "ELMI", "SAMUEL", "JAMILLY", "TABULEIRO", "CERVEJA"],
     isHallOfFame: false,
     aspect: "3:4"
   },

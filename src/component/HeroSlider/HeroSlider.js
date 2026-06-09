@@ -3,64 +3,50 @@
 import React, { useState, useEffect } from "react";
 import "./HeroSlider.css";
 
-export default function HeroSlider() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+// Ele agora recebe os controles vindos da Home
+export default function HeroSlider({ currentSlide, setCurrentSlide, delay, setDelay }) {
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
-  
-  // NOVO ESTADO: Controla o tempo de espera (padrão 5 segundos)
-  const [delay, setDelay] = useState(5000);
 
   const minSwipeDistance = 50;
 
   const slides = [
     {
       id: 1,
-      desktopImg: "/assets/copa.jpg",
-      mobileImg: "/assets/copa-mob.jpg",
-      alt: "Brasil vs. Marrocos"
-    },
-    {
-      id: 2,
-      desktopImg: "/assets/mafia.jpg", 
+      desktopImg: "/assets/mafia-mob.jpg", 
       mobileImg: "/assets/mafia-mob.jpg",
       alt: "Grotta Nostra"
     },
     {
-      id: 3,
-      desktopImg: "/assets/copa2.jpg",
+      id: 2,
+      desktopImg: "/assets/copa2-mob.jpg",
       mobileImg: "/assets/copa2-mob.jpg",
       alt: "Brasil vs. Haiti"
     }
   ];
 
   const nextSlide = () => {
-    setCurrentSlide(currentSlide === slides.length - 1 ? 0 : currentSlide + 1);
+    setCurrentSlide(prev => prev === slides.length - 1 ? 0 : prev + 1);
   };
 
   const prevSlide = () => {
-    setCurrentSlide(currentSlide === 0 ? slides.length - 1 : currentSlide - 1);
+    setCurrentSlide(prev => prev === 0 ? slides.length - 1 : prev - 1);
   };
 
-  // --- NOVA LÓGICA DE TEMPO ---
   useEffect(() => {
-    // Usamos setTimeout no lugar de setInterval
     const timer = setTimeout(() => {
       nextSlide();
       
-      // Se estava no tempo de 30s de descanso, devolve para 5s normais para o próximo
       if (delay !== 5000) {
         setDelay(5000);
       }
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [currentSlide, delay]); 
-  // ----------------------------
+  }, [currentSlide, delay, setDelay]); 
 
-  // FUNÇÕES DE INTERAÇÃO MANUAL (Acionam a pausa longa)
   const handleInteraction = () => {
-    setDelay(30000); // 30 segundos de pausa
+    setDelay(30000); 
   };
 
   const manualNextSlide = () => {
@@ -95,10 +81,10 @@ export default function HeroSlider() {
     const isRightSwipe = distance < -minSwipeDistance;
     
     if (isLeftSwipe) {
-      manualNextSlide(); // Usa a versão manual para dar a pausa
+      manualNextSlide(); 
     }
     if (isRightSwipe) {
-      manualPrevSlide(); // Usa a versão manual para dar a pausa
+      manualPrevSlide(); 
     }
   };
 
@@ -115,7 +101,6 @@ export default function HeroSlider() {
         </svg>
       </button>
       
-      {/* O TRILHO DO SLIDE COM A ANIMAÇÃO INLINE INTACTA */}
       <div 
         className="slider-content"
         style={{ transform: `translateX(-${currentSlide * 100}%)` }}

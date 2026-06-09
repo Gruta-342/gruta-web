@@ -1,13 +1,11 @@
 /* --- BASE DO CARD VERTICAL --- */
 .event-card-vertical {
-  min-width: 300px;
-  width: 300px;
-  background-color: #0b1b36; /* Fundo um tom acima do site para destacar */
+  width: 100%; /* Deixa o card fluido para obedecer a grade */
+  background-color: #0b1b36; 
   border-radius: 12px;
-  overflow: hidden; /* Garante que a imagem respeite as bordas arredondadas */
+  overflow: hidden; 
   display: flex;
   flex-direction: column;
-  flex-shrink: 0; /* Impede o carrossel de esmagar o card */
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -96,7 +94,8 @@
   
   /* Truque mágico para limitar a descrição a 3 linhas com "..." no final */
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

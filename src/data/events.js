@@ -13,7 +13,7 @@ export const eventsData = [
     date: "25 DEZ 2025",
     tags: ["BOARDGAME", "SOBREVIVÊNCIA"],
     description: "Todo mundo tinha um plano, mas nada saiu como planejado... como sempre!",
-    image: "/assets/dbd.png"
+    image: "/assets/games/dbd.jpg"
   },
   {
     id: 3,
@@ -21,7 +21,7 @@ export const eventsData = [
     date: "19 DEZ 2025",
     tags: ["BOARDGAME", "INVESTIGAÇÃO"],
     description: "O assassino monta a cena do crime, o mediador tenta induzir os detetives à solução do caso e Samuel sempre é suspeito.",
-    image: "/assets/deception.png"
+    image: "/assets/games/deception.jpg"
   },
   {
     id: 2,

@@ -74,7 +74,7 @@ export default function About() {
             Entre, jogue um dado e aceite o seu destino.
           </h1>
           <p>
-            A Gruta é onde a gente discute teorias, resolve mistério, inventa história,<br/> 
+            A Gruta é onde a gente discute teorias, resolve mistério, inventa história, 
             joga conversa fora e ri alto sem medo de ser feliz.
           </p>
           <p className="highlight-text">
