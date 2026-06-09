@@ -120,28 +120,24 @@
 }
 
 /* ========================================== */
-/* Responsividade Celular (Mínimo 3 colunas)  */
+/* RESPONSIVIDADE MOBILE (Celulares e Tablets)*/
 /* ========================================== */
-@media (max-width: 480px) {
-  .games-grid {
-    /* A Mágica: Força exatamente 3 colunas iguais no celular! */
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px; /* Espaço menor entre os cards para aproveitar a tela */
+@media (max-width: 768px) {
+  .hero-slider {
+    /* Muda a proporção de "tira larga" para um formato mais quadrado/vertical.
+       Se a sua arte for um pouco mais alta, mude para 4 / 5 ou 9 / 16 */
+    aspect-ratio: 4 / 3; 
+    padding: 0 10px; /* Reduz a margem lateral para a arte crescer mais */
   }
   
-  .game-overlay {
-    /* Reduz o padding para o texto não bater nas bordas do card */
-    padding: 20px 8px 10px; 
+  /* Diminui o tamanho das setas para não cobrirem muito a arte no celular */
+  .arrow {
+    width: 35px;
+    height: 35px;
   }
-
-  .game-title {
-    font-size: 11px; /* Fonte refinada para caber no card de 3 colunas */
-    line-height: 1.1;
-  }
-
-  .game-badge {
-    font-size: 8px;
-    padding: 2px 4px;
-    margin-top: 4px;
+  
+  .arrow svg {
+    width: 18px;
+    height: 18px;
   }
 }
