@@ -20,7 +20,7 @@ export default function Home() {
     
     {
       id: 1,
-      day: "14",
+      day: "13",
       month: "JUN",
       time: "19:00h",
       title: "Grotta Nostra (Máfia)",
@@ -28,7 +28,7 @@ export default function Home() {
     },
     {
       id: 2,
-      day: "27",
+      day: "19",
       month: "JUN",
       time: "21:30h",
       title: "Copa 2026: Segunda Rodada",

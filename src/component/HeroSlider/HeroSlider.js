@@ -13,8 +13,8 @@ export default function HeroSlider({ currentSlide, setCurrentSlide, delay, setDe
   const slides = [
     {
       id: 1,
-      desktopImg: "/assets/mafia-mob.jpg", 
-      mobileImg: "/assets/mafia-mob.jpg",
+      desktopImg: "/assets/grottanostra43.png", 
+      mobileImg: "/assets/grottanostra43.png",
       alt: "Grotta Nostra"
     },
     {

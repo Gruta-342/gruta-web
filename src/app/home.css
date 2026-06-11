@@ -14,7 +14,7 @@
 
 /* COLUNA DO SLIDER */
 .home-slider-wrapper {
-  flex: 2;
+  flex: 1;
   position: relative;
   border-radius: 12px;
   overflow: hidden;
@@ -23,9 +23,9 @@
 }
 
 .home-slider-wrapper .hero-slider {
-  aspect-ratio: 2 / 1 !important;
+  aspect-ratio: 4 / 3 !important;
   height: 100% !important;
-  min-height: 420px; 
+  min-height: auto; 
   padding: 0; 
 }
 
