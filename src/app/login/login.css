@@ -1,0 +1,173 @@
+/* CONTAINER PRINCIPAL */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 150px); /* Desconta o tamanho do header/footer */
+  padding: 2rem;
+  background: linear-gradient(to bottom, #081c3b, #051329);
+}
+
+/* O CARTÃO DE LOGIN */
+.login-card {
+  background-color: #051329; /* Azul escuro, padrão Gruta */
+  border: 1px solid rgba(0, 170, 255, 0.336); /* Borda suave azul */
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 420px; /* Mantemos a largura para não esticar muito */
+  color: #ffffff;
+}
+
+.login-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #00a8ff; /* Azul destaque */
+  font-size: 1.8rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+/* --- BLOCO ALTERADO: BOTÕES SOCIAIS --- */
+.social-login {
+  display: flex;
+  flex-direction: row; /* <--- ALTERADO DE COLUMN PARA ROW (Lado a lado) */
+  gap: 12px; /* Mantemos o espaço entre eles */
+  margin-bottom: 1.5rem;
+}
+
+.social-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1; /* <--- ADICIONADO: Faz cada botão ocupar 50% da largura */
+  gap: 8px; /* Espaço ícone/texto */
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  font-size: 0.95rem; /* <--- Ligeiramente menor para caber melhor side-by-side */
+  cursor: pointer;
+  white-space: nowrap; /* <--- ADICIONADO: Impede quebra de linha do texto */
+  transition: transform 0.2s, filter 0.2s;
+}
+/* -------------------------------------- */
+
+.social-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.discord-btn {
+  background-color: #5865F2;
+  color: white;
+}
+
+.google-btn {
+  background-color: #ffffff;
+  color: #121212;
+}
+
+/* DIVISOR (A linha do "ou") */
+.login-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #888;
+  margin-bottom: 1.5rem;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.login-divider:not(:empty)::before {
+  margin-right: 15px;
+}
+
+.login-divider:not(:empty)::after {
+  margin-left: 15px;
+}
+
+/* FORMULÁRIO TRADICIONAL */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-group label {
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.input-group input {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+  border-color: #00a8ff;
+  box-shadow: 0 0 10px rgba(0, 168, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.login-error {
+  color: #ff4d4d;
+  font-size: 0.9rem;
+  text-align: center;
+  margin: 0;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #00a8ff 0%, #007bb5 100%);
+  color: white;
+  padding: 14px;
+  border-radius: 8px;
+  border: none;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: filter 0.3s;
+}
+
+.submit-btn:hover {
+  filter: brightness(1.2);
+}
+
+/* RODAPÉ DO LOGIN */
+.login-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #aaa;
+}
+
+.login-footer a {
+  color: #00a8ff;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.login-footer a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}

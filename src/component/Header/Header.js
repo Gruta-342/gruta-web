@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link"; 
 import { usePathname } from "next/navigation"; 
 import "./Header.css";
+import AuthButton from "../AuthButton/AuthButton";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -34,13 +35,10 @@ export default function Header() {
             Onde o caos vira história<br />
             e a zoeira é tradição.
           </p>
-          <button className="profile-btn mobile-profile-left" title="Perfil">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="M18 20a6 6 0 0 0-12 0"></path>
-              <circle cx="12" cy="10" r="4"></circle>
-            </svg>
-          </button>
+          {/* Botão de Autenticação na visualização Mobile */}
+          <div className="mobile-profile-left">
+            <AuthButton />
+          </div>
         </div>
         
         <div className="center-section">
@@ -51,13 +49,10 @@ export default function Header() {
         </div>
 
         <div className="right-section">
-          <button className="profile-btn desktop-profile" title="Perfil">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="M18 20a6 6 0 0 0-12 0"></path>
-              <circle cx="12" cy="10" r="4"></circle>
-            </svg>
-          </button>
+          {/* Botão de Autenticação na visualização Desktop */}
+          <div className="desktop-profile">
+            <AuthButton />
+          </div>
           
           <button 
             className="hamburger-btn" 
