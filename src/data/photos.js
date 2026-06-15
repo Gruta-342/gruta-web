@@ -170,6 +170,168 @@ export const photosData = [
     tags: ["STRANGER THINGS", "GUILHERME", "ELMI", "SAMUEL", "YASMIN", "JAMILLY", "NORONHA"],
     isHallOfFame: false,
     aspect: "1:1"
+  },
+  {
+    id: 20,
+    img: "/assets/mafia/mafia1.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "GUILHERME", "ARMAS"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 21,
+    img: "/assets/mafia/mafia2.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "JAMILLY", "YASMIN", "MARIA CLARA", "ARMAS"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 22,
+    img: "/assets/mafia/mafia3.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "ELMI", "NORONHA", "GUILHERME", "CERVEJA","ARMAS" ],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 23,
+    img: "/assets/mafia/mafia4.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "YASMIN", "ARMAS"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 24,
+    img: "/assets/mafia/mafia5.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "NORONHA"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 25,
+    img: "/assets/mafia/mafia6.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "ELMI", "ARMAS"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 26,
+    img: "/assets/mafia/mafia7.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "GUILHERME", "NORONHA"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 27,
+    img: "/assets/mafia/mafia8.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "JAMILLY"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 28,
+    img: "/assets/mafia/mafia9.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "ELMI"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 29,
+    img: "/assets/mafia/mafia10.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "YASMIN", "ARMAS"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 30,
+    img: "/assets/mafia/mafia11.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "GUILHERME", "JAMILLY"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 31,
+    img: "/assets/mafia/mafia12.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "GUILHERME", "ELMI", "ARMAS", "CERVEJA"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 32,
+    img: "/assets/mafia/mafia13.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "GUILHERME", "ARMAS"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 33,
+    img: "/assets/mafia/mafia14.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "MARIA CLARA"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 34,
+    img: "/assets/mafia/mafia15.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "ELMI", "NORONHA", "CERVEJA"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 35,
+    img: "/assets/mafia/mafia16.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "MARIA CLARA", "ARMAS"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 36,
+    img: "/assets/mafia/mafia17.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "YASMIN"],
+    isHallOfFame: false,
+    aspect: "3:4"
+  },
+  {
+    id: 37,
+    img: "/assets/mafia/mafia18.jpg",
+    caption: "",
+    date: "13/06/2026",
+    tags: ["FESTA TEMÁTICA", "MAFIA ITALIANA", "GUILHERME"],
+    isHallOfFame: false,
+    aspect: "3:4"
   }
 
 ];

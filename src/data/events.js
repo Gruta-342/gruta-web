@@ -1,5 +1,13 @@
 export const eventsData = [
   {
+    id: 6,
+    title: "GROTTA NOSTRA",
+    date: "29 MAI 2026",
+    tags: ["FESTA TEMÁTICA", "MÁFIA"],
+    description: "Duas famílias rivais e uma paz frágil: alianças foram firmadas, mas também houve um traidor que se acovardou diante da Máfia.",
+    image: "/assets/grottanostra43.png"
+  },
+  {
     id: 5,
     title: "BACKROOMS",
     date: "29 MAI 2026",
