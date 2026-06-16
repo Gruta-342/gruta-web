@@ -48,18 +48,30 @@ export default function AuthButton() {
         {/* Menu Suspenso (Dropdown) */}
         {isMenuOpen && (
           <div className="auth-dropdown">
+            
+            {/* SÓ MOSTRA SE FOR ADMIN */}
+            {session.user?.roles?.includes("admin") && (
+              <button 
+                className="dropdown-item" 
+                style={{ color: "#00a8ff", fontWeight: "bold" }}
+                onClick={() => console.log("Ir para o painel admin")}
+              >
+                Painel Admin
+              </button>
+            )}
+
             <button 
               className="dropdown-item logout-trigger" 
               onClick={() => {
-                setIsMenuOpen(false); // Fecha o menu
-                setShowConfirm(true); // Abre a confirmação
+                setIsMenuOpen(false);
+                setShowConfirm(true);
               }}
             >
               Sair da conta
             </button>
           </div>
         )}
-
+        
         {/* Modal de Confirmação de Logout */}
         {showConfirm && (
           <div className="logout-modal-overlay">

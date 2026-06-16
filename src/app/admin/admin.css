@@ -1,0 +1,178 @@
+.admin-container {
+  padding: 3rem 2rem;
+  min-height: 80vh;
+  background-color: #020914; /* Fundo principal escuro da Gruta */
+  color: white;
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (min-width: 992px) {
+  .admin-grid {
+    grid-template-columns: 1.2fr 0.8fr;
+  }
+}
+
+.admin-card {
+  background-color: #06152b; /* Azul escuro dos cards */
+  border: 1px solid rgba(0, 168, 255, 0.2);
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.admin-subtitle {
+  color: #00a8ff;
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+}
+
+/* SISTEMA DE ABAS */
+.admin-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+  background: rgba(0,0,0,0.2);
+  padding: 5px;
+  border-radius: 8px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  color: #aaa;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.tab:hover {
+  color: white;
+}
+
+.tab.active {
+  background: #00a8ff;
+  color: #fff;
+}
+
+/* FORMULÁRIO */
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  color: #aaa;
+}
+
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  outline: none;
+  font-family: inherit;
+  transition: border 0.3s;
+}
+
+.form-group input:focus, 
+.form-group select:focus, 
+.form-group textarea:focus {
+  border-color: #00a8ff;
+}
+
+/* Destaque para o dropdown de templates */
+.template-highlight {
+  background: rgba(0, 168, 255, 0.05);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px dashed rgba(0, 168, 255, 0.3);
+}
+.template-highlight select {
+  color: #00a8ff;
+  font-weight: bold;
+}
+
+/* BOTÕES E LISTA */
+.admin-submit-btn {
+  background: linear-gradient(135deg, #00a8ff 0%, #007bb5 100%);
+  color: white;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.admin-submit-btn:hover { filter: brightness(1.2); }
+
+.admin-cancel-btn {
+  background: transparent;
+  color: #aaa;
+  border: 1px solid #aaa;
+  padding: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.admin-cancel-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+
+.admin-message { text-align: center; color: #00ff88; font-size: 0.9rem; margin: 0; }
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.event-item-mini {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.event-item-mini strong { display: block; font-size: 0.95rem; }
+.event-item-mini p { font-size: 0.85rem; color: #aaa; margin: 4px 0 0 0; }
+.event-item-mini span { color: #00a8ff; }
+.event-actions { display: flex; gap: 8px; }
+.edit-btn, .delete-btn {
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 6px; cursor: pointer;
+}
+.edit-btn:hover { background: rgba(0,168,255,0.2); }
+.delete-btn:hover { background: rgba(255,50,50,0.2); }
