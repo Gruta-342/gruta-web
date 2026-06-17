@@ -1,242 +1,569 @@
+/* ==========================================================================
+   Gruta 342 - Painel Administrativo CSS
+   Estrutura Linear Vertical Completa (Inclusão -> Gerenciamento)
+   ========================================================================== */
+
+:root {
+  --bg-main: #020914;
+  --bg-card: #06152b;
+  --bg-sidebar: #040d1a;
+  --accent: #00a8ff;
+  --accent-hover: #0086cc;
+  --text-main: #ffffff;
+  --text-muted: #8a9fc4;
+  --border: rgba(0, 168, 255, 0.15);
+  --success: #00e676;
+  --error: #ff3d00;
+  --bg-input: rgba(0, 0, 0, 0.35);
+  --border-edit: #ffaa00;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 .admin-container {
-  padding: 3rem 2rem;
-  min-height: 80vh;
-  background-color: #020914; 
-  color: white;
-}
-
-.admin-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-@media (min-width: 992px) {
-  .admin-grid {
-    grid-template-columns: 1.2fr 0.8fr;
-  }
-}
-
-.admin-card {
-  background-color: #06152b; 
-  border: 1px solid rgba(0, 168, 255, 0.2);
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-}
-
-.admin-subtitle {
-  color: #00a8ff;
-  margin-bottom: 1.5rem;
-  font-size: 1.4rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 10px;
-}
-
-.admin-tabs {
   display: flex;
-  gap: 10px;
-  margin-bottom: 1.5rem;
-  background: rgba(0,0,0,0.2);
-  padding: 5px;
-  border-radius: 8px;
+  min-height: 100vh;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-.tab {
-  flex: 1;
-  padding: 10px;
-  background: transparent;
-  border: none;
-  color: #aaa;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.3s ease;
-}
-
-.tab:hover {
-  color: white;
-}
-
-.tab.active {
-  background: #00a8ff;
-  color: #fff;
-}
-
-.admin-form {
+/* ==========================================================================
+   BARRA LATERAL DE NAVEGAÇÃO
+   ========================================================================== */
+.admin-sidebar {
+  width: 280px;
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  padding: 2.5rem 1.5rem;
+  flex-shrink: 0;
+}
+
+.sidebar-brand {
+  margin-bottom: 3rem;
+  padding-left: 0.5rem;
+}
+
+.sidebar-brand h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.sidebar-brand span {
+  font-size: 0.8rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 600;
+}
+
+.sidebar-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 14px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  width: 100%;
+}
+
+.menu-item:hover {
+  color: var(--text-main);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.menu-item.active {
+  color: var(--text-main);
+  background: rgba(0, 168, 255, 0.12);
+  border-left: 4px solid var(--accent);
+  padding-left: 12px;
+  font-weight: 600;
+}
+
+.menu-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* ==========================================================================
+   ÁREA CENTRAL E FLUXO VERTICAL
+   ========================================================================== */
+.admin-content-wrapper {
+  flex: 1;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.content-header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.admin-sections-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 3.5rem; /* Espaçamento confortável entre os formulários e as tabelas */
+}
+
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 1.2rem;
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+}
+
+/* ==========================================================================
+   ESTILOS DOS FORMULÁRIOS
+   ========================================================================== */
+.admin-form {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Destaque visual suave quando o formulário estiver editando um item existente */
+.admin-form:has(.btn-secondary) {
+  border-color: rgba(255, 170, 0, 0.3);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0.6rem;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .form-group label {
-  font-size: 0.85rem;
-  color: #aaa;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.form-group input, 
-.form-group select, 
-.form-group textarea {
-  background-color: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  padding: 12px;
-  border-radius: 8px;
-  outline: none;
-  font-family: inherit;
-  transition: border 0.3s;
-}
-
-.form-group input:focus, 
-.form-group select:focus, 
-.form-group textarea:focus {
-  border-color: #00a8ff;
-}
-
-.template-highlight {
-  background: rgba(0, 168, 255, 0.05);
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px dashed rgba(0, 168, 255, 0.3);
-}
-.template-highlight select {
-  color: #00a8ff;
-  font-weight: bold;
-}
-
-.admin-submit-btn {
-  background: linear-gradient(135deg, #00a8ff 0%, #007bb5 100%);
-  color: white;
-  padding: 14px;
-  border: none;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: filter 0.2s;
-}
-
-.admin-submit-btn:hover { filter: brightness(1.2); }
-
-.admin-cancel-btn {
-  background: transparent;
-  color: #aaa;
-  border: 1px solid #aaa;
-  padding: 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: all 0.2s;
-}
-
-.admin-cancel-btn:hover { background: rgba(255,255,255,0.1); color: white; }
-
-.admin-message { text-align: center; color: #00ff88; font-size: 0.9rem; margin: 0; }
-
-.events-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-height: 600px;
-  overflow-y: auto;
-}
-
-.event-item-mini {
-  background: rgba(255, 255, 255, 0.03);
-  padding: 12px;
+.admin-form input[type="text"],
+.admin-form input[type="date"],
+.admin-form input[type="time"],
+.admin-form textarea,
+.admin-select {
+  background-color: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
+  padding: 12px 14px;
+  color: var(--text-main);
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.admin-select {
+  cursor: pointer;
+  appearance: none;
+}
+
+.admin-form input:focus,
+.admin-form textarea:focus,
+.admin-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.input-half {
+  max-width: 50%;
+}
+
+/* Botões do Formulário */
+.form-actions-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  gap: 12px;
+  margin-top: 0.5rem;
 }
 
-.event-item-mini strong { display: block; font-size: 0.95rem; }
-.event-item-mini p { font-size: 0.85rem; color: #aaa; margin: 4px 0 0 0; }
-.event-item-mini span { color: #00a8ff; }
-.event-actions { display: flex; gap: 8px; }
-.edit-btn, .delete-btn {
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 6px; cursor: pointer;
-}
-.edit-btn:hover { background: rgba(0,168,255,0.2); }
-.delete-btn:hover { background: rgba(255,50,50,0.2); }
-
-/* SISTEMA DE TAGS */
-.tag-group {
-  background: rgba(0, 0, 0, 0.15);
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px dashed rgba(0, 168, 255, 0.3);
-}
-
-.selected-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.tag-pill {
-  background-color: #004a75;
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid #00a8ff;
-}
-
-.tag-pill button {
-  background: transparent;
+.btn-primary {
+  background-color: var(--accent);
+  color: #01050e;
+  font-weight: 700;
   border: none;
-  color: #00a8ff;
-  font-size: 1rem;
+  padding: 14px 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 14px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--text-main);
+  color: var(--text-main);
+}
+
+/* ==========================================================================
+   TABELAS DE GERENCIAMENTO (ALTERAÇÕES)
+   ========================================================================== */
+.records-table-wrapper {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.records-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.records-table th {
+  background-color: rgba(0, 0, 0, 0.25);
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.records-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: #e2e8f0;
+  vertical-align: middle;
+}
+
+.records-table tr:last-child td {
+  border-bottom: none;
+}
+
+.records-table tr:hover td {
+  background-color: rgba(0, 168, 255, 0.02);
+}
+
+/* Linha em destaque quando está sendo editada */
+.row-highlight-editing td {
+  background-color: rgba(255, 170, 0, 0.05) !important;
+  border-bottom: 1px solid rgba(255, 170, 0, 0.2);
+}
+
+.font-semibold {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.table-empty-state {
+  text-align: center;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 3rem !important;
+}
+
+/* Ações nas Tabelas (Ícones SVG) */
+.table-actions-flex {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.action-btn-edit,
+.action-btn-delete {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
 }
 
-.tag-pill button:hover {
-  color: #ff4757;
+.action-btn-edit svg,
+.action-btn-delete svg {
+  width: 18px;
+  height: 18px;
 }
 
+.action-btn-edit { color: var(--text-muted); }
+.action-btn-edit:hover {
+  color: var(--border-edit);
+  background: rgba(255, 170, 0, 0.1);
+  border-color: var(--border-edit);
+}
+
+.action-btn-delete { color: var(--text-muted); }
+.action-btn-delete:hover {
+  color: var(--error);
+  background: rgba(255, 61, 0, 0.1);
+  border-color: var(--error);
+}
+
+/* ==========================================================================
+   TAGS E COMPONENTES AUXILIARES
+   ========================================================================== */
 .tag-input-wrapper {
   display: flex;
+  gap: 10px;
+}
+
+.tag-input-wrapper button {
+  background: rgba(0, 168, 255, 0.08);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 0 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.tag-input-wrapper button:hover {
+  background: var(--accent);
+  color: #01050e;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 0.4rem;
+}
+
+.tag-badge {
+  background-color: rgba(0, 168, 255, 0.12);
+  border: 1px solid rgba(0, 168, 255, 0.25);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.tag-input-wrapper input {
-  flex: 1;
-}
-
-.tag-add-btn {
-  background: rgba(0, 168, 255, 0.2);
-  color: #00a8ff;
-  border: 1px solid #00a8ff;
-  border-radius: 8px;
-  padding: 0 15px;
-  font-weight: bold;
+.tag-badge button {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.2s;
+  font-size: 1.1rem;
 }
 
-.tag-add-btn:hover {
-  background: #00a8ff;
-  color: white;
+.tag-badge button:hover { color: var(--error); }
+
+.table-tags-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.table-tag-mini {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Status Operacional para Jogos */
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status-badge.disponível {
+  background-color: rgba(0, 230, 118, 0.1);
+  color: var(--success);
+  border: 1px solid rgba(0, 230, 118, 0.2);
+}
+
+.status-badge.em-uso {
+  background-color: rgba(255, 170, 0, 0.1);
+  color: var(--border-edit);
+  border: 1px solid rgba(255, 170, 0, 0.2);
+}
+
+.status-badge.manutenção {
+  background-color: rgba(255, 61, 0, 0.1);
+  color: var(--error);
+  border: 1px solid rgba(255, 61, 0, 0.2);
+}
+
+/* ==========================================================================
+   SISTEMA DE ANEXOS DA GALERIA MÚLTIPLA
+   ========================================================================== */
+.multiple-upload-zone {
+  border: 2px dashed rgba(0, 168, 255, 0.25);
+  border-radius: 8px;
+  padding: 2.2rem;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.18);
+  transition: all 0.2s ease;
+}
+
+.multiple-upload-zone:hover {
+  border-color: var(--accent);
+  background: rgba(0, 168, 255, 0.02);
+}
+
+.hidden-file-input { display: none; }
+
+.file-upload-trigger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.upload-svg {
+  width: 40px;
+  height: 40px;
+  fill: var(--text-muted);
+}
+
+.multiple-upload-zone:hover .upload-svg {
+  fill: var(--accent);
+}
+
+.gallery-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 12px;
+  margin-top: 1.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 14px;
+  border-radius: 8px;
+}
+
+.preview-thumbnail-container {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.btn-remove-thumbnail {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--error);
+  color: #ffffff;
+  border: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Sistema de Alertas */
+.admin-alert {
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.admin-alert.success {
+  background: rgba(0, 230, 118, 0.08);
+  border: 1px solid var(--success);
+  color: var(--success);
+}
+
+.admin-alert.error {
+  background: rgba(255, 61, 0, 0.08);
+  border: 1px solid var(--error);
+  color: var(--error);
+}
+
+/* Scrollbar Customizada */
+.admin-content-wrapper::-webkit-scrollbar { width: 6px; }
+.admin-content-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
 }
