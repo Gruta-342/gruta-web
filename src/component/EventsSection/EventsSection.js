@@ -17,7 +17,7 @@ export default function EventsSection() {
         if (res.ok) {
           const data = await res.json();
           // Como essa é a seção "Últimos Eventos", filtramos apenas a categoria "past"
-          const pastEvents = data.filter(event => event.category === "past");
+          const pastEvents = data.filter(event => event.category === "past").reverse();
           setEventsData(pastEvents);
         }
       } catch (error) {
@@ -35,7 +35,7 @@ export default function EventsSection() {
   return (
     <section className="events-section">
       <h2 className="section-title">ÚLTIMOS EVENTOS</h2>
-      
+
       {isLoading ? (
         <p style={{ textAlign: "center", color: "#00a8ff" }}>Carregando histórico da Gruta...</p>
       ) : (
@@ -55,8 +55,8 @@ export default function EventsSection() {
           {/* Botão Dinâmico: Alterna entre Ver mais e Ver menos */}
           {eventsData.length > 4 && (
             <div className="view-more-container">
-              <button 
-                className="view-more-btn" 
+              <button
+                className="view-more-btn"
                 onClick={() => setShowAll(!showAll)}
               >
                 {showAll ? "Ver menos" : "Ver mais"}

@@ -41,7 +41,6 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
-  
   // Nossas informações customizadas da Gruta!
   roles         String[]  @default(["guest"])
   joined_date   DateTime  @default(now())
@@ -56,4 +55,18 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+// NOVO: Modelo de Eventos
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  date        String   
+  time        String   
+  category    String   
+  bannerUrl   String?  
+  tags        String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

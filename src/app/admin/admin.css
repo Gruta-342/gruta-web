@@ -1,7 +1,7 @@
 .admin-container {
   padding: 3rem 2rem;
   min-height: 80vh;
-  background-color: #020914; /* Fundo principal escuro da Gruta */
+  background-color: #020914; 
   color: white;
 }
 
@@ -20,7 +20,7 @@
 }
 
 .admin-card {
-  background-color: #06152b; /* Azul escuro dos cards */
+  background-color: #06152b; 
   border: 1px solid rgba(0, 168, 255, 0.2);
   border-radius: 12px;
   padding: 2rem;
@@ -35,7 +35,6 @@
   padding-bottom: 10px;
 }
 
-/* SISTEMA DE ABAS */
 .admin-tabs {
   display: flex;
   gap: 10px;
@@ -66,7 +65,6 @@
   color: #fff;
 }
 
-/* FORMULÁRIO */
 .admin-form {
   display: flex;
   flex-direction: column;
@@ -109,7 +107,6 @@
   border-color: #00a8ff;
 }
 
-/* Destaque para o dropdown de templates */
 .template-highlight {
   background: rgba(0, 168, 255, 0.05);
   padding: 10px;
@@ -121,7 +118,6 @@
   font-weight: bold;
 }
 
-/* BOTÕES E LISTA */
 .admin-submit-btn {
   background: linear-gradient(135deg, #00a8ff 0%, #007bb5 100%);
   color: white;
@@ -176,3 +172,71 @@
 }
 .edit-btn:hover { background: rgba(0,168,255,0.2); }
 .delete-btn:hover { background: rgba(255,50,50,0.2); }
+
+/* SISTEMA DE TAGS */
+.tag-group {
+  background: rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px dashed rgba(0, 168, 255, 0.3);
+}
+
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tag-pill {
+  background-color: #004a75;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #00a8ff;
+}
+
+.tag-pill button {
+  background: transparent;
+  border: none;
+  color: #00a8ff;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tag-pill button:hover {
+  color: #ff4757;
+}
+
+.tag-input-wrapper {
+  display: flex;
+  gap: 8px;
+}
+
+.tag-input-wrapper input {
+  flex: 1;
+}
+
+.tag-add-btn {
+  background: rgba(0, 168, 255, 0.2);
+  color: #00a8ff;
+  border: 1px solid #00a8ff;
+  border-radius: 8px;
+  padding: 0 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tag-add-btn:hover {
+  background: #00a8ff;
+  color: white;
+}
