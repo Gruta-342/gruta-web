@@ -130,7 +130,7 @@
 .admin-sections-vertical {
   display: flex;
   flex-direction: column;
-  gap: 3.5rem; /* Espaçamento confortável entre os formulários e as tabelas */
+  gap: 3.5rem;
 }
 
 .section-title {
@@ -158,7 +158,6 @@
   gap: 1.5rem;
 }
 
-/* Destaque visual suave quando o formulário estiver editando um item existente */
 .admin-form:has(.btn-secondary) {
   border-color: rgba(255, 170, 0, 0.3);
 }
@@ -221,7 +220,6 @@
   max-width: 50%;
 }
 
-/* Botões do Formulário */
 .form-actions-row {
   display: flex;
   gap: 12px;
@@ -307,10 +305,15 @@
   background-color: rgba(0, 168, 255, 0.02);
 }
 
-/* Linha em destaque quando está sendo editada */
 .row-highlight-editing td {
   background-color: rgba(255, 170, 0, 0.05) !important;
   border-bottom: 1px solid rgba(255, 170, 0, 0.2);
+}
+
+/* Classe para escurecer o item oculto */
+.item-hidden td {
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
 }
 
 .font-semibold {
@@ -329,19 +332,20 @@
   padding: 3rem !important;
 }
 
-/* Ações nas Tabelas (Ícones SVG) */
+/* ==========================================================================
+   AÇÕES NAS TABELAS (NOVOS SVGS E BOTÕES)
+   ========================================================================== */
 .table-actions-flex {
   display: flex;
   justify-content: center;
   gap: 10px;
 }
 
-.action-btn-edit,
-.action-btn-delete {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+.table-actions-flex button {
+  width: 32px;
+  height: 32px;
+  border: none;
   border-radius: 6px;
-  padding: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -349,24 +353,45 @@
   transition: all 0.2s ease;
 }
 
-.action-btn-edit svg,
-.action-btn-delete svg {
+.table-actions-flex button svg {
   width: 18px;
   height: 18px;
 }
 
-.action-btn-edit { color: var(--text-muted); }
-.action-btn-edit:hover {
-  color: var(--border-edit);
-  background: rgba(255, 170, 0, 0.1);
-  border-color: var(--border-edit);
+/* Novo botão de Ocultar/Exibir */
+.action-btn-toggle {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
 }
 
-.action-btn-delete { color: var(--text-muted); }
-.action-btn-delete:hover {
+.action-btn-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--text-main);
+  transform: scale(1.05);
+}
+
+/* Botão de Editar mais vibrante */
+.action-btn-edit {
+  background: rgba(255, 170, 0, 0.15);
+  color: #ffaa00;
+}
+
+.action-btn-edit:hover {
+  background: #ffaa00;
+  color: #000;
+  transform: scale(1.05);
+}
+
+/* Botão de Excluir mais vibrante */
+.action-btn-delete {
+  background: rgba(255, 61, 0, 0.15);
   color: var(--error);
-  background: rgba(255, 61, 0, 0.1);
-  border-color: var(--error);
+}
+
+.action-btn-delete:hover {
+  background: var(--error);
+  color: #fff;
+  transform: scale(1.05);
 }
 
 /* ==========================================================================
@@ -421,7 +446,9 @@
   font-size: 1.1rem;
 }
 
-.tag-badge button:hover { color: var(--error); }
+.tag-badge button:hover {
+  color: var(--error);
+}
 
 .table-tags-flex {
   display: flex;
@@ -436,33 +463,6 @@
   border-radius: 4px;
   font-size: 0.75rem;
   color: var(--text-muted);
-}
-
-/* Status Operacional para Jogos */
-.status-badge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  display: inline-block;
-}
-
-.status-badge.disponível {
-  background-color: rgba(0, 230, 118, 0.1);
-  color: var(--success);
-  border: 1px solid rgba(0, 230, 118, 0.2);
-}
-
-.status-badge.em-uso {
-  background-color: rgba(255, 170, 0, 0.1);
-  color: var(--border-edit);
-  border: 1px solid rgba(255, 170, 0, 0.2);
-}
-
-.status-badge.manutenção {
-  background-color: rgba(255, 61, 0, 0.1);
-  color: var(--error);
-  border: 1px solid rgba(255, 61, 0, 0.2);
 }
 
 /* ==========================================================================
@@ -482,7 +482,9 @@
   background: rgba(0, 168, 255, 0.02);
 }
 
-.hidden-file-input { display: none; }
+.hidden-file-input {
+  display: none;
+}
 
 .file-upload-trigger {
   display: flex;
@@ -562,7 +564,10 @@
 }
 
 /* Scrollbar Customizada */
-.admin-content-wrapper::-webkit-scrollbar { width: 6px; }
+.admin-content-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
 .admin-content-wrapper::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;

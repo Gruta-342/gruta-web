@@ -21,7 +21,7 @@ export default function Home() {
         if (response.ok) {
           const data = await response.json();
           // Filtra apenas os eventos que têm a categoria "upcoming" (Próximos)
-          const filtered = data.filter(evt => evt.category === "upcoming");
+          const filtered = data.filter(evt => evt.category === "upcoming" && evt.is_visible !== false);
           setUpcomingEvents(filtered);
         }
       } catch (error) {

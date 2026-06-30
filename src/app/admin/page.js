@@ -34,7 +34,6 @@ export default function AdminPanel() {
   const fetchEvents = async () => {
     setIsLoading(true);
     try {
-      // CORREÇÃO DO ERRO 404: Caminho /api/admin/events adicionado
       const response = await fetch("/api/admin/events"); 
       if (response.ok) {
         const data = await response.json();
@@ -80,6 +79,39 @@ export default function AdminPanel() {
     setEventTags(eventTags.filter((t) => t !== tagToRemove));
   };
 
+  // --- ALTERAR VISIBILIDADE DO EVENTO (Usando sua API / Prisma -> Neon) ---
+  const toggleVisibility = async (item) => {
+    try {
+      const newStatus = item.is_visible === false ? true : false;
+      
+      // Montamos o pacote com todos os dados do evento, mas com a visibilidade invertida
+      const payload = {
+        ...item,
+        is_visible: newStatus
+      };
+
+      // Dispara para a SUA rota de API que conversa com o Prisma/Neon
+      const response = await fetch(`/api/admin/events/${item.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) throw new Error("Falha ao atualizar no banco de dados.");
+      
+      // Atualiza o estado localmente sem recarregar tudo
+      setEvents(events.map(e => e.id === item.id ? { ...e, is_visible: newStatus } : e));
+      
+      setAlert({ 
+        type: "success", 
+        message: `Item ${newStatus ? 'visível no site' : 'ocultado do site'} com sucesso!` 
+      });
+    } catch (error) {
+      console.error("Erro ao alterar visibilidade:", error);
+      setAlert({ type: "error", message: "Erro ao alterar visibilidade do item." });
+    }
+  };
+
   // --- SALVAR EVENTO E FAZER UPLOAD ---
   const handleEventSubmit = async (e) => {
     e.preventDefault();
@@ -101,20 +133,17 @@ export default function AdminPanel() {
     // 1. SE O USUÁRIO ESCOLHEU UM ARQUIVO NOVO, FAZEMOS O UPLOAD PARA O SUPABASE PRIMEIRO
     if (eventImageFile) {
       const fileExt = eventImageFile.name.split(".").pop();
-      // Cria um nome de arquivo único para não sobrescrever imagens antigas
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
 
-      // Faz o upload para a pasta/bucket chamada "events"
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("events")
         .upload(fileName, eventImageFile);
 
       if (uploadError) {
         setAlert({ type: "error", message: "Erro ao fazer upload da imagem no Supabase." });
-        return; // Para o processo se a imagem falhar
+        return; 
       }
 
-      // Pega a URL pública permanente da imagem que acabou de subir
       const { data: urlData } = supabase.storage.from("events").getPublicUrl(fileName);
       finalBannerUrl = urlData.publicUrl;
     }
@@ -126,22 +155,20 @@ export default function AdminPanel() {
       date: eventDate,
       time: backendCategory === "upcoming" ? eventTime : "",
       category: backendCategory,
-      bannerUrl: finalBannerUrl, // URL da imagem enviada ou mantida
+      bannerUrl: finalBannerUrl, 
       tags: eventTags
     };
 
-    // 3. SALVA NO BANCO DE DADOS (PRISMA)
+    // 3. SALVA NO BANCO DE DADOS
     try {
       let response;
       if (editingEventId !== null) {
-        // CORREÇÃO DO ERRO 404: /api/admin/events/[id]
         response = await fetch(`/api/admin/events/${editingEventId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(eventPayload)
         });
       } else {
-        // CORREÇÃO DO ERRO 404: /api/admin/events
         response = await fetch("/api/admin/events", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -169,7 +196,6 @@ export default function AdminPanel() {
   const deleteEvent = async (id) => {
     if (!confirm("Tem certeza que deseja deletar este evento?")) return;
     try {
-      // CORREÇÃO DO ERRO 404
       const response = await fetch(`/api/admin/events/${id}`, { method: "DELETE" });
       if (response.ok) {
         setAlert({ type: "success", message: "Evento excluído!" });
@@ -189,8 +215,8 @@ export default function AdminPanel() {
     setEventDescription(evt.description);
     setEventDate(evt.date ? evt.date.split("T")[0] : "");
     setEventTime(evt.time || "");
-    setEventBannerUrl(evt.bannerUrl || ""); // Guarda a URL antiga
-    setEventImageFile(null); // Limpa o input de arquivo (pois ele não precisa mandar de novo se não quiser trocar)
+    setEventBannerUrl(evt.bannerUrl || "");
+    setEventImageFile(null); 
     setEventTags(evt.tags || []);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -256,7 +282,6 @@ export default function AdminPanel() {
                   )}
                 </div>
 
-                {/* UPLOAD DE ARQUIVO AO INVÉS DE TEXTO */}
                 <div className="form-group">
                   <label>Capa / Banner do Evento (Upload)</label>
                   <input
@@ -265,7 +290,6 @@ export default function AdminPanel() {
                     onChange={(e) => setEventImageFile(e.target.files[0])}
                     className="admin-file-input"
                   />
-                  {/* Pré-visualização da imagem para ficar bonito */}
                   {(eventImageFile || eventBannerUrl) && (
                     <div style={{ marginTop: '10px' }}>
                       <img 
@@ -314,7 +338,7 @@ export default function AdminPanel() {
             </section>
           )}
 
-          {/* TABELA DE REGISTROS MANTIDA INTACTA */}
+          {/* TABELA DE REGISTROS COM SVGs ATUALIZADOS E BOTÃO DE EXIBIR/OCULTAR */}
           {(activeMenu === "proximos" || activeMenu === "ultimos") && (
             <section className="existing-records-section">
               <h2 className="section-title">Itens Ativos no Banco de Dados ({displayedEvents.length})</h2>
@@ -327,30 +351,53 @@ export default function AdminPanel() {
                       <tr>
                         <th>Título</th>
                         <th>Data {activeMenu === "proximos" && "/ Horário"}</th>
-                        <th>Tags</th>
+                        {/* Exibe o cabeçalho de Tags apenas se NÃO for 'proximos' */}
+                        {activeMenu !== "proximos" && <th>Tags</th>}
                         <th className="text-center">Ações</th>
                       </tr>
                     </thead>
                     <tbody>
                       {displayedEvents.map((item) => (
-                        <tr key={item.id} className={editingEventId === item.id ? "row-highlight-editing" : ""}>
+                        <tr key={item.id} className={`${editingEventId === item.id ? "row-highlight-editing" : ""} ${item.is_visible === false ? "item-hidden" : ""}`.trim()}>
                           <td className="font-semibold">{item.title}</td>
                           <td>
                             {item.date ? new Date(item.date).toLocaleDateString("pt-BR", {timeZone: "UTC"}) : "N/A"}
                             {activeMenu === "proximos" && item.time ? ` às ${item.time}` : ""}
                           </td>
-                          <td>
-                            <div className="table-tags-flex">
-                              {item.tags?.map((t, idx) => <span key={idx} className="table-tag-mini">{t}</span>)}
-                            </div>
-                          </td>
+                          
+                          {/* Renderiza as tags dinamicamente apenas se NÃO for 'proximos' */}
+                          {activeMenu !== "proximos" && (
+                            <td>
+                              <div className="table-tags-flex">
+                                {item.tags?.map((t, idx) => <span key={idx} className="table-tag-mini">{t}</span>)}
+                              </div>
+                            </td>
+                          )}
+
                           <td>
                             <div className="table-actions-flex">
-                              <button type="button" className="action-btn-edit" onClick={() => startEditEvent(item)} title="Editar dados">
-                                <svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                              {/* Botão de Visibilidade (Olho aberto/fechado) */}
+                              <button 
+                                type="button" 
+                                className="action-btn-toggle" 
+                                onClick={() => toggleVisibility(item)} 
+                                title={item.is_visible === false ? "Exibir no site" : "Ocultar do site"}
+                              >
+                                {item.is_visible === false ? (
+                                  <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.978 9.978 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                                ) : (
+                                  <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                )}
                               </button>
+
+                              {/* Novo Botão de Editar */}
+                              <button type="button" className="action-btn-edit" onClick={() => startEditEvent(item)} title="Editar dados">
+                                <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                              </button>
+
+                              {/* Novo Botão de Excluir */}
                               <button type="button" className="action-btn-delete" onClick={() => deleteEvent(item.id)} title="Excluir do Supabase">
-                                <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                                <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                               </button>
                             </div>
                           </td>

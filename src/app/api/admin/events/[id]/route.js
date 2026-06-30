@@ -15,7 +15,7 @@ export async function PUT(req, { params }) {
     const { id } = await params; 
     const data = await req.json();
 
-    // Atualiza o evento incluindo as novas colunas de Imagem e Tags
+    // Atualiza o evento incluindo as novas colunas de Imagem, Tags e Visibilidade
     const updatedEvent = await prisma.event.update({
       where: { id },
       data: {
@@ -26,6 +26,7 @@ export async function PUT(req, { params }) {
         category: data.category,
         bannerUrl: data.bannerUrl,
         tags: data.tags || [],
+        is_visible: data.is_visible,
       },
     });
 
