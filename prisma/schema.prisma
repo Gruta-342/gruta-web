@@ -25,7 +25,7 @@ model Account {
 
   @@unique([provider, providerAccountId])
 }
-n
+
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -57,7 +57,6 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// NOVO: Modelo de Eventos
 model Event {
   id          String   @id @default(cuid())
   title       String
@@ -70,4 +69,16 @@ model Event {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   is_visible  Boolean  @default(true)
+}
+
+model Game {
+  id         String   @id @default(uuid())
+  title      String
+  category   String   // Ex: "Próprios", "Tabuleiros", "Online"npx prisma db push
+  image      String   // URL da imagem no Supabase ou caminho local
+  badge      String?  // Opcional, para tags como "MOBILE"
+  is_visible Boolean  @default(true) //
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
