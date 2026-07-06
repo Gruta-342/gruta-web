@@ -572,3 +572,94 @@
   background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
 }
+
+/* --- ESTILOS PARA BATCH UPLOAD NA GALERIA --- */
+.gallery-batch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.gallery-batch-card {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 15px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn-remove-batch {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: var(--error);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-weight: bold;
+  z-index: 2;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+  transition: transform 0.2s;
+}
+
+.btn-remove-batch:hover {
+  transform: scale(1.1);
+}
+
+.batch-preview {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #000;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.batch-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.batch-fields input[type="text"],
+.batch-fields input[type="date"],
+.batch-fields select {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: white;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.batch-fields input[type="text"]::placeholder {
+  color: rgba(255,255,255,0.4);
+}
+
+.checkbox-label {
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffaa00;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.batch-tags button {
+  background: var(--accent);
+  color: var(--bg-main);
+  border: none;
+  border-radius: 6px;
+  padding: 0 12px;
+  cursor: pointer;
+  font-weight: bold;
+}

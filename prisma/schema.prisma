@@ -82,3 +82,17 @@ model Game {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
+
+model Gallery {
+  id           String   @id @default(uuid())
+  img          String   // URL da imagem no Supabase ou caminho local
+  caption      String?  // Legenda da foto
+  date         String   // Mantido como String para aceitar o formato "dd/mm/aaaa" do seu arquivo
+  tags         String[] // Array de strings suportado nativamente pelo PostgreSQL
+  isHallOfFame Boolean  @default(false)
+  aspect       String   @default("4:3") // Guarda a proporção da imagem (ex: "4:3", "16:9", "3:4")
+  is_visible   Boolean  @default(true)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
