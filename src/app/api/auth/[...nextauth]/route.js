@@ -8,31 +8,13 @@ import bcrypt from "bcryptjs";
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
+  secret: process.env.NEXTAUTH_SECRET,
   // OBRIGATÓRIO: Quando usamos Credentials com Prisma, a sessão deve ser via Token (JWT)
   session: {
     strategy: "jwt",
   },
-  callbacks: {
-    async jwt({ token, user }) {
-      // O 'user' só vem no momento exato em que o cara faz o login
-      if (user) {
-        token.roles = user.roles;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      // Repassa os cargos do token invisível para a sessão do frontend
-      if (session.user) {
-        session.user.roles = token.roles;
-      }
-      return session;
-    }
-  },
   pages: {
-    signIn: "/login", 
-  },
-  pages: {
-    signIn: "/login", 
+    signIn: "/login",
   },
   providers: [
     DiscordProvider({
@@ -79,7 +61,6 @@ export const authOptions = {
     })
   ],
   callbacks: {
-    // Como mudamos para JWT, precisamos passar as 'roles' para o token primeiro...
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
@@ -87,9 +68,8 @@ export const authOptions = {
       }
       return token;
     },
-    // ...e depois do token para a sessão visual do site
     async session({ session, token }) {
-      if (token) {
+      if (token && session.user) {
         session.user.id = token.id;
         session.user.roles = token.roles;
       }

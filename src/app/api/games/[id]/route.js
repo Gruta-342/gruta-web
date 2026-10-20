@@ -1,11 +1,15 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../../auth/[...nextauth]/route";
+import { prisma } from "../../../../lib/prisma";
 
 export async function PUT(request, { params }) {
   try {
-    // CORREÇÃO: Adicionamos o 'await' aqui porque no Next.js atual params é uma Promise
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.roles?.includes("admin")) {
+      return NextResponse.json({ message: "Não autorizado." }, { status: 403 });
+    }
+
     const { id } = await params;
     const data = await request.json();
     
@@ -17,7 +21,7 @@ export async function PUT(request, { params }) {
         image: data.image,
         badge: data.badge || null,
         is_visible: data.is_visible,
-      }
+      },
     });
     return NextResponse.json(game);
   } catch (error) {
@@ -28,11 +32,15 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
-    // CORREÇÃO: Adicionamos o 'await' aqui também!
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.roles?.includes("admin")) {
+      return NextResponse.json({ message: "Não autorizado." }, { status: 403 });
+    }
+
     const { id } = await params;
     
     await prisma.game.delete({
-      where: { id }
+      where: { id },
     });
     return NextResponse.json({ success: true, message: "Jogo deletado." });
   } catch (error) {

@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../../auth/[...nextauth]/route";
+import { prisma } from "../../../../lib/prisma";
 
 export async function PUT(request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.roles?.includes("admin")) {
+      return NextResponse.json({ message: "Não autorizado." }, { status: 403 });
+    }
+
     const { items } = await request.json(); // Recebe um array: [{ id: "...", order: 0 }, { id: "...", order: 1 }]
     
     // Atualiza todos os itens recebidos de uma vez só usando uma transação do Prisma

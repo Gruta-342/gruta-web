@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../auth/[...nextauth]/route";
+import { prisma } from "../../../lib/prisma";
 
 export async function GET() {
   try {
     const games = await prisma.game.findMany({
-      orderBy: { order: 'asc' }
+      orderBy: { order: "asc" },
     });
     return NextResponse.json(games);
   } catch (error) {
@@ -17,6 +17,11 @@ export async function GET() {
 
 export async function POST(request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.roles?.includes("admin")) {
+      return NextResponse.json({ message: "Acesso Negado. Apenas administradores." }, { status: 403 });
+    }
+
     const data = await request.json();
     const game = await prisma.game.create({
       data: {
@@ -25,7 +30,7 @@ export async function POST(request) {
         image: data.image,
         badge: data.badge || null,
         is_visible: data.is_visible !== undefined ? data.is_visible : true,
-      }
+      },
     });
     return NextResponse.json(game, { status: 201 });
   } catch (error) {

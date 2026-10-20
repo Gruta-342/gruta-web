@@ -3,6 +3,35 @@
 import React, { useState, useEffect } from "react";
 import "./Jogos.css";
 
+// Sub-componente para não repetirmos código na hora de desenhar a grade
+function GameGrid({ title, tagline, games, isLoading }) {
+  return (
+    <div className="game-category-section">
+      <h2 className="section-subtitle">{title}</h2>
+      {tagline && <p className="section-tagline">{tagline}</p>}
+      
+      {/* Caso a categoria ainda não tenha jogos cadastrados/visíveis */}
+      {games.length === 0 && !isLoading ? (
+        <p style={{ color: "#8a9fc4", marginTop: "15px", fontStyle: "italic" }}>
+          Nenhum jogo disponível nesta categoria no momento.
+        </p>
+      ) : (
+        <div className="games-grid">
+          {games.map(game => (
+            <div key={game.id} className="game-card">
+              <img src={game.image} alt={game.title} className="game-cover" loading="lazy" />
+              <div className="game-overlay">
+                <h3 className="game-title">{game.title}</h3>
+                {game.badge && <span className="game-badge">{game.badge}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Jogos() {
   const [gamesData, setGamesData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -29,36 +58,9 @@ export default function Jogos() {
   }, []);
 
   // Filtramos os jogos por categoria para criar as seções (com base nos dados do Banco)
-  const tabuleiros = gamesData.filter(g => g.category === "Tabuleiros");
-  const online = gamesData.filter(g => g.category === "Online");
-  const proprios = gamesData.filter(g => g.category === "Próprios");
-
-  // Sub-componente para não repetirmos código na hora de desenhar a grade
-  const GameGrid = ({ title, tagline, games }) => (
-    <div className="game-category-section">
-      <h2 className="section-subtitle">{title}</h2>
-      {tagline && <p className="section-tagline">{tagline}</p>}
-      
-      {/* Caso a categoria ainda não tenha jogos cadastrados/visíveis */}
-      {games.length === 0 && !isLoading ? (
-        <p style={{ color: "#8a9fc4", marginTop: "15px", fontStyle: "italic" }}>
-          Nenhum jogo disponível nesta categoria no momento.
-        </p>
-      ) : (
-        <div className="games-grid">
-          {games.map(game => (
-            <div key={game.id} className="game-card">
-              <img src={game.image} alt={game.title} className="game-cover" />
-              <div className="game-overlay">
-                <h3 className="game-title">{game.title}</h3>
-                {game.badge && <span className="game-badge">{game.badge}</span>}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+  const tabuleiros = React.useMemo(() => gamesData.filter(g => g.category === "Tabuleiros"), [gamesData]);
+  const online = React.useMemo(() => gamesData.filter(g => g.category === "Online"), [gamesData]);
+  const proprios = React.useMemo(() => gamesData.filter(g => g.category === "Próprios"), [gamesData]);
 
   return (
     <section className="jogos-page">

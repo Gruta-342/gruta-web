@@ -29,8 +29,8 @@
   padding: 0; 
 }
 
-.home-slider-wrapper .hero-slider .arrow.left-arrow { margin-left: 20px; }
-.home-slider-wrapper .hero-slider .arrow.right-arrow { margin-right: 20px; }
+.home-slider-wrapper .hero-slider .arrow.left-arrow { margin-left: 0; }
+.home-slider-wrapper .hero-slider .arrow.right-arrow { margin-right: 0; }
 
 /* COLUNA DA LISTA LATERAL */
 .home-events-sidebar {

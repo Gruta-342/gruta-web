@@ -24,7 +24,7 @@ export default function EventCard({ data }) {
       {/* IMAGEM E DATA FLUTUANTE */}
       <div className="card-image-wrapper" style={{ position: "relative" }}> 
         <Image 
-          src={data.bannerUrl} 
+          src={data.bannerUrl || "/assets/logo.png"} 
           alt={data.title} 
           className="card-image"
           width={500}

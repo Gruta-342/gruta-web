@@ -108,7 +108,10 @@ export default function Galeria() {
   const hallOfFamePhotos = sortedPhotosData.filter(photo => photo.isHallOfFame);
 
   const selectedPhoto = sortedPhotosData.find(photo => photo.id === selectedPhotoId);
-  const currentPhotoIndex = filteredPhotos.findIndex(photo => photo.id === selectedPhotoId);
+  const activeLightboxList = filteredPhotos.some(photo => photo.id === selectedPhotoId)
+    ? filteredPhotos
+    : sortedPhotosData;
+  const currentPhotoIndex = activeLightboxList.findIndex(photo => photo.id === selectedPhotoId);
 
   const columns = Array.from({ length: columnCount }, () => ({ photos: [], weight: 0 }));
 
@@ -124,15 +127,17 @@ export default function Galeria() {
   });
 
   const showNext = (e) => {
-    e.stopPropagation(); 
-    const nextIndex = (currentPhotoIndex + 1) % filteredPhotos.length;
-    setSelectedPhotoId(filteredPhotos[nextIndex].id);
+    if (e) e.stopPropagation(); 
+    if (activeLightboxList.length <= 1 || currentPhotoIndex === -1) return;
+    const nextIndex = (currentPhotoIndex + 1) % activeLightboxList.length;
+    setSelectedPhotoId(activeLightboxList[nextIndex].id);
   };
 
   const showPrev = (e) => {
-    e.stopPropagation(); 
-    const prevIndex = (currentPhotoIndex - 1 + filteredPhotos.length) % filteredPhotos.length;
-    setSelectedPhotoId(filteredPhotos[prevIndex].id);
+    if (e) e.stopPropagation(); 
+    if (activeLightboxList.length <= 1 || currentPhotoIndex === -1) return;
+    const prevIndex = (currentPhotoIndex - 1 + activeLightboxList.length) % activeLightboxList.length;
+    setSelectedPhotoId(activeLightboxList[prevIndex].id);
   };
 
   useEffect(() => {
@@ -320,7 +325,7 @@ export default function Galeria() {
         <div className="lightbox-overlay" onClick={() => setSelectedPhotoId(null)}>
           <button className="close-lightbox" onClick={() => setSelectedPhotoId(null)}>×</button>
 
-          {filteredPhotos.length > 1 && (
+          {activeLightboxList.length > 1 && (
             <>
               <button className="lightbox-nav-btn prev" onClick={showPrev} title="Anterior (Seta Esquerda)">
                 <ArrowLeftIcon />

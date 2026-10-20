@@ -6,31 +6,32 @@ import "./HeroSlider.css";
 export default function HeroSlider({ currentSlide, setCurrentSlide, delay, setDelay, events = [] }) {
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   const minSwipeDistance = 50;
 
   const nextSlide = () => {
     if (events.length === 0) return;
-    setCurrentSlide(prev => prev === events.length - 1 ? 0 : prev + 1);
+    setCurrentSlide(prev => (prev === events.length - 1 ? 0 : prev + 1));
   };
 
   const prevSlide = () => {
     if (events.length === 0) return;
-    setCurrentSlide(prev => prev === 0 ? events.length - 1 : prev - 1);
+    setCurrentSlide(prev => (prev === 0 ? events.length - 1 : prev - 1));
   };
 
   useEffect(() => {
-    if (events.length <= 1) return;
+    if (events.length <= 1 || isPaused) return;
 
     const timer = setTimeout(() => {
       nextSlide();
-      if (delay !== 5000) {
+      if (delay !== 5000 && setDelay) {
         setDelay(5000);
       }
     }, delay);
 
     return () => clearTimeout(timer);
-  }, [currentSlide, delay, events.length]);
+  }, [currentSlide, delay, events.length, isPaused]);
 
   const onTouchStart = (e) => {
     setTouchEnd(null);
@@ -44,17 +45,25 @@ export default function HeroSlider({ currentSlide, setCurrentSlide, delay, setDe
     const distance = touchStart - touchEnd;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
-    if (isLeftSwipe) nextSlide();
-    if (isRightSwipe) prevSlide();
+    if (isLeftSwipe) {
+      if (setDelay && delay !== 5000) setDelay(5000);
+      nextSlide();
+    }
+    if (isRightSwipe) {
+      if (setDelay && delay !== 5000) setDelay(5000);
+      prevSlide();
+    }
   };
 
   const manualNextSlide = (e) => {
     e.stopPropagation();
+    if (setDelay && delay !== 5000) setDelay(5000);
     nextSlide();
   };
 
   const manualPrevSlide = (e) => {
     e.stopPropagation();
+    if (setDelay && delay !== 5000) setDelay(5000);
     prevSlide();
   };
 
@@ -62,21 +71,27 @@ export default function HeroSlider({ currentSlide, setCurrentSlide, delay, setDe
   if (events.length === 0) {
     return (
       <div className="hero-slider" style={{ background: "#051329", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <img src="/assets/logo-gruta.png" alt="Gruta 342" style={{ width: "50%", objectFit: "contain" }} />
+        <img src="/assets/logo.png" alt="Gruta 342" style={{ width: "50%", objectFit: "contain" }} />
       </div>
     );
   }
 
   return (
-    /* CORREÇÃO: A classe principal DEVE ser 'hero-slider' para o home.css aplicar o aspect-ratio e ocupar 100% */
     <div 
       className="hero-slider"
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
     >
       {events.length > 1 && (
-        <button className="arrow left-arrow" onClick={manualPrevSlide} aria-label="Slide anterior">
+        <button 
+          type="button" 
+          className="arrow left-arrow" 
+          onClick={manualPrevSlide} 
+          aria-label="Slide anterior"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
@@ -90,9 +105,9 @@ export default function HeroSlider({ currentSlide, setCurrentSlide, delay, setDe
         {events.map((slide) => (
           <div key={slide.id} className="slide" style={{ minWidth: '100%', height: '100%', position: 'relative' }}>
             <picture style={{ display: 'block', width: '100%', height: '100%' }}>
-              <source media="(max-width: 768px)" srcSet={slide.bannerUrl || "/assets/logo-gruta.png"} />
+              <source media="(max-width: 768px)" srcSet={slide.bannerUrl || "/assets/logo.png"} />
               <img 
-                src={slide.bannerUrl || "/assets/logo-gruta.png"} 
+                src={slide.bannerUrl || "/assets/logo.png"} 
                 alt={slide.title} 
                 className="slide-image" 
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -103,7 +118,12 @@ export default function HeroSlider({ currentSlide, setCurrentSlide, delay, setDe
       </div>
       
       {events.length > 1 && (
-        <button className="arrow right-arrow" onClick={manualNextSlide} aria-label="Próximo slide">
+        <button 
+          type="button" 
+          className="arrow right-arrow" 
+          onClick={manualNextSlide} 
+          aria-label="Próximo slide"
+        >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
@@ -111,12 +131,16 @@ export default function HeroSlider({ currentSlide, setCurrentSlide, delay, setDe
       )}
 
       {events.length > 1 && (
-        <div className="slider-dots">
+        <div className="dots-container">
           {events.map((_, index) => (
             <button
               key={index}
+              type="button"
               className={`dot ${index === currentSlide ? "active" : ""}`}
-              onClick={() => setCurrentSlide(index)}
+              onClick={() => {
+                if (setDelay && delay !== 5000) setDelay(5000);
+                setCurrentSlide(index);
+              }}
               aria-label={`Ir para o slide ${index + 1}`}
             />
           ))}
