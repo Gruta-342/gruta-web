@@ -1,10 +1,10 @@
-import EmConstrucao from "../../component/EmConstrucao/EmConstrucao";
+import JogosOnline from "../../component/JogosOnline/JogosOnline";
 
 export const metadata = {
-  title: "Jogos Online | Gruta",
-  description: "Em breve: novos jogos para jogar online diretamente no site da Gruta.",
+  title: "Jogos | Gruta",
+  description: "Jogue nossos minigames diretamente pelo site e conecte-se com a galera.",
 };
 
 export default function JogosPage() {
-  return <EmConstrucao />;
+  return <JogosOnline />;
 }

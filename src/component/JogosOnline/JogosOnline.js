@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // Importado para fazer o redirecionamento
 import "./JogosOnline.css";
 import { gamesData } from "../../data/games";
 
@@ -11,8 +12,10 @@ const DiscordIcon = () => (
 );
 
 export default function JogosOnline() {
+  const router = useRouter(); // Roteador para navegação de página inteira
+  
   const [communityGames, setCommunityGames] = useState([]);
-  const [activeMinigame, setActiveMinigame] = useState(null); // 'd20' | 'roleta' | 'info-mafia' | 'info-detetive'
+  const [activeMinigame, setActiveMinigame] = useState(null); 
 
   // Minigame D20 State
   const [diceValue, setDiceValue] = useState(20);
@@ -104,14 +107,14 @@ export default function JogosOnline() {
   // Jogos Web Próprios da Gruta
   const grutaPlayableGames = [
     {
-      id: "roleta-gruta",
-      title: "Roleta do Destino",
-      description: "Sorteios rápidos, desafios e prendas insanas para apimentar qualquer resenha ou chamada da Gruta.",
-      image: "/assets/about.jpg",
-      tags: ["MINIGAME", "DISPONÍVEL", "PARTICIPATIVO"],
+      id: "termo-gruta",
+      title: "Termo da Gruta",
+      description: "O clássico jogo de adivinhar palavras com o tempero da nossa comunidade. Uma palavra por dia para testar seu vocabulário!",
+      image: "/assets/games/termo.jpg", // Lembre-se de adicionar uma imagem ou ícone para o Termo nesta pasta
+      tags: ["WEB GAME", "DISPONÍVEL", "DIÁRIO"],
       status: "playable",
       statusText: "Jogar Agora",
-      action: () => setActiveMinigame("roleta"),
+      action: () => router.push("/jogos/termo"), // Redireciona para a página criada no Passo 1
     },
     {
       id: "d20-gruta",
@@ -123,46 +126,16 @@ export default function JogosOnline() {
       statusText: "Jogar Agora",
       action: () => setActiveMinigame("d20"),
     },
-    {
-      id: "mafia-online",
-      title: "Máfia Italiana: Cidade Dorme",
-      description: "Salas de dedução social em tempo real. Falcones vs Leones: vote, blefe e descubra os assassinos antes que seja tarde.",
-      image: "/assets/mafia.png",
-      tags: ["MULTIPLAYER WEB", "4 - 12 JOGADORES", "EM BREVE"],
-      status: "dev",
-      statusText: "Em Produção",
-      action: () => setActiveMinigame("info-mafia"),
-    },
-    {
-      id: "detetive-gruta",
-      title: "Detective Night: Casos da Gruta",
-      description: "Quem bebeu a última cerveja? Qual foi a desculpa usada? Um jogo cômico de cartas e dedução feito sob medida.",
-      image: "/assets/escape.png",
-      tags: ["WEB GAME", "DEDUÇÃO", "EM BREVE"],
-      status: "soon",
-      statusText: "Em Produção",
-      action: () => setActiveMinigame("info-detetive"),
-    },
   ];
 
   return (
     <section className="jogos-online-page">
       {/* Header */}
       <div className="jogos-online-header">
-        <span className="jogos-online-badge">🎮 Jogos no Navegador & Multiplayer</span>
         <h1 className="jogos-online-title">Jogos da Gruta</h1>
         <p className="jogos-online-intro">
-          Aqui a zoeira e a competição acontecem online. Jogue nossos minigames diretamente pelo site ou conecte-se com a galera nas jogatinas comunitárias.
+          Aqui a competição acontece online. Jogue nossos minigames diretamente pelo site.
         </p>
-        <a 
-          href="https://discord.gg/QtKJwPNRah" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="jogos-discord-banner"
-        >
-          <DiscordIcon />
-          <span>Participe das calls e jogatinas no Discord da Gruta</span>
-        </a>
       </div>
 
       {/* 1. SEÇÃO DE JOGOS WEB (JOGÁVEIS NO SITE) */}
@@ -209,37 +182,7 @@ export default function JogosOnline() {
           </div>
         ))}
       </div>
-
-      {/* 2. SEÇÃO DE JOGOS DA COMUNIDADE (ON-LINE PC & MOBILE) */}
-      <div className="jogos-section-header">
-        <div>
-          <h2 className="jogos-section-title">Jogos da Comunidade</h2>
-          <p className="jogos-section-tagline">Títulos que jogamos juntos em chamada: lag, sobrevivência e alianças duvidosas.</p>
-        </div>
-      </div>
-
-      <div className="community-grid">
-        {communityGames.map((game) => (
-          <div 
-            key={game.id} 
-            className="community-card" 
-            title={`${game.title} - Jogamos no Discord!`}
-            onClick={() => window.open("https://discord.gg/QtKJwPNRah", "_blank")}
-          >
-            <img 
-              src={game.image} 
-              alt={game.title} 
-              className="community-cover" 
-              loading="lazy"
-              onError={(e) => { e.currentTarget.src = "/assets/logo.png"; }}
-            />
-            <div className="community-overlay">
-              <h3 className="community-title">{game.title}</h3>
-            </div>
-          </div>
-        ))}
-      </div>
-
+      
       {/* MODAL: D20 ROLLER */}
       {activeMinigame === "d20" && (
         <div className="game-modal-overlay" onClick={() => setActiveMinigame(null)}>
