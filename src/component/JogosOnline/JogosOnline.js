@@ -117,6 +117,16 @@ export default function JogosOnline() {
       action: () => router.push("/jogos/termo"), // Redireciona para a página criada no Passo 1
     },
     {
+      id: "cruzadinha-gruta",
+      title: "Cruzadinha da Gruta",
+      description: "Palavras cruzadas inteligentes com 17 temas variados e 3 níveis de dificuldade. Teste seu vocabulário e raciocínio lógico!",
+      image: "/assets/games/cruzadinha.jpg",
+      tags: ["WEB GAME", "DISPONÍVEL", "17 TEMAS"],
+      status: "playable",
+      statusText: "Jogar Agora",
+      action: () => router.push("/jogos/cruzadinha"),
+    },
+    {
       id: "d20-gruta",
       title: "Rolador de Críticos D20",
       description: "Utilitário interativo de dados para campanhas de RPG e decisões que exigem a intervenção dos deuses da sorte.",
