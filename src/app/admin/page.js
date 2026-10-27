@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import "./admin.css";
 
@@ -9,6 +11,9 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default function AdminPanel() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
   const [activeMenu, setActiveMenu] = useState("proximos");
   const [alert, setAlert] = useState({ type: "", message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -46,10 +51,19 @@ export default function AdminPanel() {
   const [editingGalleryId, setEditingGalleryId] = useState(null);
 
   useEffect(() => {
-    fetchEvents();
-    fetchGames();
-    fetchGallery();
-  }, []);
+    if (status === "loading") return;
+    if (!session || !session.user?.roles?.includes("admin")) {
+      router.push("/login");
+    }
+  }, [session, status, router]);
+
+  useEffect(() => {
+    if (session?.user?.roles?.includes("admin")) {
+      fetchEvents();
+      fetchGames();
+      fetchGallery();
+    }
+  }, [session]);
 
   useEffect(() => {
     if (alert.message) {
@@ -393,6 +407,14 @@ export default function AdminPanel() {
   // ==========================================
   // RENDERIZAÇÃO
   // ==========================================
+  if (status === "loading" || !session || !session.user?.roles?.includes("admin")) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "70vh", color: "#00d2ff" }}>
+        <span>Verificando credenciais de administrador...</span>
+      </div>
+    );
+  }
+
   const currentCategoryFilter = activeMenu === "proximos" ? "upcoming" : "past";
   const displayedEvents = events.filter((evt) => evt.category === currentCategoryFilter);
 
@@ -407,7 +429,7 @@ export default function AdminPanel() {
           <button className={`menu-item ${activeMenu === "proximos" ? "active" : ""}`} onClick={() => { setActiveMenu("proximos"); clearEventForm(); }}>Próximos Eventos</button>
           <button className={`menu-item ${activeMenu === "ultimos" ? "active" : ""}`} onClick={() => { setActiveMenu("ultimos"); clearEventForm(); }}>Últimos Eventos</button>
           <button className={`menu-item ${activeMenu === "galeria" ? "active" : ""}`} onClick={() => { setActiveMenu("galeria"); clearGalleryForm(); }}>Galeria</button>
-          <button className={`menu-item ${activeMenu === "jogos" ? "active" : ""}`} onClick={() => { setActiveMenu("jogos"); clearGameForm(); }}>Jogos</button>
+          <button className={`menu-item ${activeMenu === "jogos" ? "active" : ""}`} onClick={() => { setActiveMenu("jogos"); clearGameForm(); }}>Acervo & Jogos</button>
         </nav>
       </aside>
 

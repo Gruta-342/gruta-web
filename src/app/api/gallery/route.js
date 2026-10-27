@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../auth/[...nextauth]/route";
+import { prisma } from "../../../lib/prisma";
 
 export async function GET() {
   try {
     const photos = await prisma.gallery.findMany({
-      orderBy: { order: 'desc' } 
+      orderBy: { order: "desc" },
     });
     return NextResponse.json(photos);
   } catch (error) {
@@ -16,12 +16,17 @@ export async function GET() {
 
 export async function POST(request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.roles?.includes("admin")) {
+      return NextResponse.json({ message: "Acesso Negado. Apenas administradores." }, { status: 403 });
+    }
+
     const data = await request.json();
     
     // Se enviarmos várias fotos juntas (Lote), usa o createMany
     if (Array.isArray(data)) {
-       const result = await prisma.gallery.createMany({ data });
-       return NextResponse.json({ success: true, count: result.count }, { status: 201 });
+      const result = await prisma.gallery.createMany({ data });
+      return NextResponse.json({ success: true, count: result.count }, { status: 201 });
     } 
     // Se for uma foto só
     const photo = await prisma.gallery.create({ data });

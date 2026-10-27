@@ -1,0 +1,548 @@
+/* ======================================================== */
+/* TERMO DA GRUTA - ESTILOS PRINCIPAIS (TEMA AZUL GRUTA)     */
+/* ======================================================== */
+
+/* -------------------- ESTRUTURA GERAL -------------------- */
+.termo-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  width: 100%;
+  padding: 10px 20px 20px;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+}
+
+/* -------------------- CABEÇALHO -------------------- */
+.termo-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  width: 100%;
+  padding: 5px 0 15px;
+  border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+  margin-bottom: 15px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-start;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.termo-title {
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: #00d2ff;
+  margin: 0;
+  text-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
+}
+
+.termo-day-tag {
+  font-size: 11px;
+  font-weight: 700;
+  color: #8a9fc4;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+/* Botões do Cabeçalho e Seletor */
+.header-btn {
+  background: rgba(10, 33, 71, 0.6);
+  border: 1px solid rgba(0, 210, 255, 0.2);
+  color: #8a9fc4;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.header-btn:hover {
+  background: rgba(0, 210, 255, 0.15);
+  border-color: #00d2ff;
+  color: #00d2ff;
+}
+
+.mode-dropdown-container {
+  position: relative;
+}
+
+.mode-dropdown-menu {
+  position: absolute;
+  top: 115%;
+  left: 0;
+  background: #071731;
+  border: 1px solid rgba(0, 210, 255, 0.3);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 4px;
+  z-index: 2000;
+  min-width: 140px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.dropdown-item {
+  background: transparent;
+  border: none;
+  color: #8a9fc4;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dropdown-item:hover, .dropdown-item.active {
+  background: rgba(0, 210, 255, 0.15);
+  color: #00d2ff;
+}
+
+.termo-icon-btn {
+  background: rgba(10, 33, 71, 0.6);
+  border: 1px solid rgba(0, 210, 255, 0.2);
+  color: #8a9fc4;
+  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.termo-icon-btn:hover {
+  background: rgba(0, 210, 255, 0.15);
+  border-color: #00d2ff;
+  color: #00d2ff;
+}
+
+/* -------------------- TABULEIROS -------------------- */
+.termo-boards-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 15px;
+  min-height: 0;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.termo-board {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  max-width: 320px;
+  transition: opacity 0.3s ease;
+}
+
+.termo-board.board-solved {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Modos Específicos */
+.termo-boards-container.mode-DOUBLE {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 650px;
+}
+
+.termo-boards-container.mode-QUAD {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+}
+
+/* -------------------- LINHAS E BLOCOS -------------------- */
+.termo-row {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+}
+.termo-row.len-5 { grid-template-columns: repeat(5, 1fr); }
+.termo-row.len-6 { grid-template-columns: repeat(6, 1fr); }
+
+.termo-row.shake { animation: rowShake 0.4s ease; }
+@keyframes rowShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+.termo-tile {
+  aspect-ratio: 1 / 1;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: white;
+  background-color: #081730;
+  border: 2px solid rgba(0, 210, 255, 0.15);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.termo-tile.active { border-color: #00d2ff; }
+.termo-tile.selected-tile { border-color: #00d2ff; box-shadow: inset 0 -4px 0 #00d2ff; }
+.termo-tile.revealed { animation: tileFlip 0.5s ease forwards; }
+
+@keyframes tileFlip {
+  0% { transform: rotateX(0); }
+  50% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0); }
+}
+
+.termo-tile.correct { background-color: #2e9e5b !important; border-color: #2e9e5b !important; color: #fff; }
+.termo-tile.present { background-color: #d9a726 !important; border-color: #d9a726 !important; color: #fff; }
+.termo-tile.absent { background-color: #0f1f38 !important; border-color: #0f1f38 !important; color: #556c8d; }
+
+/* -------------------- TECLADO -------------------- */
+.termo-keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 850px; 
+  padding: 0 10px;
+}
+
+.termo-keyboard.game-over { 
+  opacity: 0.7; 
+  pointer-events: none; 
+}
+
+.termo-kb-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.termo-key {
+  height: 56px; 
+  flex: 1;
+  background-color: #0e264d;
+  color: white;
+  border: 1px solid rgba(0, 210, 255, 0.12);
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.termo-key.key-special { flex: 1.5; font-size: 13px; background-color: #091c38; }
+.termo-key:active { transform: scale(0.95); }
+
+.termo-key.correct { background-color: #2e9e5b !important; border-color: #2e9e5b !important; }
+.termo-key.present { background-color: #d9a726 !important; border-color: #d9a726 !important; }
+.termo-key.absent { background-color: #071221 !important; border-color: #071221 !important; opacity: 0.6; }
+
+/* -------------------- UTILITÁRIOS E SOBREPOSIÇÃO (MODAIS) -------------------- */
+.termo-toast {
+  position: fixed;
+  top: 130px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #00d2ff;
+  color: #051329;
+  font-weight: 800;
+  padding: 10px 20px;
+  border-radius: 8px;
+  z-index: 99999;
+}
+
+/* O Overlay ocupa o ecrã inteiro e alinha os modais ao centro perfeitamente */
+.termo-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(2, 8, 18, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 9999; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* -------------------- MODAL DE ESTATÍSTICAS E AJUDA -------------------- */
+.termo-stats-modal {
+  background: #071731;
+  border: 1px solid rgba(0, 210, 255, 0.3);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 420px;
+  padding: 30px 24px;
+  color: white;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+  font-family: system-ui, -apple-system, sans-serif;
+  box-sizing: border-box;
+}
+
+.termo-modal-close-btn { 
+  position: absolute; 
+  top: 12px; 
+  right: 16px; 
+  background: none; 
+  border: none; 
+  color: #8a9fc4; 
+  font-size: 20px; 
+  cursor: pointer; 
+}
+
+.termo-stats-title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 25px;
+  text-transform: uppercase;
+}
+
+.termo-dist-title {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 800;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.termo-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.termo-stat-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.termo-stat-value {
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 5px;
+}
+
+.termo-stat-label {
+  font-size: 11px;
+  color: #8a9fc4;
+  line-height: 1.2;
+}
+
+/* Gráfico de Distribuição */
+.termo-dist-section {
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.termo-dist-graph {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.termo-dist-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.termo-dist-num {
+  font-size: 14px;
+  font-weight: 800;
+  width: 16px;
+  text-align: right;
+}
+
+.termo-dist-bar-wrapper {
+  flex: 1;
+  background: transparent;
+  height: 22px;
+}
+
+.termo-dist-bar, .loss-bar {
+  height: 100%;
+  background: #0e264d;
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  border-radius: 2px;
+  min-width: fit-content;
+}
+
+.termo-dist-bar.highlight {
+  background: #00d2ff;
+  color: #051329;
+}
+
+.loss-highlight {
+  background: #b52c2c;
+}
+
+/* Rodapé do Modal */
+.termo-stats-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.termo-footer-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.termo-footer-col.align-right {
+  align-items: flex-end;
+}
+
+.termo-next-label {
+  font-size: 12px;
+  color: #8a9fc4;
+  margin-bottom: 2px;
+}
+
+.termo-countdown {
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+  color: white;
+}
+
+.termo-share-btn {
+  background: #00d2ff;
+  color: #051329;
+  border: none;
+  border-radius: 4px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.2s;
+}
+
+.termo-share-btn:hover {
+  opacity: 0.9;
+}
+
+.termo-play-again-btn {
+  width: 100%;
+  padding: 14px;
+  background: #00d2ff;
+  color: #051329;
+  font-weight: 900;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: transform 0.1s;
+}
+
+.termo-play-again-btn:active {
+  transform: scale(0.98);
+}
+
+/* Modal Como Jogar */
+.termo-help-body { text-align: left; font-size: 14px; line-height: 1.5; color: #cbd5e1; }
+.termo-help-body p { margin-bottom: 12px; }
+.termo-help-example { margin-top: 15px; border-top: 1px solid rgba(0, 210, 255, 0.15); padding-top: 10px; }
+.termo-example-row { display: flex; gap: 5px; margin-bottom: 8px; }
+.termo-example-tile { width: 36px; height: 36px; font-size: 18px; flex-shrink: 0; }
+.termo-example-text { font-size: 12px; color: #8a9fc4; }
+.termo-example-text strong { color: #fff; }
+
+/* -------------------- RESPONSIVIDADE MOBILE -------------------- */
+@media (max-width: 768px) {
+  .termo-wrapper { padding: 10px; }
+  
+  .termo-header { padding-bottom: 10px; margin-bottom: 10px; }
+  .termo-title { font-size: 22px; }
+  .hide-mobile { display: none; }
+  
+  .header-btn { padding: 8px 12px; }
+  .header-back-btn { padding: 8px; border-radius: 8px; }
+  .termo-icon-btn { width: 34px; height: 34px; }
+
+  .termo-keyboard { max-width: 100%; gap: 6px; padding: 0; }
+  .termo-kb-row { gap: 4px; }
+  .termo-key { height: 48px; font-size: 14px; }
+  
+  .termo-boards-container.mode-QUAD {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+    max-width: 400px;
+  }
+  
+  .termo-boards-container.mode-QUAD .termo-board { gap: 3px; max-width: 180px; margin: 0 auto; }
+  .termo-boards-container.mode-QUAD .termo-row { gap: 3px; }
+  .termo-boards-container.mode-QUAD .termo-tile { font-size: 14px; border-width: 1px; }
+
+  .termo-boards-container.mode-DOUBLE { gap: 10px; max-width: 400px; }
+}
+
+@media (max-width: 480px) {
+  .termo-key { height: 44px; font-size: 12px; }
+  .termo-key.key-special { font-size: 10px; }
+  
+  .termo-boards-container.mode-QUAD { gap: 5px; max-width: 320px; }
+  
+  .termo-stats-grid { gap: 4px; }
+  .termo-stat-value { font-size: 24px; }
+  .termo-countdown { font-size: 24px; }
+  .termo-share-btn { font-size: 14px; padding: 10px 14px; }
+}

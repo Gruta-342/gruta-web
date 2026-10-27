@@ -1,0 +1,417 @@
+.jogos-online-page {
+  padding: 40px 20px 90px;
+  max-width: 1200px;
+  margin: 0 auto;
+  color: white;
+}
+
+/* Header */
+.jogos-online-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.jogos-online-badge {
+  display: inline-block;
+  background: rgba(0, 210, 255, 0.12);
+  color: #00d2ff;
+  border: 1px solid rgba(0, 210, 255, 0.35);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+}
+
+.jogos-online-title {
+  font-size: 40px;
+  color: #00d2ff;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 12px;
+}
+
+.jogos-online-intro {
+  color: #a0aab5;
+  font-size: 18px;
+  max-width: 720px;
+  margin: 0 auto 20px;
+  line-height: 1.5;
+}
+
+.jogos-discord-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(88, 101, 242, 0.15);
+  border: 1px solid rgba(88, 101, 242, 0.4);
+  color: #c7cdff;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.jogos-discord-banner:hover {
+  background: rgba(88, 101, 242, 0.3);
+  border-color: #5865F2;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.jogos-discord-banner svg {
+  width: 20px;
+  height: 20px;
+  color: #5865F2;
+}
+
+/* Seções de Jogos */
+.jogos-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 25px;
+  border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+  padding-bottom: 12px;
+}
+
+.jogos-section-title {
+  font-size: 24px;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin: 0;
+}
+
+.jogos-section-tagline {
+  color: #8a9fc4;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+/* Grid de Jogos Próprios Jogáveis (Novo Estilo App/Grid) */
+.playable-games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 24px;
+  margin-bottom: 60px;
+}
+
+.playable-card {
+  background: #121824;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+
+.playable-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 16px 30px rgba(0, 210, 255, 0.15);
+  border-color: rgba(0, 210, 255, 0.4);
+}
+
+.playable-media-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: #051329;
+  overflow: hidden;
+}
+
+.playable-media-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.playable-card:hover .playable-media-img {
+  transform: scale(1.1);
+}
+
+.playable-title-bar {
+  padding: 16px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0f1523;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.playable-title-bar h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.playable-status-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  z-index: 2;
+}
+
+.status-dev {
+  background-color: #ff9100;
+  color: #051329;
+}
+
+/* Modal de Jogo / Minigame */
+.game-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.game-modal-card {
+  background: #081a38;
+  border: 1px solid rgba(0, 210, 255, 0.4);
+  border-radius: 16px;
+  max-width: 650px;
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 210, 255, 0.2);
+  overflow: hidden;
+  animation: modalScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.game-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(0, 210, 255, 0.15);
+}
+
+.game-modal-header h3 {
+  margin: 0;
+  color: #00d2ff;
+  font-size: 20px;
+}
+
+.game-modal-close {
+  color: #8a9fc4;
+  font-size: 24px;
+  line-height: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.game-modal-close:hover {
+  color: white;
+}
+
+.game-modal-body {
+  padding: 30px 24px;
+  text-align: center;
+}
+
+/* Área Interativa: D20 Dice Roller */
+.dice-roller-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.dice-display {
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, #0e3064 0%, #06152d 100%);
+  border: 3px solid #00d2ff;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: 900;
+  color: white;
+  box-shadow: 0 0 25px rgba(0, 210, 255, 0.4);
+  transition: transform 0.4s ease;
+}
+
+.dice-display.rolling {
+  animation: rollAnimation 0.5s ease infinite alternate;
+}
+
+@keyframes rollAnimation {
+  0% { transform: rotate(-15deg) scale(0.95); }
+  100% { transform: rotate(15deg) scale(1.05); }
+}
+
+.dice-result-text {
+  font-size: 16px;
+  font-weight: 700;
+  min-height: 24px;
+}
+
+.dice-result-text.critical-success {
+  color: #00e676;
+  text-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
+}
+
+.dice-result-text.critical-failure {
+  color: #ff3d71;
+  text-shadow: 0 0 10px rgba(255, 61, 113, 0.5);
+}
+
+.dice-roll-btn {
+  background: linear-gradient(135deg, #00d2ff 0%, #0077ff 100%);
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(0, 210, 255, 0.4);
+}
+
+.dice-roll-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 210, 255, 0.6);
+}
+
+/* Área Interativa: Roleta da Gruta */
+.roulette-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.roulette-box {
+  background: rgba(5, 19, 41, 0.8);
+  border: 2px dashed rgba(0, 210, 255, 0.4);
+  padding: 24px 20px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 450px;
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #00d2ff;
+  text-shadow: 0 0 8px rgba(0, 210, 255, 0.3);
+}
+
+/* Grid de Jogos da Comunidade */
+.community-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.community-card {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #0a2147;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.community-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 210, 255, 0.25);
+  border-color: rgba(0, 210, 255, 0.5);
+}
+
+.community-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.community-card:hover .community-cover {
+  transform: scale(1.06);
+}
+
+.community-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 30px 12px 12px;
+  background: linear-gradient(to top, rgba(5, 19, 41, 0.95) 0%, rgba(5, 19, 41, 0) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+}
+
+.community-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: white;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .jogos-online-title {
+    font-size: 30px;
+  }
+
+  .playable-games-grid {
+    /* Ajuste para mobile para não esticar o card ao limite da tela */
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
+  }
+
+  .community-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 12px;
+  }
+
+  .jogos-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}

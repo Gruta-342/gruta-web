@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-import { gamesData } from "../../../data/games"; // Ajuste o caminho correto para chegar no seu arquivo games.js
-
-const prisma = new PrismaClient();
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../auth/[...nextauth]/route";
+import { prisma } from "../../../lib/prisma";
+import { gamesData } from "../../../data/games";
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.roles?.includes("admin")) {
+      return NextResponse.json({ message: "Acesso Negado. Apenas administradores." }, { status: 403 });
+    }
+
     // Mapeia os dados do arquivo para o formato que o banco de dados espera
     const formattedGames = gamesData.map((game) => ({
       title: game.title,

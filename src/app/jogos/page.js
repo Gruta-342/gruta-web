@@ -1,10 +1,10 @@
-import Jogos from "../../component/Jogos/Jogos";
+import JogosOnline from "../../component/JogosOnline/JogosOnline";
 
 export const metadata = {
-  title: "Jogos da Gruta",
-  description: "Nosso acervo de tabuleiros, games online e desenvolvimentos próprios.",
+  title: "Jogos | Gruta",
+  description: "Jogue nossos minigames diretamente pelo site e conecte-se com a galera.",
 };
 
 export default function JogosPage() {
-  return <Jogos />;
+  return <JogosOnline />;
 }

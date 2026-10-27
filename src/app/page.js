@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import HeroSlider from "../component/HeroSlider/HeroSlider";
 import EventsSection from "../component/EventsSection/EventsSection";
 import "./home.css";
@@ -12,6 +12,15 @@ export default function Home() {
   // Estado para armazenar os próximos eventos reais vindos do banco
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const sidebarListRef = useRef(null);
+
+  useEffect(() => {
+    if (!sidebarListRef.current) return;
+    const activeEl = sidebarListRef.current.querySelector(".sidebar-event-item.active");
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [activeSlide]);
 
   // Buscar os eventos diretamente da API que corrigimos no admin
   useEffect(() => {
@@ -65,7 +74,7 @@ export default function Home() {
         <div className="home-events-sidebar">
           <h2 className="sidebar-title">Próximos Eventos</h2>
           
-          <div className="sidebar-list">
+          <div className="sidebar-list" ref={sidebarListRef}>
             {upcomingEvents.map((event, index) => {
               // Tratamento estrito de data para exibir no formato do seu design (Dia e Mês curto)
               const eventDate = event.date ? new Date(event.date) : new Date();

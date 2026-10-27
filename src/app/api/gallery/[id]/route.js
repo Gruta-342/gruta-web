@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../../auth/[...nextauth]/route";
+import { prisma } from "../../../../lib/prisma";
 
 export async function PUT(request, { params }) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.roles?.includes("admin")) {
+      return NextResponse.json({ message: "Não autorizado." }, { status: 403 });
+    }
+
     const { id } = await params;
     const data = await request.json();
     
@@ -28,6 +33,11 @@ export async function PUT(request, { params }) {
 
 export async function DELETE(request, { params }) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user?.roles?.includes("admin")) {
+      return NextResponse.json({ message: "Não autorizado." }, { status: 403 });
+    }
+
     const { id } = await params;
     await prisma.gallery.delete({ where: { id } });
     return NextResponse.json({ success: true });

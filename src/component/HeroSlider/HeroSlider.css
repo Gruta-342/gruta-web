@@ -5,11 +5,7 @@
   width: 100%;
   box-sizing: border-box;
   background-color: #0b1b36; 
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 40px;
-  overflow: hidden; /* Corta o que estiver fora do bloco principal */
+  overflow: hidden;
 }
 
 /* O TRILHO QUE SE MOVE */
@@ -48,18 +44,22 @@
 
 /* --- SETAS DE NAVEGAÇÃO --- */
 .arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   color: white;
-  background: rgba(0, 0, 0, 0.4); 
+  background: rgba(0, 0, 0, 0.45); 
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 46px;
+  height: 46px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.3s;
-  z-index: 2; 
+  transition: all 0.25s ease;
+  z-index: 10; 
   cursor: pointer;
-  border: none;
 }
 
 .arrow svg {
@@ -68,21 +68,31 @@
 }
 
 .arrow:hover {
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 210, 255, 0.35);
+  border-color: #00d2ff;
+  transform: translateY(-50%) scale(1.08);
+}
+.arrow.left-arrow {
+  left: 16px;
+}
+.arrow.right-arrow {
+  right: 16px;
 }
 
 /* --- BOLINHAS (PAGINATION DOTS) --- */
 .dots-container {
   position: absolute;
-  bottom: 20px;
+  bottom: 16px;
   left: 50%;
   transform: translateX(-50%); 
   display: flex;
-  gap: 12px;
-  z-index: 3; 
-  background-color: rgba(5, 19, 41, 0.6); 
-  padding: 8px 16px; 
+  gap: 10px;
+  z-index: 10; 
+  background-color: rgba(5, 19, 41, 0.7); 
+  backdrop-filter: blur(6px);
+  padding: 6px 14px; 
   border-radius: 30px; 
+  border: 1px solid rgba(0, 210, 255, 0.2);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); 
 }
 

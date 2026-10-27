@@ -61,6 +61,16 @@ export default function AuthButton() {
               </button>
             )}
 
+            <button
+              className="dropdown-item"
+              onClick={() => {
+                setIsMenuOpen(false);
+                router.push(`/perfil/${session.user.id}`);
+              }}
+            >
+              👤 Meu Perfil
+            </button>
+
             <button 
               className="dropdown-item logout-trigger" 
               onClick={() => {
