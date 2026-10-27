@@ -19,6 +19,9 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Se a rota incluir "termo", oculta o cabeçalho completamente
+  if (pathname?.includes("/termo")) return null;
+
   const navItems = [
     { name: "HOME", path: "/" },
     { name: "ACERVO", path: "/acervo" },
@@ -36,7 +39,6 @@ export default function Header() {
             Onde o caos vira história<br />
             e a zoeira é tradição.
           </p>
-          {/* Botão de Autenticação na visualização Mobile */}
           <div className="mobile-profile-left">
             <AuthButton />
           </div>
@@ -50,7 +52,6 @@ export default function Header() {
         </div>
 
         <div className="right-section">
-          {/* Botão de Autenticação na visualização Desktop */}
           <div className="desktop-profile">
             <AuthButton />
           </div>

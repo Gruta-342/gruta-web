@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // Importado para fazer o redirecionamento
+import { useRouter } from "next/navigation";
 import "./JogosOnline.css";
 import { gamesData } from "../../data/games";
 
@@ -12,7 +12,7 @@ const DiscordIcon = () => (
 );
 
 export default function JogosOnline() {
-  const router = useRouter(); // Roteador para navegação de página inteira
+  const router = useRouter(); 
   
   const [communityGames, setCommunityGames] = useState([]);
   const [activeMinigame, setActiveMinigame] = useState(null); 
@@ -109,31 +109,22 @@ export default function JogosOnline() {
     {
       id: "termo-gruta",
       title: "Termo da Gruta",
-      description: "O clássico jogo de adivinhar palavras com o tempero da nossa comunidade. Uma palavra por dia para testar seu vocabulário!",
-      image: "/assets/games/termo.jpg", // Lembre-se de adicionar uma imagem ou ícone para o Termo nesta pasta
-      tags: ["WEB GAME", "DISPONÍVEL", "DIÁRIO"],
+      image: "/assets/games/termo.jpg",
       status: "playable",
-      statusText: "Jogar Agora",
-      action: () => router.push("/jogos/termo"), // Redireciona para a página criada no Passo 1
+      action: () => router.push("/jogos/termo"),
     },
     {
       id: "cruzadinha-gruta",
-      title: "Cruzadinha da Gruta",
-      description: "Palavras cruzadas inteligentes com 17 temas variados e 3 níveis de dificuldade. Teste seu vocabulário e raciocínio lógico!",
+      title: "Cruzadinha",
       image: "/assets/games/cruzadinha.jpg",
-      tags: ["WEB GAME", "DISPONÍVEL", "17 TEMAS"],
       status: "playable",
-      statusText: "Jogar Agora",
       action: () => router.push("/jogos/cruzadinha"),
     },
     {
       id: "d20-gruta",
-      title: "Rolador de Críticos D20",
-      description: "Utilitário interativo de dados para campanhas de RPG e decisões que exigem a intervenção dos deuses da sorte.",
-      image: "/assets/mafia.jpg",
-      tags: ["RPG & DADOS", "DISPONÍVEL", "WEB UTILITY"],
+      title: "Críticos D20",
+      image: "/assets/games/d20.jpg",
       status: "playable",
-      statusText: "Jogar Agora",
       action: () => setActiveMinigame("d20"),
     },
   ];
@@ -158,7 +149,7 @@ export default function JogosOnline() {
 
       <div className="playable-games-grid">
         {grutaPlayableGames.map((game) => (
-          <div key={game.id} className="playable-card">
+          <div key={game.id} className="playable-card" onClick={game.action}>
             <div className="playable-media-wrapper">
               <img 
                 src={game.image} 
@@ -166,28 +157,15 @@ export default function JogosOnline() {
                 className="playable-media-img"
                 onError={(e) => { e.currentTarget.src = "/assets/logo.png"; }}
               />
-              <span className={`playable-status-badge ${game.status === "playable" ? "status-playable" : game.status === "dev" ? "status-dev" : "status-soon"}`}>
-                {game.status === "playable" ? "● DISPONÍVEL" : "⚙️ EM PRODUÇÃO"}
-              </span>
+              {game.status !== "playable" && (
+                <span className="playable-status-badge status-dev">
+                  EM BREVE
+                </span>
+              )}
             </div>
 
-            <div className="playable-content">
-              <div className="playable-meta-tags">
-                {game.tags.map((tag, idx) => (
-                  <span key={idx} className="playable-tag">{tag}</span>
-                ))}
-              </div>
-
-              <h3 className="playable-title">{game.title}</h3>
-              <p className="playable-desc">{game.description}</p>
-
-              <button
-                type="button"
-                className={`playable-action-btn ${game.status === "playable" ? "btn-play-now" : "btn-dev-soon"}`}
-                onClick={game.action}
-              >
-                {game.status === "playable" ? "▶ " + game.statusText : "ℹ️ Detalhes do Projeto"}
-              </button>
+            <div className="playable-title-bar">
+              <h3>{game.title}</h3>
             </div>
           </div>
         ))}

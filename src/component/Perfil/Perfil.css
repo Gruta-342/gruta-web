@@ -1,0 +1,322 @@
+/* ============================================================
+   PERFIL DE USUÁRIO - Tema Gruta
+   ============================================================ */
+
+.perfil-container {
+  max-width: 720px;
+  margin: 40px auto;
+  padding: 0 20px 80px;
+  font-family: inherit;
+}
+
+/* HEADER DO PERFIL */
+.perfil-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.perfil-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.perfil-badge.own {
+  background: rgba(0, 168, 255, 0.15);
+  color: #00d2ff;
+  border: 1px solid rgba(0, 210, 255, 0.35);
+}
+
+.perfil-badge.other {
+  background: rgba(255, 255, 255, 0.06);
+  color: #cccccc;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.perfil-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 3px solid #00a8ff;
+  object-fit: cover;
+  background: #0b131e;
+}
+
+.perfil-avatar-fallback {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 3px solid #00a8ff;
+  background: linear-gradient(135deg, #00a8ff 0%, #007bb5 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.perfil-nome {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+}
+
+.perfil-email {
+  font-size: 1rem;
+  color: #8892a5;
+  margin: 4px 0 0;
+  word-break: break-all;
+}
+
+.perfil-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(0, 168, 255, 0.2);
+  margin: 26px 0;
+}
+
+/* BADGE DE FUNÇÃO */
+.perfil-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.role-admin {
+  background: rgba(255, 77, 77, 0.15);
+  color: #ff4d4d;
+  border: 1px solid rgba(255, 77, 77, 0.35);
+}
+
+.role-guest,
+.role-member {
+  background: rgba(0, 168, 255, 0.15);
+  color: #00a8ff;
+  border: 1px solid rgba(0, 168, 255, 0.35);
+}
+
+/* DADOS DO PERFIL */
+.perfil-dados {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.perfil-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 18px;
+  background: #07111b;
+  border: 1px solid rgba(0, 168, 255, 0.15);
+  border-radius: 10px;
+}
+
+.perfil-item .label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #00a8ff;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.perfil-item .valor {
+  font-size: 1rem;
+  color: #e8eef5;
+}
+
+/* AÇÕES */
+.perfil-acoes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.perfil-acoes.row {
+  flex-direction: row;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: #00a8ff;
+  color: #ffffff;
+}
+
+.btn-primary:hover {
+  background: #0096e6;
+  box-shadow: 0 0 20px rgba(0, 168, 255, 0.45);
+}
+
+.btn-outline {
+  background: transparent;
+  color: #00a8ff;
+  border: 1px solid rgba(0, 168, 255, 0.45);
+}
+
+.btn-outline:hover {
+  background: rgba(0, 168, 255, 0.1);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #cccccc;
+}
+
+.btn-ghost:hover {
+  color: #ffffff;
+}
+
+.btn-danger {
+  background: #ff4d4d;
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background: #e60000;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  filter: grayscale(0.7);
+}
+
+/* FORMULÁRIO DE EDIÇÃO */
+.perfil-edicao {
+  background: #07111b;
+  border: 1px solid rgba(0, 168, 255, 0.2);
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 30px;
+}
+
+.perfil-edicao h3 {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+  color: #00d2ff;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.campo label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #b9c4d6;
+}
+
+.campo input {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 168, 255, 0.35);
+  background: #051329;
+  color: #e8eef5;
+  font-size: 1rem;
+}
+
+.campo input:focus {
+  outline: none;
+  border-color: #00d2ff;
+  box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.2);
+}
+
+.perfil-acoes-edicao {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* ESTADO VAZIO / ERRO */
+.perfil-vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 20px;
+  color: #8892a5;
+}
+
+.perfil-vazio p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* LOGIN NECESSÁRIO PARA INTERAGIR */
+.perfil-somente-leitura {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #cccccc;
+}
+
+.perfil-somente-leitura a {
+  color: #00a8ff;
+  text-decoration: underline;
+}
+
+.perfil-somente-leitura a:hover {
+  color: #00d2ff;
+}
+
+/* RESPONSIVO */
+@media (max-width: 640px) {
+  .perfil-container {
+    margin: 24px auto;
+    padding: 0 16px 60px;
+  }
+
+  .perfil-avatar,
+  .perfil-avatar-fallback {
+    width: 96px;
+    height: 96px;
+  }
+
+  .perfil-nome {
+    font-size: 1.5rem;
+  }
+
+  .perfil-acoes.row {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

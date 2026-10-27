@@ -7,8 +7,20 @@ export const metadata = {
 
 export default function TermoPage() {
   return (
-    <main style={{ backgroundColor: "#020812", minHeight: "100vh", paddingTop: "20px" }}>
+    <div style={{ 
+      backgroundColor: "#020812", 
+      width: "100vw",
+      height: "100vh", 
+      overflow: "hidden", 
+      position: "fixed", 
+      top: 0, 
+      left: 0,
+      zIndex: 9999,
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center"
+    }}>
       <Termo />
-    </main>
+    </div>
   );
 }

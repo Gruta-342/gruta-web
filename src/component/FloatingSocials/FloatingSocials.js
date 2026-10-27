@@ -6,25 +6,17 @@ import "./FloatingSocials.css";
 
 export default function FloatingSocials() {
   const pathname = usePathname();
+  
   const isPainelAdmin = pathname?.startsWith("/admin");
+  const isTermo = pathname?.includes("/termo");
 
-  // Se estivermos em qualquer página dentro de /admin, não renderiza os botões
-  if (isPainelAdmin) {
+  // Se estivermos no Painel Admin ou no jogo Termo, não renderiza os botões
+  if (isPainelAdmin || isTermo) {
     return null;
   }
 
-  //{/* Botão do Discord */}
-  //    <a 
-  //      href="https://discord.gg/QtKJwPNRah" 
-  //      target="_blank" 
-  //      rel="noopener noreferrer" 
-  //      className="social-btn discord"
-  //    title="Junte-se ao nosso Discord"
-  //   >
-
   return (
     <div className="floating-socials">
-      {/* Botão do Instagram */}
       <a 
         href="https://instagram.com/gruta342" 
         target="_blank" 
@@ -32,14 +24,12 @@ export default function FloatingSocials() {
         className="social-btn instagram"
         title="Siga nosso Instagram"
       >
-        {/* Ícone SVG do Instagram */}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
           <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
           <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
         </svg>
       </a>
-
     </div>
   );
 }

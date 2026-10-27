@@ -92,35 +92,36 @@
   margin-top: 4px;
 }
 
-/* Grid de Jogos Próprios Jogáveis */
+/* Grid de Jogos Próprios Jogáveis (Novo Estilo App/Grid) */
 .playable-games-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 24px;
   margin-bottom: 60px;
 }
 
 .playable-card {
-  background: rgba(10, 33, 71, 0.7);
-  border-radius: 16px;
-  border: 1px solid rgba(0, 210, 255, 0.2);
+  background: #121824;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: all 0.3s ease;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
 }
 
 .playable-card:hover {
-  transform: translateY(-6px);
-  border-color: #00d2ff;
-  box-shadow: 0 14px 30px rgba(0, 210, 255, 0.25);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 16px 30px rgba(0, 210, 255, 0.15);
+  border-color: rgba(0, 210, 255, 0.4);
 }
 
 .playable-media-wrapper {
   position: relative;
   width: 100%;
-  height: 180px;
+  aspect-ratio: 1 / 1;
   background-color: #051329;
   overflow: hidden;
 }
@@ -129,117 +130,50 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
+  transition: transform 0.5s ease;
 }
 
 .playable-card:hover .playable-media-img {
-  transform: scale(1.05);
+  transform: scale(1.1);
+}
+
+.playable-title-bar {
+  padding: 16px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0f1523;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.playable-title-bar h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 1.3;
 }
 
 .playable-status-badge {
   position: absolute;
   top: 12px;
   right: 12px;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-}
-
-.status-playable {
-  background-color: #00e676;
-  color: #051329;
+  z-index: 2;
 }
 
 .status-dev {
   background-color: #ff9100;
   color: #051329;
-}
-
-.status-soon {
-  background-color: #00d2ff;
-  color: #051329;
-}
-
-.playable-content {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.playable-meta-tags {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-}
-
-.playable-tag {
-  background: rgba(0, 210, 255, 0.1);
-  color: #00d2ff;
-  font-size: 11px;
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-weight: 600;
-}
-
-.playable-title {
-  font-size: 20px;
-  font-weight: 800;
-  color: white;
-  margin-bottom: 8px;
-}
-
-.playable-desc {
-  font-size: 13.5px;
-  color: #a0aab5;
-  line-height: 1.45;
-  margin-bottom: 20px;
-  flex: 1;
-}
-
-.playable-action-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  border: none;
-}
-
-.btn-play-now {
-  background: linear-gradient(135deg, #00d2ff 0%, #0077ff 100%);
-  color: white;
-  box-shadow: 0 4px 15px rgba(0, 210, 255, 0.35);
-}
-
-.btn-play-now:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 210, 255, 0.5);
-}
-
-.btn-dev-soon {
-  background: rgba(255, 255, 255, 0.08);
-  color: #8a9fc4;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.btn-dev-soon:hover {
-  background: rgba(0, 210, 255, 0.1);
-  color: #00d2ff;
-  border-color: rgba(0, 210, 255, 0.3);
 }
 
 /* Modal de Jogo / Minigame */
@@ -465,7 +399,9 @@
   }
 
   .playable-games-grid {
-    grid-template-columns: 1fr;
+    /* Ajuste para mobile para não esticar o card ao limite da tela */
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 16px;
   }
 
   .community-grid {
