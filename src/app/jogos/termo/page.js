@@ -10,7 +10,7 @@ export default function TermoPage() {
     <div style={{ 
       backgroundColor: "#020812", 
       width: "100vw",
-      height: "100vh", 
+      height: "100dvh", 
       overflow: "hidden", 
       position: "fixed", 
       top: 0, 
