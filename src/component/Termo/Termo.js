@@ -115,7 +115,6 @@ export default function Termo() {
       setSecretWords([daily.word]);
       setDayNumber(daily.dayNumber);
 
-      // Restaura o progresso do desafio diário se já tiver começado
       try {
         const savedState = localStorage.getItem(STATE_STORAGE_KEY);
         if (savedState) {
@@ -130,7 +129,7 @@ export default function Termo() {
             if (parsed.gameStatus !== "IN_PROGRESS") {
               setTimeout(() => setShowStatsModal(true), 600);
             }
-            return; // Encerra o setup aqui para não zerar as variáveis abaixo
+            return;
           }
         }
       } catch (e) {}
@@ -138,7 +137,6 @@ export default function Termo() {
       setSecretWords(getRandomWords(mode.words, mode.length));
     }
 
-    // Configuração do zero para os modos infinitos ou para um novo dia do Diário
     setGuesses([]);
     setSolvedBoards([]);
     setCurrentGuessArray(Array(mode.length).fill(""));
@@ -249,7 +247,6 @@ export default function Termo() {
     setActiveCol(0);
     setGameStatus(newStatus);
 
-    // Salva o estado atual do Desafio Diário a cada jogada
     if (activeMode.id === "DAILY") {
       try {
         localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify({
@@ -264,7 +261,13 @@ export default function Termo() {
       showToast("Sensacional! Você venceu!", 2500);
       handleGameEnd(true, updatedGuesses.length, activeMode.id);
     } else if (newStatus === "LOST") {
-      showToast("Que pena! Fim de jogo.", 3500);
+      // Identificar palavras não adivinhadas
+      const missedWords = secretWords.filter((_, idx) => !newSolvedBoards.includes(idx));
+      const message = missedWords.length > 1 
+        ? `Que pena! As palavras eram: ${missedWords.join(", ")}`
+        : `Que pena! A palavra era ${missedWords[0]}`;
+        
+      showToast(message, 4000); // Mostra o toast por mais tempo para dar tempo de ler
       handleGameEnd(false, updatedGuesses.length, activeMode.id);
     }
   }, []);

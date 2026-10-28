@@ -14,7 +14,7 @@
   box-sizing: border-box;
   user-select: none;
   -webkit-user-select: none;
-  overflow: hidden;
+  overflow: hidden; /* Ocultar barras de scroll no container principal */
 }
 
 /* -------------------- CABEÇALHO -------------------- */
@@ -157,9 +157,17 @@
   width: 100%;
   gap: 15px;
   min-height: 0;
-  overflow: hidden;
   margin-bottom: 8px;
+  /* Permitir scroll vertical na área dos tabuleiros */
+  overflow-y: auto; 
+  /* Esconder a barra de scroll padrão do navegador na área do tabuleiro (opcional mas recomendado)*/
+  scrollbar-width: none; 
+  -ms-overflow-style: none;
 }
+.termo-boards-container::-webkit-scrollbar { 
+    display: none; 
+}
+
 
 .termo-board {
   display: flex;
@@ -168,8 +176,8 @@
   gap: 5px;
   width: 100%;
   max-width: 320px;
-  max-height: 100%;
   transition: opacity 0.3s ease;
+  margin: auto; /* Ajuda no alinhamento ao fazer scroll */
 }
 
 .termo-board.board-solved {
@@ -246,7 +254,7 @@
   width: 100%;
   max-width: 850px; 
   padding: 0;
-  flex-shrink: 0;
+  flex-shrink: 0; /* Impede o teclado de encolher */
 }
 
 .termo-keyboard.game-over { 
@@ -559,27 +567,50 @@
 
   /* Ajustes para o Modo Quarteto (2x2) */
   .termo-boards-container.mode-QUAD {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 6px;
-    max-width: 380px;
+    grid-template-columns: 1fr 1fr; /* Mantém as 2 colunas */
+    gap: 15px; /* Aumenta o gap para evitar colagem */
+    max-width: 450px; /* Dá um pouco mais de espaço */
+    align-items: start; /* Alinha pelo topo no scroll */
+    padding-bottom: 20px; /* Dá espaço extra no fim do scroll */
   }
   
-  .termo-boards-container.mode-QUAD .termo-board { gap: 2px; max-width: 170px; margin: 0 auto; }
-  .termo-boards-container.mode-QUAD .termo-row { gap: 2px; }
+  .termo-boards-container.mode-QUAD .termo-board { gap: 4px; width: 100%; margin: 0 auto; } /* Usa 100% da coluna */
+  .termo-boards-container.mode-QUAD .termo-row { gap: 4px; }
+  
+  /* Tamanho mínimo confortável para as peças no Quarteto mobile */
   .termo-boards-container.mode-QUAD .termo-tile { 
-    font-size: 10px; 
+    font-size: 12px; 
     border-width: 1px; 
-    max-height: 20px; 
-    border-radius: 3px;
+    height: 28px; /* Altura fixa ou mínima para não encolher demais */
+    width: 28px;
+    max-height: none;
+    border-radius: 4px;
   }
 
-  .termo-boards-container.mode-DOUBLE { gap: 8px; max-width: 380px; }
+  /* Ajuste no Duplo para acompanhar */
+  .termo-boards-container.mode-DOUBLE { 
+      gap: 15px; 
+      max-width: 450px; 
+      align-items: start; 
+      padding-bottom: 20px;
+  }
 }
 
 @media (max-width: 380px) {
   .termo-key { height: 36px; font-size: 11px; }
   .termo-key.key-special { font-size: 8px; }
   .termo-tile { max-height: 38px; font-size: 14px; }
-  .termo-boards-container.mode-QUAD .termo-tile { max-height: 17px; font-size: 9px; }
+  
+  /* No quarteto, se o ecrã for super pequeno, ainda mantemos um tamanho legível */
+  .termo-boards-container.mode-QUAD { gap: 10px; }
+  .termo-boards-container.mode-QUAD .termo-tile { 
+      height: 24px; 
+      width: 24px; 
+      font-size: 10px; 
+  }
+  
+  .termo-stats-grid { gap: 4px; }
+  .termo-stat-value { font-size: 24px; }
+  .termo-countdown { font-size: 24px; }
+  .termo-share-btn { font-size: 14px; padding: 10px 14px; }
 }
