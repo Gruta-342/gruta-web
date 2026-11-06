@@ -1,22 +1,48 @@
+/* ======================================================== */
+/* --- CORREÇÃO DO BUG DE ESPAÇO VAZIO E TRANSIÇÃO DE COR --- */
+/* ======================================================== */
 .about-section {
-  padding: 20px 20px;
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   color: white;
+  /* IMPORTANTE: Nunca usar overflow-x: hidden aqui, 
+     pois isso "quebra" o position: sticky e gera os espaços vazios */
 }
 
-/* Títulos das seções */
+.content-wrapper {
+  position: relative;
+  z-index: 15; 
+  /* Reduzi o padding de 60px para 40px para a transição ser imediata */
+  padding-top: 40px; 
+  padding-bottom: 60px;
+  background-color: transparent; /* Herda o azul exato do seu site globalmente */
+}
+
+/* Os conteúdos internos que limitam a largura de leitura */
+.members-section,
+.activities-section,
+.manifesto-section,
+.about-separator {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 20px;
+}
+
 .section-subtitle {
-  text-align: left; /* Mantendo o seu novo alinhamento à esquerda */
+  text-align: left;
   font-size: 32px;
   color: white;
-  margin-bottom: 8px; /* <--- A MÁGICA DO ESPAÇAMENTO ESTÁ AQUI */
-  margin-top: 40px;
+  margin-bottom: 8px;
+  margin-top: 20px;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
-/* Novo Subtítulo (A frase do brinde) */
+.section-subtitle.center {
+  text-align: center;
+}
+
 .section-tagline {
   text-align: left;
   font-size: 18px;
@@ -25,92 +51,212 @@
   font-style: italic;
 }
 
-/* --- 1. INTRODUÇÃO (HERO) --- */
-.about-hero {
+.section-tagline.center {
+  text-align: center;
+}
+
+/* ======================================================== */
+/* --- 1. A DESCIDA À GRUTA (ZOOM OUT STICKY SCROLL) ---    */
+/* ======================================================== */
+/* Container pai com 300vh para permitir um longo "tempo" de animação */
+.parallax-zoom-container {
+  position: relative;
+  width: 100%;
+  height: 400vh;
+  background-color: #010d21; /* Fundo base atrás da caverna */
+}
+
+/* Moldura que "trava" (Sticky) na tela enquanto você rola dentro do container pai */
+.parallax-sticky-frame {
+  position: sticky;
+  top: 0;
+  width: 100vw;
+  height: 100vh; 
+  overflow: hidden; /* Mantém o zoom dentro dos limites da tela atual */
   display: flex;
+  justify-content: center;
   align-items: center;
-  justify-content: space-between;
-  gap: 50px;
-  margin-bottom: 60px;
 }
 
-.about-text-container {
-  flex: 1; /* Ocupa metade do espaço */
-  text-align: left; /* Alinhamento à esquerda conforme você pediu */
-  font-size: 18px;
-  line-height: 1.6;
-  color: #a0aab5;
-}
-
-.about-title {
-  color: #00d2ff;
-  font-size: 48px;
-  letter-spacing: 2px;
-  margin-bottom: 30px;
-  line-height: 1.2;
-}
-
-.mobile-only-title {
-  display: none;
-}
-
-.about-text-container p {
-  margin-bottom: 15px;
-}
-
-.highlight-text {
-  color: white;
-  font-weight: bold;
-  font-size: 20px;
-  font-style: italic;
-}
-
-/* Nova Caixa da Mídia */
-.about-media-container {
-  flex: 1; /* Ocupa a outra metade do espaço */
-  max-width: 550px; /* Limita o tamanho para não ficar gigante em telas ultrawide */
-  aspect-ratio: 4 / 3; /* Trava exatamente na proporção 4:3 */
-  border-radius: 12px;
+/* Criamos um container interno estrito em 16:9 que vai conter as imagens */
+.parallax-ratio-box {
+  position: relative;
+  width: 1600px; /* Largura fixa para manter a proporção 16:9 */
+  height: 900px; /* Altura fixa para manter a proporção 16:9 */
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Sombra dramática */
-  border: 1px solid rgba(255, 255, 255, 0.05); /* Borda sutil */
+  display: flex;
+  align-items: flex-end;
 }
 
-.about-media {
+/* Configuração base para não distorcer o horizonte e manter proporção 16:9 */
+.parallax-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Garante que a foto preencha o 4:3 sem distorcer */
+  object-fit: cover;
+  aspect-ratio: 16 / 9; /* Garante que a proporção original seja respeitada */
+  object-position: center center;
+  transform-origin: center center; 
+  pointer-events: none; 
+  will-change: transform;
 }
 
-/* --- 2. MEMBROS DA GRUTA --- */
-.members-grid {
-  display: grid;
-  /* Cria colunas automáticas com mínimo de 300px */
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  justify-items: center;
+/* Z-Indexes das Camadas */
+.layer-5 { z-index: 1; } /* Céu */
+.layer-4 { z-index: 2; } /* Montanhas */
+.layer-3 { z-index: 3; } /* Lago */
+.layer-2 { z-index: 4; } /* Vegetação */
+/* Text container -> z-index 5 */
+.layer-1 { z-index: 6; } /* Caverna (Frente de Tudo) */
+
+/* Textos da Introdução Flutuantes e Brilhantes */
+.parallax-text-container {
+  position: relative;
+  z-index: 5;
+  text-align: center;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  will-change: opacity, transform;
 }
 
-.member-card {
+.cave-giant-title {
+  color: #ffffff;
+  font-size: 60px;
+  line-height: 1.2;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 30px;
+  max-width: 900px;
+}
+
+.cave-giant-desc {
+  font-size: 22px;
+  color: #cfd8dc;
+  line-height: 1.6;
+  max-width: 700px;
+  text-shadow: 0 5px 15px rgba(0,0,0,1);
+}
+
+.cave-giant-highlight {
+  font-size: 26px;
+  color: white;
+  font-weight: bold;
+  font-style: italic;
+  margin: 15px 0 25px;
+  text-shadow: 0 0 15px rgba(255,255,255,0.4), 0 5px 15px rgba(0,0,0,1);
+}
+
+.bottom-desc {
+  margin-top: 10px;
+}
+
+
+/* ======================================================== */
+/* --- 2. DEQUE DE MEMBROS E RESTANTE DO SITE ---           */
+/* ======================================================== */
+.members-deck-container {
+  position: relative;
   width: 100%;
-  max-width: 350px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  max-width: 800px;
+  height: 350px; 
+  margin: 0 auto;
+  z-index: 10;
+  --deck-scale: 1; 
 }
 
-.member-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(0, 210, 255, 0.2);
-  border-color: rgba(0, 210, 255, 0.4);
+.deck-card {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  width: 220px;
+  transform-origin: bottom center;
+  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  border-radius: 12px;
+  border: 2px solid transparent;
+  box-shadow: -5px 10px 20px rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  transform: translate(
+    calc(-50% + (var(--tx) * 1px * var(--deck-scale))), 
+    calc(var(--ty) * 1px * var(--deck-scale))
+  ) rotate(calc(var(--rot) * 1deg));
 }
 
 .member-image {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
+  border-radius: 10px;
+}
+
+.members-deck-container .deck-card:hover:not(.active) {
+  transform: translate(
+    calc(-50% + (var(--tx) * 1px * var(--deck-scale))), 
+    calc((var(--ty) * 1px * var(--deck-scale)) - 25px)
+  ) rotate(calc(var(--rot) * 1deg)) scale(1.05) !important;
+  border-color: var(--theme-color);
+  box-shadow: 0 10px 30px rgba(33, 150, 243, 0.6); 
+}
+
+.members-deck-container .deck-card.active {
+  transform: translate(-50%, 170px) scale(1.15) rotate(0deg) !important;
+  border-color: var(--theme-color);
+  box-shadow: 0 15px 40px rgba(33, 150, 243, 0.8);
+}
+
+.character-panel {
+  position: relative;
+  z-index: 5; 
+  max-width: 650px;
+  margin: 160px auto 40px; 
+  min-height: 120px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s ease;
+  visibility: hidden;
+}
+
+.character-panel.visible {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+.holographic-scroll {
+  background: rgba(8, 26, 56, 0.8);
+  border: 1px solid var(--theme-color, #00d2ff);
+  box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.05), 0 5px 15px rgba(0,0,0,0.5);
+  padding: 60px 40px 30px; 
+  border-radius: 12px;
+  text-align: center;
+  backdrop-filter: blur(5px);
+  width: 100%;
+}
+
+.character-title {
+  font-size: 26px;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.character-alias {
+  color: #a0aab5;
+  font-size: 20px;
+  font-weight: normal;
+}
+
+.character-flavor {
+  font-size: 17px;
+  font-style: italic;
+  color: #e0e6ed;
+  line-height: 1.6;
 }
 
 /* --- 3. O QUE FAZEMOS --- */
@@ -151,70 +297,332 @@
   line-height: 1.5;
 }
 
+.about-separator {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.3), transparent);
+  margin: 60px 0;
+}
+
+
+/* --- 4. ESTATUTO DA GRUTA --- */
+.estatuto-section {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.estatuto-closed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+}
+
+.estatuto-btn {
+  background-color: transparent;
+  color: #00d2ff;
+  border: 2px solid #00d2ff;
+  padding: 15px 30px;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.estatuto-btn:hover {
+  background-color: #00d2ff;
+  color: #020a1a; 
+  box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
+  transform: translateY(-3px);
+}
+
+.estatuto-btn.cancel {
+  border-color: #a0aab5;
+  color: #a0aab5;
+}
+.estatuto-btn.cancel:hover {
+  background-color: #a0aab5;
+  color: #020a1a;
+  box-shadow: 0 0 20px rgba(160, 170, 181, 0.4);
+}
+
+.estatuto-open {
+  background: linear-gradient(145deg, rgba(8, 26, 56, 0.6) 0%, rgba(2, 10, 26, 0.8) 100%);
+  border: 1px solid rgba(0, 210, 255, 0.3);
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  animation: fadeInEstatuto 0.5s ease forwards;
+  text-align: left; 
+}
+
+@keyframes fadeInEstatuto {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.estatuto-header {
+  text-align: center;
+  margin-bottom: 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 20px;
+}
+
+.estatuto-header h2 {
+  color: #00d2ff;
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.estatuto-header span {
+  color: #a0aab5;
+  font-style: italic;
+  font-size: 16px;
+}
+
+.estatuto-capitulo {
+  margin-bottom: 35px;
+}
+
+.estatuto-capitulo h3 {
+  color: white;
+  font-size: 22px;
+  margin-bottom: 15px;
+  border-left: 4px solid #00d2ff;
+  padding-left: 10px;
+}
+
+.estatuto-capitulo h4 {
+  color: #a0aab5;
+  font-size: 18px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.estatuto-capitulo p {
+  color: #cfd8dc;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.estatuto-capitulo p strong {
+  color: white;
+}
+
+.estatuto-capitulo ul {
+  list-style-type: none;
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
+
+.estatuto-capitulo ul li {
+  color: #cfd8dc;
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.estatuto-capitulo ul li strong {
+  color: #00d2ff;
+}
+
+.paragrafo-unico {
+  font-style: italic;
+  margin-top: 10px;
+  padding-left: 15px;
+  border-left: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.aprovacao-text {
+  text-align: center;
+  margin-top: 30px;
+  color: #00d2ff !important;
+  font-size: 18px !important;
+}
+
+.estatuto-footer {
+  text-align: center;
+  margin-top: 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 30px;
+}
+
+
+/* --- 5. MODAL CUSTOMIZADO (POP-UP) --- */
+.custom-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 10, 26, 0.85); 
+  backdrop-filter: blur(8px);
+  animation: fadeInOverlay 0.3s ease;
+}
+
+.custom-modal-box {
+  background: linear-gradient(145deg, rgba(8, 26, 56, 0.95) 0%, rgba(2, 10, 26, 1) 100%);
+  border: 1px solid #00d2ff;
+  border-radius: 12px;
+  padding: 40px 30px;
+  width: 90%;
+  max-width: 450px;
+  text-align: center;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 210, 255, 0.1);
+  animation: scaleInModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.modal-text {
+  color: white;
+  font-size: 20px;
+  line-height: 1.5;
+  margin-bottom: 30px;
+  font-weight: 500;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.modal-buttons.center-btn {
+  justify-content: center;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleInModal {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+
 /* ======================================================== */
 /* --- RESPONSIVIDADE MOBILE ---                            */
 /* ======================================================== */
 @media (max-width: 768px) {
   
-  .about-section {
-    /* Adicionamos 90px de padding no final para o conteúdo não ficar escondido atrás dos botões flutuantes! */
-    padding: 30px 15px 90px; 
+  .parallax-zoom-container {
+    height: 200vh; /* No mobile a duração do scroll é menor para conforto */
   }
 
-  /* --- 1. MÁGICA DA INTRODUÇÃO MOBILE --- */
-  
-  /* Esconde o título de dentro da caixa */
-  .desktop-only-title {
-    display: none !important;
-  }
-
-  /* Liga o título centralizado do topo */
-  .mobile-only-title {
-    display: block !important;
-    text-align: center;
-    font-size: 28px;
-    margin-bottom: 25px;
-  }
-
-  .about-hero {
-    /* Continua invertendo a ordem para a foto ficar acima dos parágrafos */
-    flex-direction: column-reverse; 
-    gap: 25px;
-    margin-bottom: 40px;
+  .cave-giant-title {
+    font-size: 38px;
+    margin-bottom: 20px;
   }
   
-  .about-text-container {
-    text-align: left; /* Parágrafos elegantes alinhados à esquerda */
-    font-size: 16px; 
-    line-height: 1.5;
+  .cave-giant-desc {
+    font-size: 16px;
   }
-
-  .highlight-text {
+  
+  .cave-giant-highlight {
     font-size: 18px;
+    margin: 5px 0 20px;
   }
 
-  /* --- 2. CARDS DOS MEMBROS DE 2 EM 2 --- */
-  .members-grid {
-    grid-template-columns: repeat(2, 1fr); /* Força exatamente 2 colunas de larguras iguais */
-    gap: 15px; /* Reduz o espaço entre os cards para caber bonitinho na tela */
+  .members-deck-container {
+    --deck-scale: 0.55; 
+    height: 180px;      
+    display: block; 
+  }
+
+  .deck-card {
+    width: 120px;       
+  }
+
+  .members-deck-container .deck-card.active {
+    transform: translate(-50%, 110px) scale(1.3) rotate(0deg) !important; 
+  }
+
+  .members-deck-container:not(.has-active) .deck-card {
+    animation: mobileWave 4.5s infinite ease-in-out;
+    animation-delay: calc(var(--idx) * 0.2s); 
+  }
+
+  @keyframes mobileWave {
+    0%, 100% {
+      transform: translate(
+        calc(-50% + (var(--tx) * 1px * var(--deck-scale))), 
+        calc(var(--ty) * 1px * var(--deck-scale))
+      ) rotate(calc(var(--rot) * 1deg));
+      border-color: transparent;
+      box-shadow: -5px 10px 20px rgba(0, 0, 0, 0.7);
+    }
+    10% {
+      transform: translate(
+        calc(-50% + (var(--tx) * 1px * var(--deck-scale))), 
+        calc((var(--ty) * 1px * var(--deck-scale)) - 15px)
+      ) rotate(calc(var(--rot) * 1deg)) scale(1.1);
+      border-color: var(--theme-color);
+      box-shadow: 0 10px 25px rgba(33, 150, 243, 0.6);
+    }
+    20% {
+      transform: translate(
+        calc(-50% + (var(--tx) * 1px * var(--deck-scale))), 
+        calc(var(--ty) * 1px * var(--deck-scale))
+      ) rotate(calc(var(--rot) * 1deg));
+      border-color: transparent;
+      box-shadow: -5px 10px 20px rgba(0, 0, 0, 0.7);
+    }
+  }
+
+  .character-panel {
+    margin-top: 80px; 
+    min-height: 250px; 
   }
   
-  /* Ajuste no espaçamento dos títulos para o celular */
+  .holographic-scroll {
+    padding: 85px 25px 40px; 
+  }
+
   .section-subtitle {
     font-size: 24px;
+    text-align: center;
   }
 
   .section-tagline {
     font-size: 16px;
     margin-bottom: 30px;
+    text-align: center;
   }
 
-  /* --- 3. O QUE FAZEMOS --- */
+  .estatuto-open {
+    padding: 25px 15px;
+  }
+  
+  .estatuto-header h2 {
+    font-size: 26px;
+  }
+  
+  .estatuto-btn {
+    font-size: 16px;
+    padding: 12px 20px;
+    width: 100%;
+  }
+
   .activities-grid {
-    gap: 15px; /* Reduzimos o gap geral para economizar espaço de tela */
+    gap: 15px; 
   }
 
   .activity-card {
-    padding: 20px 15px; /* Card ligeiramente mais fino nas laterais */
+    padding: 20px 15px; 
+  }
+  
+  .modal-buttons {
+    flex-direction: column;
+  }
+  
+  .modal-buttons .estatuto-btn {
+    width: 100%;
   }
 }

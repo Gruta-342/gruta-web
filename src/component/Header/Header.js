@@ -22,6 +22,9 @@ export default function Header() {
   // Se a rota incluir "termo", oculta o cabeçalho completamente
   if (pathname?.includes("/termo")) return null;
 
+  // Verifica se estamos na página "Sobre"
+  const isSobre = pathname?.includes("/sobre");
+
   const navItems = [
     { name: "HOME", path: "/" },
     { name: "ACERVO", path: "/acervo" },
@@ -30,8 +33,12 @@ export default function Header() {
     { name: "SOBRE", path: "/sobre" }
   ];
 
+  // A classe 'scrolled' só é ativada se NÃO estivermos na página Sobre.
+  // A página Sobre recebe a classe exclusiva 'is-sobre-page'.
+ const headerClass = `header-container ${(isScrolled && !isSobre) ? "scrolled" : ""} ${isSobre ? "is-sobre-page" : ""}`;
+
   return (
-    <header className={`header-container ${isScrolled ? "scrolled" : ""}`}>
+    <header className={headerClass}>
       <div className="top-bar">
         
         <div className="left-section">
