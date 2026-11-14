@@ -1,24 +1,22 @@
 /* ======================================================== */
-/* --- CORREÇÃO DO BUG DE ESPAÇO VAZIO E TRANSIÇÃO DE COR --- */
+/* --- ESTRUTURA BASE ---                                   */
 /* ======================================================== */
 .about-section {
   width: 100%;
   margin: 0 auto;
   color: white;
-  /* IMPORTANTE: Nunca usar overflow-x: hidden aqui, 
-     pois isso "quebra" o position: sticky e gera os espaços vazios */
+  padding: 20px 20px;
+  max-width: 1200px;
 }
 
 .content-wrapper {
   position: relative;
   z-index: 15; 
-  /* Reduzi o padding de 60px para 40px para a transição ser imediata */
   padding-top: 40px; 
   padding-bottom: 60px;
-  background-color: transparent; /* Herda o azul exato do seu site globalmente */
+  background-color: transparent;
 }
 
-/* Os conteúdos internos que limitam a largura de leitura */
 .members-section,
 .activities-section,
 .manifesto-section,
@@ -26,7 +24,6 @@
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
-  padding: 0 20px;
 }
 
 .section-subtitle {
@@ -34,7 +31,7 @@
   font-size: 32px;
   color: white;
   margin-bottom: 8px;
-  margin-top: 20px;
+  margin-top: 40px;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -55,108 +52,72 @@
   text-align: center;
 }
 
-/* ======================================================== */
-/* --- 1. A DESCIDA À GRUTA (ZOOM OUT STICKY SCROLL) ---    */
-/* ======================================================== */
-/* Container pai com 300vh para permitir um longo "tempo" de animação */
-.parallax-zoom-container {
-  position: relative;
-  width: 100%;
-  height: 400vh;
-  background-color: #010d21; /* Fundo base atrás da caverna */
+.about-separator {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.3), transparent);
+  margin: 60px 0;
 }
 
-/* Moldura que "trava" (Sticky) na tela enquanto você rola dentro do container pai */
-.parallax-sticky-frame {
-  position: sticky;
-  top: 0;
-  width: 100vw;
-  height: 100vh; 
-  overflow: hidden; /* Mantém o zoom dentro dos limites da tela atual */
+/* ======================================================== */
+/* --- 1. INTRODUÇÃO (HERO) ORIGINAL ---                    */
+/* ======================================================== */
+.about-hero {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: space-between;
+  gap: 50px;
+  margin-bottom: 60px;
 }
 
-/* Criamos um container interno estrito em 16:9 que vai conter as imagens */
-.parallax-ratio-box {
-  position: relative;
-  width: 1600px; /* Largura fixa para manter a proporção 16:9 */
-  height: 900px; /* Altura fixa para manter a proporção 16:9 */
+.about-text-container {
+  flex: 1;
+  text-align: left;
+  font-size: 18px;
+  line-height: 1.6;
+  color: #a0aab5;
+}
+
+.about-title {
+  color: #00d2ff;
+  font-size: 48px;
+  letter-spacing: 2px;
+  margin-bottom: 30px;
+  line-height: 1.2;
+}
+
+.mobile-only-title {
+  display: none;
+}
+
+.about-text-container p {
+  margin-bottom: 15px;
+}
+
+.highlight-text {
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  font-style: italic;
+}
+
+.about-media-container {
+  flex: 1;
+  max-width: 550px;
+  aspect-ratio: 4 / 3;
+  border-radius: 12px;
   overflow: hidden;
-  display: flex;
-  align-items: flex-end;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Configuração base para não distorcer o horizonte e manter proporção 16:9 */
-.parallax-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
+.about-media {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  aspect-ratio: 16 / 9; /* Garante que a proporção original seja respeitada */
-  object-position: center center;
-  transform-origin: center center; 
-  pointer-events: none; 
-  will-change: transform;
 }
-
-/* Z-Indexes das Camadas */
-.layer-5 { z-index: 1; } /* Céu */
-.layer-4 { z-index: 2; } /* Montanhas */
-.layer-3 { z-index: 3; } /* Lago */
-.layer-2 { z-index: 4; } /* Vegetação */
-/* Text container -> z-index 5 */
-.layer-1 { z-index: 6; } /* Caverna (Frente de Tudo) */
-
-/* Textos da Introdução Flutuantes e Brilhantes */
-.parallax-text-container {
-  position: relative;
-  z-index: 5;
-  text-align: center;
-  padding: 0 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  will-change: opacity, transform;
-}
-
-.cave-giant-title {
-  color: #ffffff;
-  font-size: 60px;
-  line-height: 1.2;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-bottom: 30px;
-  max-width: 900px;
-}
-
-.cave-giant-desc {
-  font-size: 22px;
-  color: #cfd8dc;
-  line-height: 1.6;
-  max-width: 700px;
-  text-shadow: 0 5px 15px rgba(0,0,0,1);
-}
-
-.cave-giant-highlight {
-  font-size: 26px;
-  color: white;
-  font-weight: bold;
-  font-style: italic;
-  margin: 15px 0 25px;
-  text-shadow: 0 0 15px rgba(255,255,255,0.4), 0 5px 15px rgba(0,0,0,1);
-}
-
-.bottom-desc {
-  margin-top: 10px;
-}
-
 
 /* ======================================================== */
-/* --- 2. DEQUE DE MEMBROS E RESTANTE DO SITE ---           */
+/* --- 2. DEQUE DE MEMBROS E MODAIS ---                     */
 /* ======================================================== */
 .members-deck-container {
   position: relative;
@@ -259,7 +220,9 @@
   line-height: 1.6;
 }
 
-/* --- 3. O QUE FAZEMOS --- */
+/* ======================================================== */
+/* --- 3. O QUE FAZEMOS ---                                 */
+/* ======================================================== */
 .activities-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -297,14 +260,9 @@
   line-height: 1.5;
 }
 
-.about-separator {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 210, 255, 0.3), transparent);
-  margin: 60px 0;
-}
-
-
-/* --- 4. ESTATUTO DA GRUTA --- */
+/* ======================================================== */
+/* --- 4. ESTATUTO DA GRUTA ---                             */
+/* ======================================================== */
 .estatuto-section {
   text-align: center;
   margin-bottom: 60px;
@@ -451,8 +409,7 @@
   padding-top: 30px;
 }
 
-
-/* --- 5. MODAL CUSTOMIZADO (POP-UP) --- */
+/* Modais */
 .custom-modal-overlay {
   position: fixed;
   inset: 0;
@@ -506,30 +463,44 @@
   to { transform: scale(1); opacity: 1; }
 }
 
-
 /* ======================================================== */
 /* --- RESPONSIVIDADE MOBILE ---                            */
 /* ======================================================== */
 @media (max-width: 768px) {
   
-  .parallax-zoom-container {
-    height: 200vh; /* No mobile a duração do scroll é menor para conforto */
+  .about-section {
+    padding: 30px 15px 90px; 
   }
 
-  .cave-giant-title {
-    font-size: 38px;
-    margin-bottom: 20px;
+  /* --- 1. MÁGICA DA INTRODUÇÃO MOBILE (Original) --- */
+  .desktop-only-title {
+    display: none !important;
+  }
+
+  .mobile-only-title {
+    display: block !important;
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 25px;
+  }
+
+  .about-hero {
+    flex-direction: column-reverse; 
+    gap: 25px;
+    margin-bottom: 40px;
   }
   
-  .cave-giant-desc {
-    font-size: 16px;
+  .about-text-container {
+    text-align: left; 
+    font-size: 16px; 
+    line-height: 1.5;
   }
-  
-  .cave-giant-highlight {
+
+  .highlight-text {
     font-size: 18px;
-    margin: 5px 0 20px;
   }
-
+  
+  /* --- 2. DECK MOBILE --- */
   .members-deck-container {
     --deck-scale: 0.55; 
     height: 180px;      
@@ -596,6 +567,7 @@
     text-align: center;
   }
 
+  /* --- 3. ESTATUTO MOBILE --- */
   .estatuto-open {
     padding: 25px 15px;
   }
@@ -610,6 +582,7 @@
     width: 100%;
   }
 
+  /* --- 4. ATIVIDADES MOBILE --- */
   .activities-grid {
     gap: 15px; 
   }

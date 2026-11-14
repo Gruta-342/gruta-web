@@ -121,6 +121,13 @@ export default function JogosOnline() {
       action: () => router.push("/jogos/cruzadinha"),
     },
     {
+      id: "morcegos-gruta",
+      title: "Caça Morcegos",
+      image: "/assets/games/morcegos.jpg", // Lembre-se de adicionar uma imagem ou o fallback funcionará
+      status: "playable",
+      action: () => router.push("/jogos/morcegos"),
+    },
+    {
       id: "d20-gruta",
       title: "Críticos D20",
       image: "/assets/games/d20.jpg",
