@@ -19,8 +19,8 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Se a rota incluir "termo", oculta o cabeçalho completamente
-  if (pathname?.includes("/termo")) return null;
+  // Se a rota incluir "jogos", oculta o cabeçalho completamente
+  if (pathname?.includes("/jogos/")) return null;
 
   // Verifica se estamos na página "Sobre"
   const isSobre = pathname?.includes("/sobre");
