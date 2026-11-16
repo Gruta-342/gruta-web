@@ -127,18 +127,18 @@
   align-items: center;
   justify-content: center;
   min-height: 0;
-  gap: 16px;
-  padding: 6px 0;
+  gap: 12px;
+  padding: 4px 0;
 }
 
 .dados-total-banner {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   background: rgba(8, 26, 56, 0.9);
   border: 1px solid rgba(0, 210, 255, 0.45);
   box-shadow: 0 0 20px rgba(0, 210, 255, 0.2);
-  padding: 8px 20px;
+  padding: 7px 18px;
   border-radius: 999px;
   flex-shrink: 0;
   transition: opacity 0.2s ease;
@@ -163,6 +163,12 @@
   line-height: 1;
 }
 
+.dados-total-breakdown {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8a9fc4;
+}
+
 .dados-arena {
   width: 100%;
   flex: 1;
@@ -171,7 +177,7 @@
   justify-content: center;
   overflow-y: auto;
   min-height: 0;
-  padding: 8px;
+  padding: 6px;
   box-sizing: border-box;
 }
 
@@ -204,14 +210,14 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 14px;
   width: 100%;
 }
 
 .dados-die-card {
   position: relative;
-  width: 126px;
-  height: 126px;
+  width: 120px;
+  height: 120px;
   background: radial-gradient(circle, #0e3064 0%, #06152d 100%);
   border: 3px solid #00d2ff;
   border-radius: 24px;
@@ -224,14 +230,14 @@
 }
 
 .dados-cards-grid.few-dice .dados-die-card {
-  width: 112px;
-  height: 112px;
+  width: 106px;
+  height: 106px;
   border-radius: 20px;
 }
 
 .dados-cards-grid.many-dice .dados-die-card {
-  width: 86px;
-  height: 86px;
+  width: 82px;
+  height: 82px;
   border-radius: 16px;
   border-width: 2px;
 }
@@ -308,7 +314,7 @@
 }
 
 .dados-die-value {
-  font-size: 46px;
+  font-size: 44px;
   font-weight: 900;
   color: #ffffff;
   line-height: 1;
@@ -316,23 +322,23 @@
 }
 
 .dados-cards-grid.few-dice .dados-die-value {
-  font-size: 40px;
+  font-size: 38px;
 }
 
 .dados-cards-grid.many-dice .dados-die-value {
-  font-size: 28px;
+  font-size: 26px;
   margin-top: 10px;
 }
 
 /* -------------------- PAINEL INFERIOR DE CONTROLES -------------------- */
 .dados-controls-dock {
   width: 100%;
-  max-width: 680px;
+  max-width: 720px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  background: rgba(6, 19, 41, 0.85);
+  background: rgba(6, 19, 41, 0.88);
   border: 1px solid rgba(0, 210, 255, 0.22);
   border-radius: 16px;
   padding: 12px 16px;
@@ -346,8 +352,9 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding-bottom: 8px;
+  padding-bottom: 10px;
   border-bottom: 1px solid rgba(0, 210, 255, 0.14);
+  flex-wrap: wrap;
 }
 
 .dados-formula-wrap {
@@ -372,13 +379,95 @@
   letter-spacing: 0.5px;
 }
 
+.dados-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+/* Campo Modificador */
+.dados-modifier-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(10, 33, 71, 0.7);
+  border: 1px solid rgba(0, 210, 255, 0.25);
+  border-radius: 10px;
+  padding: 3px 8px;
+}
+
+.dados-modifier-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #8a9fc4;
+  white-space: nowrap;
+}
+
+.dados-modifier-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.dados-mod-step {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 210, 255, 0.22);
+  background: rgba(2, 8, 18, 0.55);
+  color: #c7d4e5;
+  font-size: 13px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dados-mod-step:hover:not(:disabled) {
+  background: rgba(0, 210, 255, 0.18);
+  border-color: #00d2ff;
+  color: #00d2ff;
+}
+
+.dados-mod-step:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dados-modifier-input {
+  width: 44px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+  text-align: center;
+  outline: none;
+  padding: 2px 0;
+  -moz-appearance: textfield;
+}
+
+.dados-modifier-input::-webkit-outer-spin-button,
+.dados-modifier-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.dados-modifier-input::placeholder {
+  color: #647b9c;
+}
+
 .dados-clear-btn {
   background: rgba(239, 68, 68, 0.14);
   border: 1px solid rgba(239, 68, 68, 0.4);
   color: #fca5a5;
   font-size: 11px;
   font-weight: 800;
-  padding: 4px 10px;
+  padding: 6px 10px;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -395,86 +484,164 @@
   cursor: not-allowed;
 }
 
-.dados-selectors-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
+/* -------------------- GRADE DE FORMAS DOS DADOS -------------------- */
+.dados-shapes-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
   width: 100%;
 }
 
-.dados-selector-pill {
-  display: inline-flex;
-  align-items: stretch;
-  background: rgba(10, 33, 71, 0.75);
-  border: 1px solid rgba(0, 210, 255, 0.25);
-  border-radius: 10px;
-  overflow: hidden;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+.dados-shape-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
 
-.dados-selector-pill.has-count {
-  border-color: #00d2ff;
-  box-shadow: 0 0 12px rgba(0, 210, 255, 0.2);
-}
-
-.dados-pill-minus {
-  background: rgba(2, 8, 18, 0.45);
-  border: none;
-  border-right: 1px solid rgba(0, 210, 255, 0.2);
-  color: #8a9fc4;
-  font-size: 15px;
+.dados-shape-badge {
+  position: absolute;
+  top: -2px;
+  right: 4px;
+  background: #00d2ff;
+  color: #051329;
+  font-size: 10px;
   font-weight: 900;
-  width: 28px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
+  box-shadow: 0 2px 8px rgba(0, 210, 255, 0.45);
+  z-index: 2;
+  pointer-events: none;
 }
 
-.dados-pill-minus:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.25);
-  color: #ffffff;
-}
-
-.dados-pill-minus:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.dados-pill-add {
+.dados-shape-trigger {
   background: transparent;
   border: none;
-  color: #e6f1ff;
-  padding: 8px 12px;
-  font-size: 13px;
-  font-weight: 800;
+  padding: 0;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: background 0.15s ease;
+  justify-content: center;
+  transition: transform 0.18s ease;
 }
 
-.dados-pill-add:hover:not(:disabled) {
-  background: rgba(0, 210, 255, 0.15);
-  color: #00d2ff;
+.dados-shape-trigger:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.05);
 }
 
-.dados-pill-add:disabled {
+.dados-shape-trigger:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.dados-pill-count {
-  background: #00d2ff;
-  color: #051329;
-  font-size: 11px;
+.dados-shape-box {
+  position: relative;
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dados-shape-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.dados-shape-svg polygon,
+.dados-shape-svg rect {
+  fill: #1c3582;
+  stroke: #9bb8ff;
+  stroke-width: 2.5;
+  stroke-linejoin: round;
+  transition: fill 0.2s ease, stroke 0.2s ease, filter 0.2s ease;
+}
+
+.dados-shape-item.has-count .dados-shape-svg polygon,
+.dados-shape-item.has-count .dados-shape-svg rect {
+  fill: #2445a8;
+  stroke: #cfe0ff;
+  filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.35));
+}
+
+.dados-shape-trigger:hover:not(:disabled) .dados-shape-svg polygon,
+.dados-shape-trigger:hover:not(:disabled) .dados-shape-svg rect {
+  fill: #2648b0;
+  stroke: #ffffff;
+}
+
+.dados-shape-label {
+  position: absolute;
+  font-size: 13px;
   font-weight: 900;
-  padding: 1px 6px;
-  border-radius: 999px;
-  line-height: 1.3;
+  color: #dce8ff;
+  letter-spacing: 0.3px;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.dados-shape-label.is-d4 {
+  transform: translateY(6px);
+  font-size: 12px;
+}
+
+.dados-shape-label.is-d100 {
+  font-size: 11px;
+}
+
+/* Botões - e + abaixo de cada forma */
+.dados-shape-actions {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 64px;
+  background: rgba(10, 33, 71, 0.8);
+  border: 1px solid rgba(0, 210, 255, 0.28);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dados-shape-btn {
+  flex: 1;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: #e6f1ff;
+  font-size: 15px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  padding: 0;
+}
+
+.dados-shape-btn.minus {
+  border-right: 1px solid rgba(0, 210, 255, 0.22);
+  color: #9fb4d6;
+}
+
+.dados-shape-btn.minus:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.28);
+  color: #ffffff;
+}
+
+.dados-shape-btn.plus:hover:not(:disabled) {
+  background: rgba(0, 210, 255, 0.22);
+  color: #00d2ff;
+}
+
+.dados-shape-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .dados-roll-btn {
@@ -664,6 +831,11 @@
   border-radius: 6px;
 }
 
+.dados-history-chip.mod-chip {
+  border-color: rgba(0, 210, 255, 0.3);
+  color: #9fd8ff;
+}
+
 .dados-history-chip strong {
   color: #ffffff;
 }
@@ -733,50 +905,84 @@
   }
 
   .dados-die-card {
-    width: 104px;
-    height: 104px;
+    width: 100px;
+    height: 100px;
     border-radius: 20px;
   }
 
   .dados-cards-grid.few-dice .dados-die-card {
-    width: 90px;
-    height: 90px;
+    width: 86px;
+    height: 86px;
     border-radius: 16px;
   }
 
   .dados-cards-grid.many-dice .dados-die-card {
-    width: 72px;
-    height: 72px;
+    width: 70px;
+    height: 70px;
     border-radius: 14px;
   }
 
   .dados-die-value {
-    font-size: 38px;
+    font-size: 36px;
   }
 
   .dados-cards-grid.few-dice .dados-die-value {
-    font-size: 32px;
+    font-size: 30px;
   }
 
   .dados-cards-grid.many-dice .dados-die-value {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .dados-controls-dock {
-    padding: 10px 10px;
+    padding: 10px 8px;
     gap: 10px;
   }
 
-  .dados-selectors-grid {
-    gap: 6px;
+  .dados-shapes-grid {
+    gap: 4px;
   }
 
-  .dados-pill-add {
-    padding: 7px 9px;
+  .dados-shape-box {
+    width: 42px;
+    height: 42px;
+  }
+
+  .dados-shape-label {
+    font-size: 10px;
+  }
+
+  .dados-shape-label.is-d4 {
+    font-size: 9px;
+    transform: translateY(4px);
+  }
+
+  .dados-shape-label.is-d100 {
+    font-size: 8.5px;
+  }
+
+  .dados-shape-badge {
+    right: 0;
+    min-width: 15px;
+    height: 15px;
+    font-size: 9px;
+  }
+
+  .dados-shape-actions {
+    max-width: 44px;
+  }
+
+  .dados-shape-btn {
+    height: 22px;
+    font-size: 13px;
+  }
+
+  .dados-modifier-label {
+    font-size: 9px;
+  }
+
+  .dados-modifier-input {
+    width: 36px;
     font-size: 12px;
-  }
-
-  .dados-pill-minus {
-    width: 24px;
   }
 }
