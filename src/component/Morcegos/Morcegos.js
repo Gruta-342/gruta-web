@@ -70,6 +70,17 @@ function getSecondsUntilMidnight() {
   return Math.max(0, Math.floor((tomorrow - now) / 1000));
 }
 
+function markDailyAsCompleted(gameId) {
+  try {
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    const raw = localStorage.getItem("gruta_daily_completed_log");
+    const log = raw ? JSON.parse(raw) : {};
+    log[gameId] = today;
+    localStorage.setItem("gruta_daily_completed_log", JSON.stringify(log));
+  } catch (e) {}
+}
+
 export default function Morcegos() {
   const [activeMode, setActiveMode] = useState(GAME_MODES.DAILY);
   const [dayNumber, setDayNumber] = useState(1);
@@ -129,6 +140,10 @@ export default function Morcegos() {
   }, []);
 
   const recordGameResult = useCallback((won, remainingLives, modeId) => {
+    if (modeId === "DAILY") {
+      markDailyAsCompleted("morcegos-gruta");
+    }
+
     setStats((prev) => {
       const curr = prev[modeId] || INITIAL_STATS[modeId];
       const newPlayed = curr.played + 1;
@@ -302,6 +317,7 @@ export default function Morcegos() {
               setLives(parsed.lives ?? LIVES);
               setGameStatus(parsed.gameStatus || "PLAYING");
               if (parsed.gameStatus && parsed.gameStatus !== "PLAYING") {
+                markDailyAsCompleted("morcegos-gruta");
                 setTimeout(() => setShowStatsModal(true), 500);
               }
               return;
@@ -340,6 +356,9 @@ export default function Morcegos() {
           gameStatus: updatedStatus
         })
       );
+      if (updatedStatus !== "PLAYING") {
+        markDailyAsCompleted("morcegos-gruta");
+      }
     } catch (e) {}
   }, []);
 

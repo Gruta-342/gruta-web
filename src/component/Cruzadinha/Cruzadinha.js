@@ -10,10 +10,70 @@ import {
 } from "../../lib/cruzadinhaGenerator.js";
 
 const STATS_STORAGE_KEY = "gruta_cruzadinha_stats";
+const DAILY_STATE_STORAGE_KEY = "gruta_cruzadinha_daily_state";
+
+const MODE_LABELS = {
+  daily: "Diário",
+  easy: "Fácil",
+  medium: "Médio",
+  hard: "Difícil"
+};
+
+function getTodayKey() {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function getDailyPuzzleNumber() {
+  const epoch = new Date(2026, 0, 1).getTime();
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.floor((today.getTime() - epoch) / (1000 * 60 * 60 * 24));
+  return Math.max(1, diffDays + 1);
+}
+
+function createSeededRandom(seedStr) {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < seedStr.length; i++) {
+    h ^= seedStr.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return function () {
+    h += 0x6d2b79f5;
+    let t = Math.imul(h ^ (h >>> 15), 1 | h);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function generateDeterministicDailyPuzzle(dateKey) {
+  const seededRng = createSeededRandom(`GRUTA_CRUZADINHA_${dateKey}`);
+  const originalRandom = Math.random;
+  Math.random = seededRng;
+  try {
+    return generateCrosswordPuzzle("random", "hard");
+  } finally {
+    Math.random = originalRandom;
+  }
+}
+
+function markDailyAsCompleted(gameId) {
+  try {
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    const raw = localStorage.getItem("gruta_daily_completed_log");
+    const log = raw ? JSON.parse(raw) : {};
+    log[gameId] = today;
+    localStorage.setItem("gruta_daily_completed_log", JSON.stringify(log));
+  } catch (e) {}
+}
 
 export default function Cruzadinha() {
+  const [gameMode, setGameMode] = useState("daily"); // "daily" | "easy" | "medium" | "hard"
   const [theme, setTheme] = useState("random");
-  const [difficulty, setDifficulty] = useState("easy");
   const [puzzle, setPuzzle] = useState(null);
   const [userGrid, setUserGrid] = useState([]);
   const [selectedCell, setSelectedCell] = useState(null);
@@ -33,6 +93,7 @@ export default function Cruzadinha() {
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showWinModal, setShowWinModal] = useState(false);
+  const [showMobileCluesModal, setShowMobileCluesModal] = useState(false);
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
   const [diffDropdownOpen, setDiffDropdownOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
@@ -47,6 +108,9 @@ export default function Cruzadinha() {
   const boardRef = useRef(null);
   const themeDropdownRef = useRef(null);
   const diffDropdownRef = useRef(null);
+
+  const isDaily = gameMode === "daily";
+  const effectiveDifficulty = isDaily ? "hard" : gameMode;
 
   useEffect(() => {
     try {
@@ -86,16 +150,84 @@ export default function Cruzadinha() {
     }, 2800);
   }, []);
 
-  const startNewGame = useCallback(
-    (newTheme = theme, newDiff = difficulty) => {
+  const saveDailyProgress = useCallback(
+    (gridData, elapsedSeconds, over, wonFlag, surrenderedFlag) => {
       try {
-        const p = generateCrosswordPuzzle(newTheme, newDiff);
+        const payload = {
+          dateKey: getTodayKey(),
+          userGrid: gridData,
+          timer: elapsedSeconds,
+          isGameOver: over,
+          gameWon: wonFlag,
+          surrendered: surrenderedFlag
+        };
+        localStorage.setItem(DAILY_STATE_STORAGE_KEY, JSON.stringify(payload));
+        if (over) {
+          markDailyAsCompleted("cruzadinha-gruta");
+        }
+      } catch (e) {}
+    },
+    []
+  );
+
+  const startNewGame = useCallback(
+    (targetMode = gameMode, targetTheme = theme) => {
+      try {
+        const dailyMode = targetMode === "daily";
+        const resolvedTheme = dailyMode ? "random" : targetTheme;
+        const resolvedDiff = dailyMode ? "hard" : targetMode;
+
+        if (dailyMode) {
+          setTheme("random");
+        }
+
+        const todayKey = getTodayKey();
+        const p = dailyMode
+          ? generateDeterministicDailyPuzzle(todayKey)
+          : generateCrosswordPuzzle(resolvedTheme, resolvedDiff);
+
         setPuzzle(p);
 
-        const emptyUserGrid = Array(p.rows)
-          .fill(null)
-          .map(() => Array(p.cols).fill(""));
-        setUserGrid(emptyUserGrid);
+        let restoredDaily = null;
+        if (dailyMode) {
+          try {
+            const rawSaved = localStorage.getItem(DAILY_STATE_STORAGE_KEY);
+            if (rawSaved) {
+              const parsed = JSON.parse(rawSaved);
+              if (
+                parsed &&
+                parsed.dateKey === todayKey &&
+                Array.isArray(parsed.userGrid) &&
+                parsed.userGrid.length === p.rows &&
+                parsed.userGrid[0]?.length === p.cols
+              ) {
+                restoredDaily = parsed;
+              }
+            }
+          } catch (e) {}
+        }
+
+        if (restoredDaily) {
+          setUserGrid(restoredDaily.userGrid);
+          setTimer(restoredDaily.timer || 0);
+          setIsGameOver(Boolean(restoredDaily.isGameOver));
+          setGameWon(Boolean(restoredDaily.gameWon));
+          setSurrendered(Boolean(restoredDaily.surrendered));
+          setIsTimerRunning(!restoredDaily.isGameOver);
+          if (restoredDaily.isGameOver) {
+            markDailyAsCompleted("cruzadinha-gruta");
+          }
+        } else {
+          const emptyUserGrid = Array(p.rows)
+            .fill(null)
+            .map(() => Array(p.cols).fill(""));
+          setUserGrid(emptyUserGrid);
+          setTimer(0);
+          setIsTimerRunning(true);
+          setIsGameOver(false);
+          setGameWon(false);
+          setSurrendered(false);
+        }
 
         if (p.words.length > 0) {
           const firstWord = p.words[0];
@@ -107,23 +239,19 @@ export default function Cruzadinha() {
           setSelectedWordIndex(0);
         }
 
-        setTimer(0);
-        setIsTimerRunning(true);
-        setIsGameOver(false);
-        setGameWon(false);
-        setSurrendered(false);
         setConfirmGiveUp(false);
         setShowWinModal(false);
+        setShowMobileCluesModal(false);
       } catch (err) {
         console.error("Erro ao inicializar jogo:", err);
         showToast("Erro ao gerar cruzadinha. Tentando novamente...");
       }
     },
-    [theme, difficulty, showToast]
+    [gameMode, theme, showToast]
   );
 
   useEffect(() => {
-    startNewGame();
+    startNewGame("daily", "random");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -136,6 +264,13 @@ export default function Cruzadinha() {
     }
     return () => clearInterval(interval);
   }, [isTimerRunning, isGameOver]);
+
+  // Persiste progresso do modo Diário continuamente
+  useEffect(() => {
+    if (isDaily && puzzle && userGrid.length > 0) {
+      saveDailyProgress(userGrid, timer, isGameOver, gameWon, surrendered);
+    }
+  }, [isDaily, puzzle, userGrid, timer, isGameOver, gameWon, surrendered, saveDailyProgress]);
 
   const formatTime = (secs) => {
     const m = Math.floor(secs / 60);
@@ -234,7 +369,7 @@ export default function Cruzadinha() {
       for (let i = 0; i < w.word.length; i++) {
         const curR = w.dir === "V" ? w.r + i : w.r;
         const curC = w.dir === "H" ? w.c + i : w.c;
-        if (!userGrid[curR][curC]) {
+        if (!userGrid[curR]?.[curC]) {
           targetCell = { r: curR, c: curC };
           break;
         }
@@ -245,21 +380,26 @@ export default function Cruzadinha() {
   );
 
   const selectWordFromClue = useCallback(
-    (wordObj) => {
-      if (isGameOver) return;
-      setSelectedWordIndex(wordObj.index);
-      setSelectedDirection(wordObj.dir);
+    (wordObj, closeMobileMenu = false) => {
+      if (!isGameOver) {
+        setSelectedWordIndex(wordObj.index);
+        setSelectedDirection(wordObj.dir);
 
-      let targetCell = { r: wordObj.r, c: wordObj.c };
-      for (let i = 0; i < wordObj.word.length; i++) {
-        const curR = wordObj.dir === "V" ? wordObj.r + i : wordObj.r;
-        const curC = wordObj.dir === "H" ? wordObj.c + i : wordObj.c;
-        if (!userGrid[curR][curC]) {
-          targetCell = { r: curR, c: curC };
-          break;
+        let targetCell = { r: wordObj.r, c: wordObj.c };
+        for (let i = 0; i < wordObj.word.length; i++) {
+          const curR = wordObj.dir === "V" ? wordObj.r + i : wordObj.r;
+          const curC = wordObj.dir === "H" ? wordObj.c + i : wordObj.c;
+          if (!userGrid[curR]?.[curC]) {
+            targetCell = { r: curR, c: curC };
+            break;
+          }
         }
+        setSelectedCell(targetCell);
       }
-      setSelectedCell(targetCell);
+
+      if (closeMobileMenu) {
+        setShowMobileCluesModal(false);
+      }
     },
     [isGameOver, userGrid]
   );
@@ -291,12 +431,16 @@ export default function Cruzadinha() {
           setIsTimerRunning(false);
           setShowWinModal(true);
           updateStats(true, timer);
+          if (isDaily) {
+            saveDailyProgress(currentUserGrid, timer, true, true, false);
+            markDailyAsCompleted("cruzadinha-gruta");
+          }
         } else {
           showToast("A grade está completa, mas ainda há letras incorretas!");
         }
       }
     },
-    [puzzle, timer, updateStats, showToast]
+    [puzzle, timer, updateStats, showToast, isDaily, saveDailyProgress]
   );
 
   const handleInputCharacter = useCallback(
@@ -415,7 +559,14 @@ export default function Cruzadinha() {
 
   useEffect(() => {
     function handleKeyDown(e) {
-      if (showHelpModal || showStatsModal || showWinModal || diffDropdownOpen || themeDropdownOpen)
+      if (
+        showHelpModal ||
+        showStatsModal ||
+        showWinModal ||
+        showMobileCluesModal ||
+        diffDropdownOpen ||
+        themeDropdownOpen
+      )
         return;
 
       if (e.key === "Tab") {
@@ -475,6 +626,7 @@ export default function Cruzadinha() {
     showHelpModal,
     showStatsModal,
     showWinModal,
+    showMobileCluesModal,
     diffDropdownOpen,
     themeDropdownOpen,
     navigateWord,
@@ -505,8 +657,12 @@ export default function Cruzadinha() {
     );
     setUserGrid(revealedGrid);
     updateStats(false, timer);
+    if (isDaily) {
+      saveDailyProgress(revealedGrid, timer, true, false, true);
+      markDailyAsCompleted("cruzadinha-gruta");
+    }
     showToast("Respostas reveladas. Mais sorte na próxima!");
-  }, [isGameOver, confirmGiveUp, puzzle, timer, updateStats, showToast]);
+  }, [isGameOver, confirmGiveUp, puzzle, timer, updateStats, showToast, isDaily, saveDailyProgress]);
 
   const isCellInActiveWord = useCallback(
     (r, c) => {
@@ -528,18 +684,53 @@ export default function Cruzadinha() {
     [currentWord]
   );
 
-  const isWordFilled = useCallback(
+  // Verifica se todas as letras da palavra estão corretas
+  const isWordSolved = useCallback(
     (w) => {
-      if (!userGrid.length) return false;
+      if (!puzzle || !userGrid.length || !w) return false;
       for (let i = 0; i < w.word.length; i++) {
         const curR = w.dir === "V" ? w.r + i : w.r;
         const curC = w.dir === "H" ? w.c + i : w.c;
-        if (!userGrid[curR] || !userGrid[curR][curC]) return false;
+        const userChar = userGrid[curR]?.[curC];
+        const expectedChar = puzzle.grid[curR]?.[curC]?.solution;
+        if (!userChar || userChar !== expectedChar) return false;
       }
       return true;
     },
-    [userGrid]
+    [puzzle, userGrid]
   );
+
+  // Conjunto de coordenadas (r-c) pertencentes a qualquer palavra já acertada
+  const solvedCellsSet = useMemo(() => {
+    const set = new Set();
+    if (!puzzle || !userGrid.length) return set;
+
+    for (const w of puzzle.words) {
+      let wordCorrect = true;
+      for (let i = 0; i < w.word.length; i++) {
+        const curR = w.dir === "V" ? w.r + i : w.r;
+        const curC = w.dir === "H" ? w.c + i : w.c;
+        const userChar = userGrid[curR]?.[curC];
+        const expectedChar = puzzle.grid[curR]?.[curC]?.solution;
+        if (!userChar || userChar !== expectedChar) {
+          wordCorrect = false;
+          break;
+        }
+      }
+      if (wordCorrect) {
+        for (let i = 0; i < w.word.length; i++) {
+          const curR = w.dir === "V" ? w.r + i : w.r;
+          const curC = w.dir === "H" ? w.c + i : w.c;
+          set.add(`${curR}-${curC}`);
+        }
+      }
+    }
+    return set;
+  }, [puzzle, userGrid]);
+
+  const isCurrentWordSolved = useMemo(() => {
+    return currentWord ? isWordSolved(currentWord) : false;
+  }, [currentWord, isWordSolved]);
 
   const horizontalWords = useMemo(() => {
     if (!puzzle) return [];
@@ -556,6 +747,58 @@ export default function Cruzadinha() {
     ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
     ["Z", "X", "C", "V", "B", "N", "M", "BKSP"]
   ];
+
+  const renderCluesColumns = (closeOnSelect = false) => (
+    <>
+      <div className="cz-clues-column">
+        <h3 className="cz-clues-heading">
+          <span className="cz-clues-icon">➡️</span> Horizontais
+        </h3>
+        <div className="cz-clues-list">
+          {horizontalWords.map((w) => {
+            const solved = isWordSolved(w);
+            const isActive = currentWord?.index === w.index;
+            return (
+              <button
+                key={`H-${w.number}-${w.word}`}
+                type="button"
+                className={`cz-clue-item ${isActive ? "active" : ""} ${solved ? "completed" : ""}`}
+                onClick={() => selectWordFromClue(w, closeOnSelect)}
+              >
+                <span className="cz-clue-item-number">{w.number}</span>
+                <span className="cz-clue-item-text">{w.clue}</span>
+                <span className="cz-clue-item-len">({w.word.length})</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="cz-clues-column">
+        <h3 className="cz-clues-heading">
+          <span className="cz-clues-icon">⬇️</span> Verticais
+        </h3>
+        <div className="cz-clues-list">
+          {verticalWords.map((w) => {
+            const solved = isWordSolved(w);
+            const isActive = currentWord?.index === w.index;
+            return (
+              <button
+                key={`V-${w.number}-${w.word}`}
+                type="button"
+                className={`cz-clue-item ${isActive ? "active" : ""} ${solved ? "completed" : ""}`}
+                onClick={() => selectWordFromClue(w, closeOnSelect)}
+              >
+                <span className="cz-clue-item-number">{w.number}</span>
+                <span className="cz-clue-item-text">{w.clue}</span>
+                <span className="cz-clue-item-len">({w.word.length})</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
 
   return (
     <div className="cz-page-shell">
@@ -588,7 +831,7 @@ export default function Cruzadinha() {
                 onClick={() => setDiffDropdownOpen((prev) => !prev)}
               >
                 <span className="cz-hide-mobile">MODO: </span>
-                {(DIFFICULTY_CONFIG[difficulty]?.name || "Fácil").toUpperCase()}
+                {(MODE_LABELS[gameMode] || "Diário").toUpperCase()}
                 <svg
                   width="14"
                   height="14"
@@ -609,18 +852,18 @@ export default function Cruzadinha() {
 
               {diffDropdownOpen && (
                 <div className="cz-mode-dropdown-menu">
-                  {["easy", "medium", "hard"].map((diffKey) => (
+                  {["daily", "easy", "medium", "hard"].map((modeKey) => (
                     <button
-                      key={diffKey}
+                      key={modeKey}
                       type="button"
-                      className={`cz-dropdown-item ${difficulty === diffKey ? "active" : ""}`}
+                      className={`cz-dropdown-item ${gameMode === modeKey ? "active" : ""}`}
                       onClick={() => {
-                        setDifficulty(diffKey);
+                        setGameMode(modeKey);
                         setDiffDropdownOpen(false);
-                        startNewGame(theme, diffKey);
+                        startNewGame(modeKey, modeKey === "daily" ? "random" : theme);
                       }}
                     >
-                      {DIFFICULTY_CONFIG[diffKey].name.toUpperCase()}
+                      {MODE_LABELS[modeKey].toUpperCase()}
                     </button>
                   ))}
                 </div>
@@ -630,7 +873,11 @@ export default function Cruzadinha() {
 
           <div className="cz-header-center">
             <h1 className="cz-title">CRUZADINHA</h1>
-            <span className="cz-subtitle">PALAVRAS CRUZADAS DA GRUTA</span>
+            <span className="cz-subtitle">
+              {isDaily
+                ? `DESAFIO DIÁRIO #${getDailyPuzzleNumber()} DA GRUTA`
+                : "PALAVRAS CRUZADAS DA GRUTA"}
+            </span>
           </div>
 
           <div className="cz-header-right">
@@ -682,47 +929,55 @@ export default function Cruzadinha() {
           </div>
         </header>
 
-        {/* Toolbar: Seletor de Tema, Cronômetro, Novo Jogo e Desistir */}
+        {/* Toolbar: Seletor de Tema (oculto no Diário), Cronômetro, Novo Jogo (oculto no Diário) e Desistir */}
         <div className="cz-toolbar">
           <div className="cz-theme-selector-wrap" ref={themeDropdownRef}>
-            <label className="cz-theme-label">TEMA:</label>
-            <button
-              type="button"
-              className="cz-theme-btn"
-              onClick={() => setThemeDropdownOpen((prev) => !prev)}
-              aria-expanded={themeDropdownOpen}
-            >
-              <span>{THEME_LABELS[theme]?.label || "🎲 Aleatório"}</span>
-              <svg
-                className={`cz-chevron ${themeDropdownOpen ? "open" : ""}`}
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-
-            {themeDropdownOpen && (
-              <div className="cz-theme-menu">
-                {Object.entries(THEME_LABELS).map(([k, item]) => (
-                  <button
-                    key={k}
-                    type="button"
-                    className={`cz-theme-option ${theme === k ? "selected" : ""}`}
-                    onClick={() => {
-                      setTheme(k);
-                      setThemeDropdownOpen(false);
-                      startNewGame(k, difficulty);
-                    }}
-                  >
-                    {item.label}
-                  </button>
-                ))}
+            {isDaily ? (
+              <div className="cz-daily-badge-pill">
+                <span>🎲 Aleatório • Grade 18x18</span>
               </div>
+            ) : (
+              <>
+                <label className="cz-theme-label cz-hide-mobile">TEMA:</label>
+                <button
+                  type="button"
+                  className="cz-theme-btn"
+                  onClick={() => setThemeDropdownOpen((prev) => !prev)}
+                  aria-expanded={themeDropdownOpen}
+                >
+                  <span>{THEME_LABELS[theme]?.label || "🎲 Aleatório"}</span>
+                  <svg
+                    className={`cz-chevron ${themeDropdownOpen ? "open" : ""}`}
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+
+                {themeDropdownOpen && (
+                  <div className="cz-theme-menu">
+                    {Object.entries(THEME_LABELS).map(([k, item]) => (
+                      <button
+                        key={k}
+                        type="button"
+                        className={`cz-theme-option ${theme === k ? "selected" : ""}`}
+                        onClick={() => {
+                          setTheme(k);
+                          setThemeDropdownOpen(false);
+                          startNewGame(gameMode, k);
+                        }}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
 
@@ -742,14 +997,16 @@ export default function Cruzadinha() {
               <span>{formatTime(timer)}</span>
             </div>
 
-            <button
-              type="button"
-              className="cz-btn-new-game"
-              onClick={() => startNewGame()}
-              title="Começar Novo Jogo"
-            >
-              Novo Jogo
-            </button>
+            {!isDaily && (
+              <button
+                type="button"
+                className="cz-btn-new-game"
+                onClick={() => startNewGame(gameMode, theme)}
+                title="Começar Novo Jogo"
+              >
+                Novo Jogo
+              </button>
+            )}
 
             <button
               type="button"
@@ -762,47 +1019,7 @@ export default function Cruzadinha() {
           </div>
         </div>
 
-        {/* Barra de Dica Ativa */}
-        <div className="cz-active-clue-bar">
-          <button
-            type="button"
-            className="cz-clue-nav-btn"
-            onClick={() => navigateWord(-1)}
-            title="Palavra Anterior"
-            aria-label="Palavra Anterior"
-          >
-            ‹
-          </button>
-
-          <div
-            className="cz-active-clue-content"
-            onClick={toggleDirection}
-            title="Clique para alternar entre Horizontal e Vertical"
-          >
-            {currentWord ? (
-              <>
-                <span className="cz-clue-badge">
-                  #{currentWord.number} {currentWord.dir === "H" ? "HORIZONTAL" : "VERTICAL"}
-                </span>
-                <p className="cz-clue-text">{currentWord.clue}</p>
-              </>
-            ) : (
-              <p className="cz-clue-text">Selecione uma casa para ver a dica.</p>
-            )}
-          </div>
-
-          <button
-            type="button"
-            className="cz-clue-nav-btn"
-            onClick={() => navigateWord(1)}
-            title="Próxima Palavra"
-            aria-label="Próxima Palavra"
-          >
-            ›
-          </button>
-        </div>
-
-        {/* Layout Principal: Tabuleiro + Painel de Dicas */}
+        {/* Layout Principal: Tabuleiro + Painel de Dicas (Desktop) */}
         <main className="cz-main-area">
           <div className="cz-board-section">
             {puzzle && (
@@ -810,7 +1027,9 @@ export default function Cruzadinha() {
                 className="cz-grid-container"
                 ref={boardRef}
                 style={{
-                  gridTemplateColumns: `repeat(${puzzle.cols}, minmax(0, 1fr))`
+                  "--cz-cols": puzzle.cols,
+                  "--cz-rows": puzzle.rows,
+                  gridTemplateColumns: `repeat(${puzzle.cols}, var(--cell-size))`
                 }}
               >
                 {puzzle.grid.map((row, r) =>
@@ -822,7 +1041,11 @@ export default function Cruzadinha() {
                     const isSelected = selectedCell?.r === r && selectedCell?.c === c;
                     const isInWord = isCellInActiveWord(r, c);
                     const userVal = userGrid[r]?.[c] || "";
-                    const isCorrect = surrendered || (isGameOver && userVal === cell.solution);
+                    const isInSolvedWord = solvedCellsSet.has(`${r}-${c}`);
+                    const isCorrect =
+                      surrendered ||
+                      isInSolvedWord ||
+                      (isGameOver && userVal === cell.solution);
                     const isWrong = isGameOver && !gameWon && userVal !== cell.solution;
 
                     return (
@@ -844,84 +1067,143 @@ export default function Cruzadinha() {
             )}
           </div>
 
-          <aside className="cz-clues-aside">
-            <div className="cz-clues-column">
-              <h3 className="cz-clues-heading">
-                <span className="cz-clues-icon">➡️</span> Horizontais
-              </h3>
-              <div className="cz-clues-list">
-                {horizontalWords.map((w) => {
-                  const filled = isWordFilled(w);
-                  const isActive = currentWord?.index === w.index;
-                  return (
-                    <button
-                      key={`H-${w.number}-${w.word}`}
-                      type="button"
-                      className={`cz-clue-item ${isActive ? "active" : ""} ${
-                        filled ? "completed" : ""
-                      }`}
-                      onClick={() => selectWordFromClue(w)}
-                    >
-                      <span className="cz-clue-item-number">{w.number}</span>
-                      <span className="cz-clue-item-text">{w.clue}</span>
-                      <span className="cz-clue-item-len">({w.word.length})</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="cz-clues-column">
-              <h3 className="cz-clues-heading">
-                <span className="cz-clues-icon">⬇️</span> Verticais
-              </h3>
-              <div className="cz-clues-list">
-                {verticalWords.map((w) => {
-                  const filled = isWordFilled(w);
-                  const isActive = currentWord?.index === w.index;
-                  return (
-                    <button
-                      key={`V-${w.number}-${w.word}`}
-                      type="button"
-                      className={`cz-clue-item ${isActive ? "active" : ""} ${
-                        filled ? "completed" : ""
-                      }`}
-                      onClick={() => selectWordFromClue(w)}
-                    >
-                      <span className="cz-clue-item-number">{w.number}</span>
-                      <span className="cz-clue-item-text">{w.clue}</span>
-                      <span className="cz-clue-item-len">({w.word.length})</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          </aside>
+          {/* Painel de dicas lateral fixo na versão Web */}
+          <aside className="cz-clues-aside">{renderCluesColumns(false)}</aside>
         </main>
 
-        {/* Teclado Virtual Mobile */}
-        <div className="cz-keyboard">
-          {keyboardRows.map((row, rowIdx) => (
-            <div key={rowIdx} className="cz-keyboard-row">
-              {row.map((key) => {
-                const isBksp = key === "BKSP";
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    className={`cz-key ${isBksp ? "cz-key-backspace" : ""}`}
-                    onClick={() => {
-                      if (isBksp) handleBackspace();
-                      else handleInputCharacter(key);
-                    }}
-                  >
-                    {isBksp ? "⌫" : key}
-                  </button>
-                );
-              })}
+        {/* Dock Inferior Mobile: Barra de Dica Ativa + Botão Todas as Dicas + Teclado Fixo */}
+        <div className="cz-mobile-bottom-dock">
+          <div className={`cz-active-clue-bar ${isCurrentWordSolved ? "solved" : ""}`}>
+            <button
+              type="button"
+              className="cz-clue-nav-btn"
+              onClick={() => navigateWord(-1)}
+              title="Palavra Anterior"
+              aria-label="Palavra Anterior"
+            >
+              ‹
+            </button>
+
+            <div
+              className="cz-active-clue-content"
+              onClick={toggleDirection}
+              title="Toque para alternar entre Horizontal e Vertical"
+            >
+              {currentWord ? (
+                <>
+                  <span className="cz-clue-badge">
+                    #{currentWord.number} {currentWord.dir === "H" ? "HORIZONTAL" : "VERTICAL"}
+                  </span>
+                  <p className={`cz-clue-text ${isCurrentWordSolved ? "completed" : ""}`}>
+                    {currentWord.clue}
+                  </p>
+                </>
+              ) : (
+                <p className="cz-clue-text">Selecione uma casa para ver a dica.</p>
+              )}
             </div>
-          ))}
+
+            <button
+              type="button"
+              className="cz-all-clues-btn"
+              onClick={() => setShowMobileCluesModal(true)}
+              title="Ver todas as dicas"
+              aria-label="Ver todas as dicas"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+              <span>DICAS</span>
+            </button>
+
+            <button
+              type="button"
+              className="cz-clue-nav-btn"
+              onClick={() => navigateWord(1)}
+              title="Próxima Palavra"
+              aria-label="Próxima Palavra"
+            >
+              ›
+            </button>
+          </div>
+
+          <div className={`cz-keyboard ${isGameOver ? "game-over" : ""}`}>
+            {keyboardRows.map((row, rowIdx) => (
+              <div key={rowIdx} className="cz-keyboard-row">
+                {row.map((key) => {
+                  const isBksp = key === "BKSP";
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      className={`cz-key ${isBksp ? "cz-key-backspace" : ""}`}
+                      onClick={() => {
+                        if (isBksp) handleBackspace();
+                        else handleInputCharacter(key);
+                      }}
+                    >
+                      {isBksp ? (
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="20"
+                          height="20"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
+                          <line x1="18" y1="9" x2="12" y2="15" />
+                          <line x1="12" y1="9" x2="18" y2="15" />
+                        </svg>
+                      ) : (
+                        key
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
         </div>
+
+        {/* MODAL SOBREPOSTO DE TODAS AS DICAS (MOBILE) */}
+        {showMobileCluesModal && (
+          <div className="cz-modal-overlay" onClick={() => setShowMobileCluesModal(false)}>
+            <div
+              className="cz-modal-card cz-mobile-clues-modal"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="cz-modal-header">
+                <h3>TODAS AS DICAS</h3>
+                <button
+                  type="button"
+                  className="cz-modal-close"
+                  onClick={() => setShowMobileCluesModal(false)}
+                  aria-label="Fechar dicas"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="cz-mobile-clues-scroll">{renderCluesColumns(true)}</div>
+            </div>
+          </div>
+        )}
 
         {/* MODAL: VITÓRIA */}
         {showWinModal && (
@@ -929,7 +1211,11 @@ export default function Cruzadinha() {
             <div className="cz-modal-card win-card" onClick={(e) => e.stopPropagation()}>
               <div className="cz-win-trophy">🏆</div>
               <h2 className="cz-modal-title">Parabéns!</h2>
-              <p className="cz-modal-desc">Você desvendou toda a cruzadinha com maestria!</p>
+              <p className="cz-modal-desc">
+                {isDaily
+                  ? `Você concluiu o Desafio Diário #${getDailyPuzzleNumber()}!`
+                  : "Você desvendou toda a cruzadinha com maestria!"}
+              </p>
 
               <div className="cz-win-stats-grid">
                 <div className="cz-win-stat-box">
@@ -941,21 +1227,37 @@ export default function Cruzadinha() {
                   <span className="cz-win-stat-lbl">Palavras</span>
                 </div>
                 <div className="cz-win-stat-box">
-                  <span className="cz-win-stat-val">{DIFFICULTY_CONFIG[difficulty]?.name}</span>
-                  <span className="cz-win-stat-lbl">Nível</span>
+                  <span className="cz-win-stat-val">
+                    {isDaily ? "Diário" : DIFFICULTY_CONFIG[effectiveDifficulty]?.name}
+                  </span>
+                  <span className="cz-win-stat-lbl">Modo</span>
                 </div>
               </div>
 
-              <button
-                type="button"
-                className="cz-btn-modal-action"
-                onClick={() => {
-                  setShowWinModal(false);
-                  startNewGame();
-                }}
-              >
-                🔄 Jogar Novamente
-              </button>
+              {isDaily ? (
+                <button
+                  type="button"
+                  className="cz-btn-modal-action"
+                  onClick={() => {
+                    setShowWinModal(false);
+                    setGameMode("easy");
+                    startNewGame("easy", theme);
+                  }}
+                >
+                  🎲 Jogar Modo Livre
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="cz-btn-modal-action"
+                  onClick={() => {
+                    setShowWinModal(false);
+                    startNewGame(gameMode, theme);
+                  }}
+                >
+                  🔄 Jogar Novamente
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -1000,7 +1302,7 @@ export default function Cruzadinha() {
                   <div>
                     <strong>Navegação de palavras:</strong>
                     <p>
-                      Use as setas ‹ e › na barra de dicas ou pressione <kbd>Tab</kbd> /{" "}
+                      Clique em qualquer dica na lista ou pressione <kbd>Tab</kbd> /{" "}
                       <kbd>Enter</kbd> no teclado para ir à próxima palavra.
                     </p>
                   </div>
@@ -1008,10 +1310,11 @@ export default function Cruzadinha() {
                 <div className="cz-help-item">
                   <div className="cz-help-icon">4</div>
                   <div>
-                    <strong>Temas e Dificuldades:</strong>
+                    <strong>Modos de Jogo:</strong>
                     <p>
-                      Escolha entre 17 temas variados e teste seus conhecimentos em Fácil (10x10),
-                      Médio (14x14) ou Difícil (18x18).
+                      Desafie-se no <strong>Diário</strong> (grade 18x18 aleatória igual para todos
+                      a cada dia) ou jogue livremente em Fácil (10x10), Médio (14x14) ou Difícil
+                      (18x18) com 17 temas.
                     </p>
                   </div>
                 </div>

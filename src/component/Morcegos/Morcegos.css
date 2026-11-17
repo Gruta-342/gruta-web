@@ -2,6 +2,18 @@
 /* CAÇA MORCEGOS DA GRUTA - ESTILOS (PADRÃO TERMO)          */
 /* ======================================================== */
 
+html:has(.morcegos-wrapper),
+body:has(.morcegos-wrapper) {
+  overflow: hidden !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html:has(.morcegos-wrapper)::-webkit-scrollbar,
+body:has(.morcegos-wrapper)::-webkit-scrollbar {
+  display: none;
+}
+
 .morcegos-wrapper {
   position: fixed;
   inset: 0;
@@ -18,8 +30,15 @@
   color: white;
   user-select: none;
   -webkit-user-select: none;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   font-family: system-ui, -apple-system, sans-serif;
+}
+
+.morcegos-wrapper::-webkit-scrollbar {
+  display: none;
 }
 
 /* -------------------- CABEÇALHO (IDÊNTICO AO TERMO) -------------------- */
@@ -32,6 +51,9 @@
   border-bottom: 1px solid rgba(0, 210, 255, 0.2);
   margin-bottom: 8px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  background-color: #020812;
 }
 
 .morcegos-header-left {
@@ -158,17 +180,29 @@
 
 /* -------------------- ÁREA PRINCIPAL E TABULEIRO -------------------- */
 .morcegos-main {
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
   min-height: 0;
-  gap: 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  gap: 14px;
+  padding: 6px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.morcegos-main::-webkit-scrollbar {
+  display: none;
 }
 
 .morcegos-lives {
+  margin-top: auto;
   display: flex;
   justify-content: center;
   gap: 10px;
@@ -185,13 +219,16 @@
 }
 
 .morcegos-board-container {
-  width: 100%;
+  margin-bottom: auto;
+  width: min(100%, max(220px, calc(100dvh - 175px)));
+  height: auto;
   aspect-ratio: 1 / 1;
   background-color: #020812;
   padding: 5px;
   border-radius: 10px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 210, 255, 0.15);
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .morcegos-board {
@@ -216,6 +253,7 @@
   cursor: pointer;
   transition: filter 0.15s ease, transform 0.1s ease;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .morcegos-cell:hover {
@@ -229,7 +267,8 @@
 .morcegos-cell-x {
   color: rgba(2, 8, 18, 0.42);
   font-weight: 900;
-  font-size: clamp(20px, 6vw, 32px);
+  font-size: clamp(16px, 5vw, 32px);
+  line-height: 1;
 }
 
 .morcegos-cell svg {

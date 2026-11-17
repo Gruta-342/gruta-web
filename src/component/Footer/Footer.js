@@ -7,8 +7,8 @@ import "./Footer.css";
 export default function Footer() {
   const pathname = usePathname();
 
-  // Se a rota incluir "termo", oculta o rodapé completamente
-  if (pathname?.includes("/termo")) return null;
+  // Se a rota incluir "jogos/", oculta o rodapé completamente
+  if (pathname?.includes("/jogos/")) return null;
 
   return (
     <footer className="footer-container">

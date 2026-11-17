@@ -14,7 +14,7 @@
   box-sizing: border-box;
   user-select: none;
   -webkit-user-select: none;
-  overflow: hidden; /* Ocultar barras de scroll no container principal */
+  overflow: hidden;
 }
 
 /* -------------------- CABEÇALHO -------------------- */
@@ -123,7 +123,8 @@
   transition: all 0.2s;
 }
 
-.dropdown-item:hover, .dropdown-item.active {
+.dropdown-item:hover,
+.dropdown-item.active {
   background: rgba(0, 210, 255, 0.15);
   color: #00d2ff;
 }
@@ -150,34 +151,36 @@
 
 /* -------------------- TABULEIROS -------------------- */
 .termo-boards-container {
+  --tile-gap: 6px;
+  --tile-size: clamp(36px, min(12vw, 7.2dvh), 54px);
+
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
-  gap: 15px;
+  gap: 18px;
   min-height: 0;
   margin-bottom: 8px;
-  /* Permitir scroll vertical na área dos tabuleiros */
-  overflow-y: auto; 
-  /* Esconder a barra de scroll padrão do navegador na área do tabuleiro (opcional mas recomendado)*/
-  scrollbar-width: none; 
+  overflow-y: auto;
+  scrollbar-width: none;
   -ms-overflow-style: none;
 }
-.termo-boards-container::-webkit-scrollbar { 
-    display: none; 
-}
 
+.termo-boards-container::-webkit-scrollbar {
+  display: none;
+}
 
 .termo-board {
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 5px;
-  width: 100%;
-  max-width: 320px;
+  gap: var(--tile-gap);
+  width: fit-content;
+  max-width: 100%;
   transition: opacity 0.3s ease;
-  margin: auto; /* Ajuda no alinhamento ao fazer scroll */
+  margin: auto;
 }
 
 .termo-board.board-solved {
@@ -187,64 +190,120 @@
 
 /* Modos Específicos */
 .termo-boards-container.mode-DOUBLE {
+  --tile-gap: 5px;
+  --tile-size: clamp(30px, min(7vw, 6.2dvh), 46px);
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  max-width: 650px;
+  grid-template-columns: repeat(2, auto);
+  justify-content: center;
+  gap: 20px;
 }
 
 .termo-boards-container.mode-QUAD {
+  --tile-gap: 4px;
+  --tile-size: clamp(24px, min(3.8vw, 4.8dvh), 38px);
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-  max-width: 1200px;
+  grid-template-columns: repeat(4, auto);
+  justify-content: center;
+  gap: 16px;
 }
 
 /* -------------------- LINHAS E BLOCOS -------------------- */
 .termo-row {
   display: grid;
-  gap: 5px;
-  width: 100%;
+  gap: var(--tile-gap);
+  width: fit-content;
   justify-content: center;
 }
-.termo-row.len-5 { grid-template-columns: repeat(5, 1fr); }
-.termo-row.len-6 { grid-template-columns: repeat(6, 1fr); }
 
-.termo-row.shake { animation: rowShake 0.4s ease; }
+.termo-row.len-5 {
+  grid-template-columns: repeat(5, var(--tile-size));
+}
+
+.termo-row.len-6 {
+  grid-template-columns: repeat(6, var(--tile-size));
+}
+
+.termo-row.shake {
+  animation: rowShake 0.4s ease;
+}
+
 @keyframes rowShake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-6px); }
-  40%, 80% { transform: translateX(6px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
 }
 
 .termo-tile {
+  width: var(--tile-size);
+  height: var(--tile-size);
   aspect-ratio: 1 / 1;
   border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: clamp(14px, 4.5vw, 24px);
+  font-size: calc(var(--tile-size) * 0.48);
   font-weight: 900;
   text-transform: uppercase;
   color: white;
   background-color: #081730;
   border: 2px solid rgba(0, 210, 255, 0.15);
+  box-sizing: border-box;
   transition: transform 0.15s ease, border-color 0.15s ease;
-  max-height: 52px;
+  cursor: pointer;
 }
 
-.termo-tile.active { border-color: #00d2ff; }
-.termo-tile.selected-tile { border-color: #00d2ff; box-shadow: inset 0 -4px 0 #00d2ff; }
-.termo-tile.revealed { animation: tileFlip 0.5s ease forwards; }
+.termo-tile.active {
+  border-color: #00d2ff;
+}
+
+.termo-tile.selected-tile {
+  border-color: #00d2ff;
+  box-shadow: inset 0 -4px 0 #00d2ff;
+}
+
+.termo-tile.revealed {
+  animation: tileFlip 0.5s ease forwards;
+  cursor: default;
+}
 
 @keyframes tileFlip {
-  0% { transform: rotateX(0); }
-  50% { transform: rotateX(90deg); }
-  100% { transform: rotateX(0); }
+  0% {
+    transform: rotateX(0);
+  }
+  50% {
+    transform: rotateX(90deg);
+  }
+  100% {
+    transform: rotateX(0);
+  }
 }
 
-.termo-tile.correct { background-color: #2e9e5b !important; border-color: #2e9e5b !important; color: #fff; }
-.termo-tile.present { background-color: #d9a726 !important; border-color: #d9a726 !important; color: #fff; }
-.termo-tile.absent { background-color: #0f1f38 !important; border-color: #0f1f38 !important; color: #556c8d; }
+.termo-tile.correct {
+  background-color: #2e9e5b !important;
+  border-color: #2e9e5b !important;
+  color: #fff;
+}
+
+.termo-tile.present {
+  background-color: #d9a726 !important;
+  border-color: #d9a726 !important;
+  color: #fff;
+}
+
+.termo-tile.absent {
+  background-color: #0f1f38 !important;
+  border-color: #0f1f38 !important;
+  color: #556c8d;
+}
 
 /* -------------------- TECLADO -------------------- */
 .termo-keyboard {
@@ -252,14 +311,14 @@
   flex-direction: column;
   gap: 6px;
   width: 100%;
-  max-width: 850px; 
+  max-width: 850px;
   padding: 0;
-  flex-shrink: 0; /* Impede o teclado de encolher */
+  flex-shrink: 0;
 }
 
-.termo-keyboard.game-over { 
-  opacity: 0.7; 
-  pointer-events: none; 
+.termo-keyboard.game-over {
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 .termo-kb-row {
@@ -270,7 +329,7 @@
 }
 
 .termo-key {
-  height: 50px; 
+  height: 50px;
   flex: 1;
   background-color: #0e264d;
   color: white;
@@ -283,12 +342,31 @@
   padding: 0;
 }
 
-.termo-key.key-special { flex: 1.5; font-size: 11px; background-color: #091c38; }
-.termo-key:active { transform: scale(0.95); }
+.termo-key.key-special {
+  flex: 1.5;
+  font-size: 11px;
+  background-color: #091c38;
+}
 
-.termo-key.correct { background-color: #2e9e5b !important; border-color: #2e9e5b !important; }
-.termo-key.present { background-color: #d9a726 !important; border-color: #d9a726 !important; }
-.termo-key.absent { background-color: #071221 !important; border-color: #071221 !important; opacity: 0.6; }
+.termo-key:active {
+  transform: scale(0.95);
+}
+
+.termo-key.correct {
+  background-color: #2e9e5b !important;
+  border-color: #2e9e5b !important;
+}
+
+.termo-key.present {
+  background-color: #d9a726 !important;
+  border-color: #d9a726 !important;
+}
+
+.termo-key.absent {
+  background-color: #071221 !important;
+  border-color: #071221 !important;
+  opacity: 0.6;
+}
 
 /* -------------------- UTILITÁRIOS E SOBREPOSIÇÃO (MODAIS) -------------------- */
 .termo-toast {
@@ -312,7 +390,7 @@
   height: 100dvh;
   background: rgba(2, 8, 18, 0.85);
   backdrop-filter: blur(8px);
-  z-index: 9999; 
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -334,15 +412,15 @@
   box-sizing: border-box;
 }
 
-.termo-modal-close-btn { 
-  position: absolute; 
-  top: 12px; 
-  right: 16px; 
-  background: none; 
-  border: none; 
-  color: #8a9fc4; 
-  font-size: 20px; 
-  cursor: pointer; 
+.termo-modal-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #8a9fc4;
+  font-size: 20px;
+  cursor: pointer;
 }
 
 .termo-stats-title {
@@ -419,7 +497,8 @@
   height: 20px;
 }
 
-.termo-dist-bar, .loss-bar {
+.termo-dist-bar,
+.loss-bar {
   height: 100%;
   background: #0e264d;
   color: white;
@@ -511,106 +590,166 @@
 }
 
 /* Modal Como Jogar */
-.termo-help-body { text-align: left; font-size: 13px; line-height: 1.4; color: #cbd5e1; }
-.termo-help-body p { margin-bottom: 10px; }
-.termo-help-example { margin-top: 12px; border-top: 1px solid rgba(0, 210, 255, 0.15); padding-top: 8px; }
-.termo-example-row { display: flex; gap: 4px; margin-bottom: 6px; }
-.termo-example-tile { width: 32px; height: 32px; font-size: 16px; flex-shrink: 0; }
-.termo-example-text { font-size: 11px; color: #8a9fc4; }
-.termo-example-text strong { color: #fff; }
+.termo-help-body {
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
+.termo-help-body p {
+  margin-bottom: 10px;
+}
+
+.termo-help-example {
+  margin-top: 12px;
+  border-top: 1px solid rgba(0, 210, 255, 0.15);
+  padding-top: 8px;
+}
+
+.termo-example-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.termo-example-tile {
+  --tile-size: 32px;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  flex-shrink: 0;
+  cursor: default;
+}
+
+.termo-example-text {
+  font-size: 11px;
+  color: #8a9fc4;
+}
+
+.termo-example-text strong {
+  color: #fff;
+}
 
 /* -------------------- RESPONSIVIDADE MOBILE -------------------- */
 @media (max-width: 768px) {
-  .termo-wrapper { 
-    padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 0px)); 
+  .termo-wrapper {
+    padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 0px));
   }
-  
-  .termo-header { padding-bottom: 6px; margin-bottom: 4px; }
-  .termo-title { font-size: 20px; }
-  .hide-mobile { display: none; }
-  
-  .header-btn { padding: 6px 10px; font-size: 10px; }
-  .header-back-btn { padding: 6px 8px; border-radius: 8px; }
-  .termo-icon-btn { width: 32px; height: 32px; }
 
-  .termo-keyboard { 
-    gap: 4px; 
+  .termo-header {
+    padding-bottom: 6px;
+    margin-bottom: 4px;
+  }
+
+  .termo-title {
+    font-size: 20px;
+  }
+
+  .hide-mobile {
+    display: none;
+  }
+
+  .header-btn {
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+
+  .header-back-btn {
+    padding: 6px 8px;
+    border-radius: 8px;
+  }
+
+  .termo-icon-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .termo-keyboard {
+    gap: 4px;
     padding: 0 2px;
   }
-  
-  .termo-kb-row { gap: 3px; }
-  
-  .termo-key { 
-    height: 40px; 
-    font-size: 13px; 
+
+  .termo-kb-row {
+    gap: 3px;
+  }
+
+  .termo-key {
+    height: 40px;
+    font-size: 13px;
     border-radius: 4px;
   }
-  
-  .termo-key.key-special { 
-    font-size: 9px; 
+
+  .termo-key.key-special {
+    font-size: 9px;
+  }
+
+  .termo-boards-container {
+    --tile-gap: 4px;
+    --tile-size: clamp(34px, min(13vw, 7dvh), 46px);
   }
 
   .termo-tile {
-    max-height: 44px;
-    font-size: 16px;
-    border-width: 1px;
+    border-width: 1.5px;
     border-radius: 4px;
   }
 
-  .termo-board {
-    gap: 3px;
+  /* Ajuste no Duplo mobile */
+  .termo-boards-container.mode-DOUBLE {
+    --tile-gap: 4px;
+    --tile-size: clamp(26px, min(8vw, 5.8dvh), 38px);
+    grid-template-columns: repeat(2, auto);
+    gap: 12px;
+    align-items: start;
+    padding-bottom: 16px;
   }
 
-  .termo-row {
-    gap: 3px;
-  }
-
-  /* Ajustes para o Modo Quarteto (2x2) */
+  /* Ajustes para o Modo Quarteto mobile (2x2 com gaps proporcionais) */
   .termo-boards-container.mode-QUAD {
-    grid-template-columns: 1fr 1fr; /* Mantém as 2 colunas */
-    gap: 15px; /* Aumenta o gap para evitar colagem */
-    max-width: 450px; /* Dá um pouco mais de espaço */
-    align-items: start; /* Alinha pelo topo no scroll */
-    padding-bottom: 20px; /* Dá espaço extra no fim do scroll */
-  }
-  
-  .termo-boards-container.mode-QUAD .termo-board { gap: 4px; width: 100%; margin: 0 auto; } /* Usa 100% da coluna */
-  .termo-boards-container.mode-QUAD .termo-row { gap: 4px; }
-  
-  /* Tamanho mínimo confortável para as peças no Quarteto mobile */
-  .termo-boards-container.mode-QUAD .termo-tile { 
-    font-size: 12px; 
-    border-width: 1px; 
-    height: 28px; /* Altura fixa ou mínima para não encolher demais */
-    width: 28px;
-    max-height: none;
-    border-radius: 4px;
-  }
-
-  /* Ajuste no Duplo para acompanhar */
-  .termo-boards-container.mode-DOUBLE { 
-      gap: 15px; 
-      max-width: 450px; 
-      align-items: start; 
-      padding-bottom: 20px;
+    --tile-gap: 3px;
+    --tile-size: clamp(24px, min(7.8vw, 4.4dvh), 32px);
+    grid-template-columns: repeat(2, auto);
+    gap: 14px;
+    align-items: start;
+    padding-bottom: 20px;
   }
 }
 
 @media (max-width: 380px) {
-  .termo-key { height: 36px; font-size: 11px; }
-  .termo-key.key-special { font-size: 8px; }
-  .termo-tile { max-height: 38px; font-size: 14px; }
-  
-  /* No quarteto, se o ecrã for super pequeno, ainda mantemos um tamanho legível */
-  .termo-boards-container.mode-QUAD { gap: 10px; }
-  .termo-boards-container.mode-QUAD .termo-tile { 
-      height: 24px; 
-      width: 24px; 
-      font-size: 10px; 
+  .termo-key {
+    height: 36px;
+    font-size: 11px;
   }
-  
-  .termo-stats-grid { gap: 4px; }
-  .termo-stat-value { font-size: 24px; }
-  .termo-countdown { font-size: 24px; }
-  .termo-share-btn { font-size: 14px; padding: 10px 14px; }
+
+  .termo-key.key-special {
+    font-size: 8px;
+  }
+
+  .termo-boards-container {
+    --tile-gap: 4px;
+    --tile-size: clamp(30px, min(12.5vw, 6.5dvh), 40px);
+  }
+
+  .termo-boards-container.mode-QUAD {
+    --tile-gap: 3px;
+    --tile-size: 24px;
+    gap: 10px;
+  }
+
+  .termo-stats-grid {
+    gap: 4px;
+  }
+
+  .termo-stat-value {
+    font-size: 24px;
+  }
+
+  .termo-countdown {
+    font-size: 24px;
+  }
+
+  .termo-share-btn {
+    font-size: 14px;
+    padding: 10px 14px;
+  }
 }
