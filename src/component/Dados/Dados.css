@@ -486,6 +486,7 @@ body:has(.dados-wrapper)::-webkit-scrollbar {
   outline: none;
   padding: 2px 0;
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .dados-modifier-input::-webkit-outer-spin-button,
