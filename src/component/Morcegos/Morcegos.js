@@ -23,6 +23,8 @@ const GAME_MODES = {
 const STATS_STORAGE_KEY = "gruta_morcegos_stats";
 const DAILY_STATE_KEY = "gruta_morcegos_daily_state";
 const LIVES = 3;
+// Janela calibrada para permitir 2 ou 3 toques consecutivos antes de validar a jogada
+const VALIDATION_DELAY_MS = 520;
 
 const INITIAL_STATS = {
   DAILY: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, livesDist: { 3: 0, 2: 0, 1: 0 } },
@@ -105,6 +107,17 @@ export default function Morcegos() {
   const validationTimers = useRef({});
   const activeModeRef = useRef(activeMode);
   const livesRef = useRef(lives);
+  const gameStatusRef = useRef(gameStatus);
+  const boardRef = useRef(board);
+  const errorCellsRef = useRef(errorCells);
+
+  // Controle de gesto de arrastar para marcar "X"
+  const dragStateRef = useRef({
+    isPointerDown: false,
+    isDraggingX: false,
+    startCell: null,
+    visitedCells: new Set()
+  });
 
   useEffect(() => {
     activeModeRef.current = activeMode;
@@ -113,6 +126,18 @@ export default function Morcegos() {
   useEffect(() => {
     livesRef.current = lives;
   }, [lives]);
+
+  useEffect(() => {
+    gameStatusRef.current = gameStatus;
+  }, [gameStatus]);
+
+  useEffect(() => {
+    boardRef.current = board;
+  }, [board]);
+
+  useEffect(() => {
+    errorCellsRef.current = errorCells;
+  }, [errorCells]);
 
   useEffect(() => {
     try {
@@ -296,6 +321,12 @@ export default function Morcegos() {
       Object.values(validationTimers.current).forEach(clearTimeout);
       validationTimers.current = {};
       isAnimating.current = false;
+      dragStateRef.current = {
+        isPointerDown: false,
+        isDraggingX: false,
+        startCell: null,
+        visitedCells: new Set()
+      };
       setErrorCells([]);
 
       const { dayNumber: todayNum, dateKey } = getDailyInfo();
@@ -364,6 +395,15 @@ export default function Morcegos() {
 
   const validateMove = useCallback(
     (r, c, valToValidate) => {
+      const timerKey = `${r}-${c}`;
+      delete validationTimers.current[timerKey];
+
+      if (gameStatusRef.current !== "PLAYING") return;
+
+      // Confirma que o estado atual da célula ainda corresponde ao valor agendado
+      const currentCellVal = boardRef.current[r]?.[c];
+      if (currentCellVal !== valToValidate || valToValidate === 0) return;
+
       const isBatInSolution = solutionRef.current[r][c];
       let isError = false;
 
@@ -372,7 +412,7 @@ export default function Morcegos() {
 
       if (isError) {
         isAnimating.current = true;
-        setErrorCells([{ r, c }]);
+        setErrorCells((prev) => (prev.some((e) => e.r === r && e.c === c) ? prev : [...prev, { r, c }]));
 
         setTimeout(() => {
           const nextLives = Math.max(0, livesRef.current - 1);
@@ -392,7 +432,7 @@ export default function Morcegos() {
             return revertB;
           });
 
-          setErrorCells([]);
+          setErrorCells((prev) => prev.filter((e) => !(e.r === r && e.c === c)));
           isAnimating.current = false;
         }, 550);
       } else {
@@ -420,30 +460,145 @@ export default function Morcegos() {
     [recordGameResult, saveDailyProgress, showToastMsg]
   );
 
-  const handleCellClick = (r, c) => {
-    if (gameStatus !== "PLAYING" || isAnimating.current || errorCells.length > 0) return;
-
-    setBoard((prev) => {
-      const newB = prev.map((row) => [...row]);
-      const nextVal = (newB[r][c] + 1) % 3;
-      newB[r][c] = nextVal;
-
+  // Agenda ou cancela a validação de uma célula específica
+  const scheduleCellValidation = useCallback(
+    (r, c, newVal, updatedBoard) => {
       const timerKey = `${r}-${c}`;
       if (validationTimers.current[timerKey]) {
         clearTimeout(validationTimers.current[timerKey]);
+        delete validationTimers.current[timerKey];
       }
 
-      if (nextVal !== 0) {
+      if (newVal !== 0) {
         validationTimers.current[timerKey] = setTimeout(() => {
-          validateMove(r, c, nextVal);
-        }, 400);
+          validateMove(r, c, newVal);
+        }, VALIDATION_DELAY_MS);
       } else {
-        saveDailyProgress(newB, livesRef.current, "PLAYING");
+        saveDailyProgress(updatedBoard, livesRef.current, "PLAYING");
+      }
+    },
+    [validateMove, saveDailyProgress]
+  );
+
+  // Ciclo de 3 toques: vazio (0) -> "X" (1) -> Morcego (2) -> vazio (0)
+  const cycleCellState = useCallback(
+    (r, c) => {
+      if (gameStatusRef.current !== "PLAYING" || isAnimating.current || errorCellsRef.current.length > 0) {
+        return;
       }
 
-      return newB;
-    });
+      setBoard((prev) => {
+        const currentVal = prev[r][c];
+        // Se já existe um morcego validado (sem timer pendente), mantém protegido
+        if (currentVal === 2 && !validationTimers.current[`${r}-${c}`]) {
+          return prev;
+        }
+
+        const newB = prev.map((row) => [...row]);
+        const nextVal = (currentVal + 1) % 3;
+        newB[r][c] = nextVal;
+
+        scheduleCellValidation(r, c, nextVal, newB);
+        return newB;
+      });
+    },
+    [scheduleCellValidation]
+  );
+
+  // Marca uma célula com "X" (1) durante o arraste contínuo
+  const markCellWithX = useCallback(
+    (r, c) => {
+      if (gameStatusRef.current !== "PLAYING" || isAnimating.current || errorCellsRef.current.length > 0) {
+        return;
+      }
+
+      setBoard((prev) => {
+        if (prev[r][c] !== 0) return prev;
+        const newB = prev.map((row) => [...row]);
+        newB[r][c] = 1;
+        scheduleCellValidation(r, c, 1, newB);
+        return newB;
+      });
+    },
+    [scheduleCellValidation]
+  );
+
+  const handleCellPointerDown = (e, r, c) => {
+    if (e.button !== undefined && e.button !== 0) return;
+    if (gameStatusRef.current !== "PLAYING" || isAnimating.current || errorCellsRef.current.length > 0) {
+      return;
+    }
+
+    const key = `${r}-${c}`;
+    dragStateRef.current = {
+      isPointerDown: true,
+      isDraggingX: false,
+      startCell: { r, c },
+      visitedCells: new Set([key])
+    };
   };
+
+  const handleCellPointerEnter = (r, c) => {
+    const drag = dragStateRef.current;
+    if (!drag.isPointerDown) return;
+    if (gameStatusRef.current !== "PLAYING" || isAnimating.current || errorCellsRef.current.length > 0) {
+      return;
+    }
+
+    const key = `${r}-${c}`;
+    if (drag.visitedCells.has(key)) return;
+
+    // Ao entrar em uma segunda célula mantendo pressionado, ativa o modo arraste de "X"
+    if (!drag.isDraggingX && drag.startCell) {
+      drag.isDraggingX = true;
+      markCellWithX(drag.startCell.r, drag.startCell.c);
+    }
+
+    drag.visitedCells.add(key);
+    markCellWithX(r, c);
+  };
+
+  const handleBoardPointerMove = (e) => {
+    const drag = dragStateRef.current;
+    if (!drag.isPointerDown) return;
+
+    // Necessário para telas touch (mobile), onde pointerenter não dispara durante o deslize
+    const target = document.elementFromPoint(e.clientX, e.clientY);
+    const cellEl = target?.closest?.("[data-row][data-col]");
+    if (!cellEl) return;
+
+    const r = Number(cellEl.getAttribute("data-row"));
+    const c = Number(cellEl.getAttribute("data-col"));
+    if (!Number.isNaN(r) && !Number.isNaN(c)) {
+      handleCellPointerEnter(r, c);
+    }
+  };
+
+  useEffect(() => {
+    const handleGlobalPointerUp = () => {
+      const drag = dragStateRef.current;
+      if (!drag.isPointerDown) return;
+
+      // Se não houve arraste para outras células, executa o toque normal (1x -> X, 2x -> Morcego, 3x -> Vazio)
+      if (!drag.isDraggingX && drag.startCell) {
+        cycleCellState(drag.startCell.r, drag.startCell.c);
+      }
+
+      dragStateRef.current = {
+        isPointerDown: false,
+        isDraggingX: false,
+        startCell: null,
+        visitedCells: new Set()
+      };
+    };
+
+    window.addEventListener("pointerup", handleGlobalPointerUp);
+    window.addEventListener("pointercancel", handleGlobalPointerUp);
+    return () => {
+      window.removeEventListener("pointerup", handleGlobalPointerUp);
+      window.removeEventListener("pointercancel", handleGlobalPointerUp);
+    };
+  }, [cycleCellState]);
 
   const getCellStyles = (r, c) => {
     if (!regions.length) return {};
@@ -641,6 +796,7 @@ export default function Morcegos() {
                 gridTemplateColumns: `repeat(${activeMode.size}, 1fr)`,
                 gridTemplateRows: `repeat(${activeMode.size}, 1fr)`
               }}
+              onPointerMove={handleBoardPointerMove}
             >
               {board.map((row, r) =>
                 row.map((val, c) => {
@@ -648,9 +804,12 @@ export default function Morcegos() {
                   return (
                     <div
                       key={`${r}-${c}`}
+                      data-row={r}
+                      data-col={c}
                       className={`morcegos-cell ${isError ? "error-shake" : ""}`}
                       style={getCellStyles(r, c)}
-                      onClick={() => handleCellClick(r, c)}
+                      onPointerDown={(e) => handleCellPointerDown(e, r, c)}
+                      onPointerEnter={() => handleCellPointerEnter(r, c)}
                     >
                       {val === 1 && <span className="morcegos-cell-x">✕</span>}
                       {val === 2 && <BatSvg />}
@@ -823,12 +982,13 @@ export default function Morcegos() {
                   Os morcegos <strong>não podem se tocar</strong>, nem mesmo na diagonal.
                 </li>
                 <li>
-                  Toque <strong>1x</strong> em uma casa vazia para marcar <strong>✕</strong> (sem
-                  morcego) e <strong>2x</strong> rapidamente para posicionar o{" "}
-                  <strong>morcego</strong>.
+                  Toque <strong>1x</strong> para marcar <strong>✕</strong> (ou pressione e arraste
+                  para marcar várias casas), <strong>2x</strong> para posicionar o{" "}
+                  <strong>morcego</strong> e <strong>3x</strong> para limpar a casa novamente.
                 </li>
                 <li>
-                  Marcar um <strong>✕</strong> onde há um morcego (ou vice-versa) custa uma vida!
+                  Confirmar um <strong>✕</strong> onde há um morcego (ou vice-versa) custa uma
+                  vida!
                 </li>
               </ul>
             </div>

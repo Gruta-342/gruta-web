@@ -106,6 +106,8 @@ export default function Cruzadinha() {
   });
 
   const boardRef = useRef(null);
+  const cluesAsideRef = useRef(null);
+  const clueItemRefs = useRef({});
   const themeDropdownRef = useRef(null);
   const diffDropdownRef = useRef(null);
 
@@ -187,6 +189,7 @@ export default function Cruzadinha() {
           : generateCrosswordPuzzle(resolvedTheme, resolvedDiff);
 
         setPuzzle(p);
+        clueItemRefs.current = {};
 
         let restoredDaily = null;
         if (dailyMode) {
@@ -296,6 +299,27 @@ export default function Cruzadinha() {
     return puzzle.words[selectedWordIndex] || puzzle.words[0];
   }, [puzzle, selectedWordIndex]);
 
+  // Rola automaticamente a lista lateral de dicas (Web) sempre que a dica ativa mudar e estiver fora da área visível
+  useEffect(() => {
+    if (!currentWord || !cluesAsideRef.current) return;
+    const clueEl = clueItemRefs.current[currentWord.index];
+    if (!clueEl) return;
+
+    const container = cluesAsideRef.current;
+    const containerRect = container.getBoundingClientRect();
+    const itemRect = clueEl.getBoundingClientRect();
+
+    const isOutOfView =
+      itemRect.top < containerRect.top + 8 || itemRect.bottom > containerRect.bottom - 8;
+
+    if (isOutOfView) {
+      clueEl.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+      });
+    }
+  }, [currentWord]);
+
   const findWordForCellAndDir = useCallback(
     (r, c, dir) => {
       if (!puzzle) return null;
@@ -310,6 +334,34 @@ export default function Cruzadinha() {
     },
     [puzzle]
   );
+
+  // Conjunto de coordenadas (r-c) pertencentes a qualquer palavra já acertada
+  const solvedCellsSet = useMemo(() => {
+    const set = new Set();
+    if (!puzzle || !userGrid.length) return set;
+
+    for (const w of puzzle.words) {
+      let wordCorrect = true;
+      for (let i = 0; i < w.word.length; i++) {
+        const curR = w.dir === "V" ? w.r + i : w.r;
+        const curC = w.dir === "H" ? w.c + i : w.c;
+        const userChar = userGrid[curR]?.[curC];
+        const expectedChar = puzzle.grid[curR]?.[curC]?.solution;
+        if (!userChar || userChar !== expectedChar) {
+          wordCorrect = false;
+          break;
+        }
+      }
+      if (wordCorrect) {
+        for (let i = 0; i < w.word.length; i++) {
+          const curR = w.dir === "V" ? w.r + i : w.r;
+          const curC = w.dir === "H" ? w.c + i : w.c;
+          set.add(`${curR}-${curC}`);
+        }
+      }
+    }
+    return set;
+  }, [puzzle, userGrid]);
 
   const handleCellClick = useCallback(
     (r, c) => {
@@ -453,35 +505,57 @@ export default function Cruzadinha() {
       const cell = puzzle.grid[r][c];
       if (cell.isBlock) return;
 
-      const newGrid = userGrid.map((row) => [...row]);
-      newGrid[r][c] = char;
-      setUserGrid(newGrid);
-
       const wordLen = currentWord.word.length;
       const wordStartR = currentWord.r;
       const wordStartC = currentWord.c;
       const isVert = currentWord.dir === "V";
-
       const charIdxInWord = isVert ? r - wordStartR : c - wordStartC;
 
+      const newGrid = userGrid.map((row) => [...row]);
+      const isCellLocked = solvedCellsSet.has(`${r}-${c}`);
+
+      // Só altera o valor da célula se ela NÃO pertencer a uma palavra já acertada
+      if (!isCellLocked) {
+        newGrid[r][c] = char;
+        setUserGrid(newGrid);
+      }
+
+      // Procura a próxima célula não preenchida e não travada na palavra atual
       let nextTarget = null;
       for (let step = charIdxInWord + 1; step < wordLen; step++) {
         const nextR = isVert ? wordStartR + step : wordStartR;
         const nextC = isVert ? wordStartC : wordStartC + step;
-        if (!newGrid[nextR][nextC]) {
+        if (!newGrid[nextR][nextC] && !solvedCellsSet.has(`${nextR}-${nextC}`)) {
           nextTarget = { r: nextR, c: nextC };
           break;
         }
       }
 
-      if (!nextTarget && charIdxInWord + 1 < wordLen) {
-        nextTarget = {
-          r: isVert ? wordStartR + charIdxInWord + 1 : wordStartR,
-          c: isVert ? wordStartC : wordStartC + charIdxInWord + 1
-        };
+      // Se todas à frente já estiverem preenchidas, avança para a próxima célula editável (não verde)
+      if (!nextTarget) {
+        for (let step = charIdxInWord + 1; step < wordLen; step++) {
+          const nextR = isVert ? wordStartR + step : wordStartR;
+          const nextC = isVert ? wordStartC : wordStartC + step;
+          if (!solvedCellsSet.has(`${nextR}-${nextC}`)) {
+            nextTarget = { r: nextR, c: nextC };
+            break;
+          }
+        }
       }
 
-      if (!nextTarget) {
+      // Verifica se a palavra atual acabou de ficar 100% correta
+      let currentWordJustSolved = true;
+      for (let k = 0; k < wordLen; k++) {
+        const checkR = isVert ? wordStartR + k : wordStartR;
+        const checkC = isVert ? wordStartC : wordStartC + k;
+        if (newGrid[checkR][checkC] !== puzzle.grid[checkR][checkC].solution) {
+          currentWordJustSolved = false;
+          break;
+        }
+      }
+
+      // Se chegou ao fim da palavra ou acabou de completá-la corretamente, salta para a próxima palavra pendente
+      if (!nextTarget || currentWordJustSolved) {
         for (let i = 1; i <= puzzle.words.length; i++) {
           const candidateIdx = (currentWord.index + i) % puzzle.words.length;
           const candidateWord = puzzle.words[candidateIdx];
@@ -497,36 +571,59 @@ export default function Cruzadinha() {
             }
           }
         }
-      } else {
+      }
+
+      if (nextTarget) {
         setSelectedCell(nextTarget);
       }
 
       checkVictoryCondition(newGrid);
     },
-    [isGameOver, puzzle, selectedCell, currentWord, userGrid, checkVictoryCondition]
+    [
+      isGameOver,
+      puzzle,
+      selectedCell,
+      currentWord,
+      userGrid,
+      solvedCellsSet,
+      checkVictoryCondition
+    ]
   );
 
   const handleBackspace = useCallback(() => {
     if (isGameOver || !puzzle || !selectedCell || !currentWord) return;
     const { r, c } = selectedCell;
+    const isVert = currentWord.dir === "V";
+    const charIdxInWord = isVert ? r - currentWord.r : c - currentWord.c;
+    const isCurrentLocked = solvedCellsSet.has(`${r}-${c}`);
 
     const newGrid = userGrid.map((row) => [...row]);
-    if (newGrid[r][c] !== "") {
+
+    // Se a célula atual tem letra e NÃO está travada (verde), apenas apaga ela
+    if (newGrid[r][c] !== "" && !isCurrentLocked) {
       newGrid[r][c] = "";
       setUserGrid(newGrid);
       return;
     }
 
-    const isVert = currentWord.dir === "V";
-    const charIdxInWord = isVert ? r - currentWord.r : c - currentWord.c;
-    if (charIdxInWord > 0) {
-      const prevR = isVert ? r - 1 : r;
-      const prevC = isVert ? c : c - 1;
-      newGrid[prevR][prevC] = "";
-      setUserGrid(newGrid);
+    // Caso contrário (célula vazia ou célula verde bloqueada), recua pulando células verdes
+    for (let step = charIdxInWord - 1; step >= 0; step--) {
+      const prevR = isVert ? currentWord.r + step : currentWord.r;
+      const prevC = isVert ? currentWord.c : currentWord.c + step;
+
+      if (solvedCellsSet.has(`${prevR}-${prevC}`)) {
+        // Ignora células já acertadas (verdes)
+        continue;
+      }
+
+      if (newGrid[prevR][prevC] !== "") {
+        newGrid[prevR][prevC] = "";
+        setUserGrid(newGrid);
+      }
       setSelectedCell({ r: prevR, c: prevC });
+      return;
     }
-  }, [isGameOver, puzzle, selectedCell, currentWord, userGrid]);
+  }, [isGameOver, puzzle, selectedCell, currentWord, userGrid, solvedCellsSet]);
 
   const handleArrowMove = useCallback(
     (dr, dc) => {
@@ -700,34 +797,6 @@ export default function Cruzadinha() {
     [puzzle, userGrid]
   );
 
-  // Conjunto de coordenadas (r-c) pertencentes a qualquer palavra já acertada
-  const solvedCellsSet = useMemo(() => {
-    const set = new Set();
-    if (!puzzle || !userGrid.length) return set;
-
-    for (const w of puzzle.words) {
-      let wordCorrect = true;
-      for (let i = 0; i < w.word.length; i++) {
-        const curR = w.dir === "V" ? w.r + i : w.r;
-        const curC = w.dir === "H" ? w.c + i : w.c;
-        const userChar = userGrid[curR]?.[curC];
-        const expectedChar = puzzle.grid[curR]?.[curC]?.solution;
-        if (!userChar || userChar !== expectedChar) {
-          wordCorrect = false;
-          break;
-        }
-      }
-      if (wordCorrect) {
-        for (let i = 0; i < w.word.length; i++) {
-          const curR = w.dir === "V" ? w.r + i : w.r;
-          const curC = w.dir === "H" ? w.c + i : w.c;
-          set.add(`${curR}-${curC}`);
-        }
-      }
-    }
-    return set;
-  }, [puzzle, userGrid]);
-
   const isCurrentWordSolved = useMemo(() => {
     return currentWord ? isWordSolved(currentWord) : false;
   }, [currentWord, isWordSolved]);
@@ -745,7 +814,7 @@ export default function Cruzadinha() {
   const keyboardRows = [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
     ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-    ["Z", "X", "C", "V", "B", "N", "M", "BKSP"]
+    ["CLUES", "Z", "X", "C", "V", "B", "N", "M", "BKSP"]
   ];
 
   const renderCluesColumns = (closeOnSelect = false) => (
@@ -761,6 +830,11 @@ export default function Cruzadinha() {
             return (
               <button
                 key={`H-${w.number}-${w.word}`}
+                ref={(el) => {
+                  if (!closeOnSelect) {
+                    clueItemRefs.current[w.index] = el;
+                  }
+                }}
                 type="button"
                 className={`cz-clue-item ${isActive ? "active" : ""} ${solved ? "completed" : ""}`}
                 onClick={() => selectWordFromClue(w, closeOnSelect)}
@@ -785,6 +859,11 @@ export default function Cruzadinha() {
             return (
               <button
                 key={`V-${w.number}-${w.word}`}
+                ref={(el) => {
+                  if (!closeOnSelect) {
+                    clueItemRefs.current[w.index] = el;
+                  }
+                }}
                 type="button"
                 className={`cz-clue-item ${isActive ? "active" : ""} ${solved ? "completed" : ""}`}
                 onClick={() => selectWordFromClue(w, closeOnSelect)}
@@ -1068,10 +1147,12 @@ export default function Cruzadinha() {
           </div>
 
           {/* Painel de dicas lateral fixo na versão Web */}
-          <aside className="cz-clues-aside">{renderCluesColumns(false)}</aside>
+          <aside className="cz-clues-aside" ref={cluesAsideRef}>
+            {renderCluesColumns(false)}
+          </aside>
         </main>
 
-        {/* Dock Inferior Mobile: Barra de Dica Ativa + Botão Todas as Dicas + Teclado Fixo */}
+        {/* Dock Inferior Mobile: Barra de Dica Ativa + Teclado Fixo */}
         <div className="cz-mobile-bottom-dock">
           <div className={`cz-active-clue-bar ${isCurrentWordSolved ? "solved" : ""}`}>
             <button
@@ -1094,41 +1175,18 @@ export default function Cruzadinha() {
                   <span className="cz-clue-badge">
                     #{currentWord.number} {currentWord.dir === "H" ? "HORIZONTAL" : "VERTICAL"}
                   </span>
-                  <p className={`cz-clue-text ${isCurrentWordSolved ? "completed" : ""}`}>
-                    {currentWord.clue}
-                  </p>
+                  <div className="cz-clue-text-wrap">
+                    <p className={`cz-clue-text ${isCurrentWordSolved ? "completed" : ""}`}>
+                      {currentWord.clue}
+                    </p>
+                  </div>
                 </>
               ) : (
-                <p className="cz-clue-text">Selecione uma casa para ver a dica.</p>
+                <div className="cz-clue-text-wrap">
+                  <p className="cz-clue-text">Selecione uma casa para ver a dica.</p>
+                </div>
               )}
             </div>
-
-            <button
-              type="button"
-              className="cz-all-clues-btn"
-              onClick={() => setShowMobileCluesModal(true)}
-              title="Ver todas as dicas"
-              aria-label="Ver todas as dicas"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="8" y1="6" x2="21" y2="6"></line>
-                <line x1="8" y1="12" x2="21" y2="12"></line>
-                <line x1="8" y1="18" x2="21" y2="18"></line>
-                <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                <line x1="3" y1="18" x2="3.01" y2="18"></line>
-              </svg>
-              <span>DICAS</span>
-            </button>
 
             <button
               type="button"
@@ -1146,13 +1204,31 @@ export default function Cruzadinha() {
               <div key={rowIdx} className="cz-keyboard-row">
                 {row.map((key) => {
                   const isBksp = key === "BKSP";
+                  const isCluesBtn = key === "CLUES";
                   return (
                     <button
                       key={key}
                       type="button"
-                      className={`cz-key ${isBksp ? "cz-key-backspace" : ""}`}
+                      className={`cz-key ${isBksp ? "cz-key-backspace" : ""} ${
+                        isCluesBtn ? "cz-key-clues" : ""
+                      }`}
+                      title={
+                        isBksp
+                          ? "Apagar"
+                          : isCluesBtn
+                          ? "Ver todas as dicas"
+                          : undefined
+                      }
+                      aria-label={
+                        isBksp
+                          ? "Apagar"
+                          : isCluesBtn
+                          ? "Ver todas as dicas"
+                          : key
+                      }
                       onClick={() => {
                         if (isBksp) handleBackspace();
+                        else if (isCluesBtn) setShowMobileCluesModal(true);
                         else handleInputCharacter(key);
                       }}
                     >
@@ -1171,6 +1247,27 @@ export default function Cruzadinha() {
                           <line x1="18" y1="9" x2="12" y2="15" />
                           <line x1="12" y1="9" x2="18" y2="15" />
                         </svg>
+                      ) : isCluesBtn ? (
+                        <>
+                          <svg
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <line x1="8" y1="6" x2="21" y2="6"></line>
+                            <line x1="8" y1="12" x2="21" y2="12"></line>
+                            <line x1="8" y1="18" x2="21" y2="18"></line>
+                            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                          </svg>
+                          <span>DICAS</span>
+                        </>
                       ) : (
                         key
                       )}

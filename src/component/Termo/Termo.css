@@ -307,6 +307,8 @@
 
 /* -------------------- TECLADO -------------------- */
 .termo-keyboard {
+  --kb-gap: 5px;
+  --key-width: calc((100% - (9 * var(--kb-gap))) / 10);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -314,6 +316,7 @@
   max-width: 850px;
   padding: 0;
   flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .termo-keyboard.game-over {
@@ -324,13 +327,14 @@
 .termo-kb-row {
   display: flex;
   justify-content: center;
-  gap: 5px;
+  gap: var(--kb-gap);
   width: 100%;
 }
 
 .termo-key {
   height: 50px;
-  flex: 1;
+  width: var(--key-width);
+  flex: 0 0 var(--key-width);
   background-color: #0e264d;
   color: white;
   border: 1px solid rgba(0, 210, 255, 0.12);
@@ -340,10 +344,16 @@
   cursor: pointer;
   transition: all 0.1s ease;
   padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .termo-key.key-special {
-  flex: 1.5;
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
   font-size: 11px;
   background-color: #091c38;
 }
@@ -666,12 +676,9 @@
   }
 
   .termo-keyboard {
+    --kb-gap: 3px;
     gap: 4px;
     padding: 0 2px;
-  }
-
-  .termo-kb-row {
-    gap: 3px;
   }
 
   .termo-key {

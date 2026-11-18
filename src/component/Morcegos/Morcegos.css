@@ -240,6 +240,7 @@ body:has(.morcegos-wrapper)::-webkit-scrollbar {
   overflow: hidden;
   background-color: #051329;
   box-sizing: border-box;
+  touch-action: none;
 }
 
 .morcegos-board.board-locked {
