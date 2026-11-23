@@ -207,11 +207,10 @@
     justify-content: center;
     background-color: transparent; 
     overflow: hidden; 
-    max-height: 100px; /* Um limite seguro para caber a fonte e os espaços */
+    max-height: 100px;
     opacity: 1;
     padding-top: 5px;
     padding-bottom: 0;
-    /* Agora o padding encolhe e cresce junto com a altura! */
     transition: max-height 0.4s ease, opacity 0.3s ease, padding 0.4s ease;
   }
 
@@ -219,7 +218,6 @@
   .header-container.scrolled .bottom-nav {
     max-height: 0;
     opacity: 0;
-    /* ZERANDO o espaço vazio interno */
     padding-top: 0;
     padding-bottom: 0;
   }
@@ -304,7 +302,7 @@
     display: flex !important; 
   }
 
-  /* LINHA DIVISÓRIA (Restaurada com efeito fade moderno) */
+  /* LINHA DIVISÓRIA */
   .separator { 
     display: block !important; 
     margin: 0; 
@@ -540,6 +538,43 @@
   background: rgba(255, 145, 0, 0.2);
   color: #ffb703;
   border: 1px solid rgba(255, 145, 0, 0.4);
+}
+
+.gruta-torch-guest-box {
+  background: rgba(0, 210, 255, 0.08);
+  border: 1px solid rgba(0, 210, 255, 0.28);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.gruta-torch-guest-box p {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #cfd8dc;
+  line-height: 1.4;
+}
+
+.gruta-torch-login-btn {
+  display: inline-block;
+  width: 100%;
+  box-sizing: border-box;
+  background: #00d2ff;
+  color: #051329;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: 0.4px;
+  transition: all 0.2s ease;
+}
+
+.gruta-torch-login-btn:hover {
+  background: #38ddff;
+  box-shadow: 0 0 14px rgba(0, 210, 255, 0.45);
 }
 
 .gruta-torch-stats-row {

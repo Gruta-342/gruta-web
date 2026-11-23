@@ -1,6 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { fetchPlayerProgress, saveGameCompletion } from "../../lib/playerClient";
+import { getBrazilDateKey } from "../../lib/playerDate";
 import "./Morcegos.css";
 
 const REGION_COLORS = [
@@ -17,11 +21,9 @@ const REGION_COLORS = [
 const GAME_MODES = {
   DAILY: { id: "DAILY", size: 8, label: "Diário", dropdownLabel: "DIÁRIO" },
   NORMAL: { id: "NORMAL", size: 6, label: "Normal (6x6)", dropdownLabel: "NORMAL (6X6)" },
-  HARD: { id: "HARD", size: 8, label: "Difícil (8x8)", dropdownLabel: "DIFÍCIL (8X8)" }
+  HARD: { id: "HARD", size: 8, label: "Difícil (8x8)", dropdownLabel: "DIFÍCIL (8X8)" },
 };
 
-const STATS_STORAGE_KEY = "gruta_morcegos_stats";
-const DAILY_STATE_KEY = "gruta_morcegos_daily_state";
 const LIVES = 3;
 // Janela calibrada para permitir 2 ou 3 toques consecutivos antes de validar a jogada
 const VALIDATION_DELAY_MS = 520;
@@ -29,8 +31,17 @@ const VALIDATION_DELAY_MS = 520;
 const INITIAL_STATS = {
   DAILY: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, livesDist: { 3: 0, 2: 0, 1: 0 } },
   NORMAL: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, livesDist: { 3: 0, 2: 0, 1: 0 } },
-  HARD: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, livesDist: { 3: 0, 2: 0, 1: 0 } }
+  HARD: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, livesDist: { 3: 0, 2: 0, 1: 0 } },
 };
+
+function mergeWithInitialStats(savedExtra) {
+  if (!savedExtra || typeof savedExtra !== "object") return INITIAL_STATS;
+  return {
+    DAILY: { ...INITIAL_STATS.DAILY, ...(savedExtra.DAILY || {}), livesDist: { ...INITIAL_STATS.DAILY.livesDist, ...(savedExtra.DAILY?.livesDist || {}) } },
+    NORMAL: { ...INITIAL_STATS.NORMAL, ...(savedExtra.NORMAL || {}), livesDist: { ...INITIAL_STATS.NORMAL.livesDist, ...(savedExtra.NORMAL?.livesDist || {}) } },
+    HARD: { ...INITIAL_STATS.HARD, ...(savedExtra.HARD || {}), livesDist: { ...INITIAL_STATS.HARD.livesDist, ...(savedExtra.HARD?.livesDist || {}) } },
+  };
+}
 
 const BatSvg = () => (
   <svg
@@ -59,10 +70,9 @@ function seededRandom(seedStr) {
 }
 
 function getDailyInfo() {
-  const now = new Date();
-  const start = new Date(2025, 0, 1);
-  const diffDays = Math.floor((new Date(now.getFullYear(), now.getMonth(), now.getDate()) - start) / 86400000);
-  const dateKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const dateKey = getBrazilDateKey(0);
+  const [y, m, d] = dateKey.split("-").map(Number);
+  const diffDays = Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(2025, 0, 1)) / 86400000);
   return { dayNumber: Math.max(1, diffDays), dateKey };
 }
 
@@ -72,18 +82,11 @@ function getSecondsUntilMidnight() {
   return Math.max(0, Math.floor((tomorrow - now) / 1000));
 }
 
-function markDailyAsCompleted(gameId) {
-  try {
-    const now = new Date();
-    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    const raw = localStorage.getItem("gruta_daily_completed_log");
-    const log = raw ? JSON.parse(raw) : {};
-    log[gameId] = today;
-    localStorage.setItem("gruta_daily_completed_log", JSON.stringify(log));
-  } catch (e) {}
-}
-
 export default function Morcegos() {
+  const { status } = useSession();
+  const isAuthenticated = status === "authenticated";
+  const isGuest = status === "unauthenticated";
+
   const [activeMode, setActiveMode] = useState(GAME_MODES.DAILY);
   const [dayNumber, setDayNumber] = useState(1);
 
@@ -116,13 +119,17 @@ export default function Morcegos() {
   const gameStatusRef = useRef(gameStatus);
   const boardRef = useRef(board);
   const errorCellsRef = useRef(errorCells);
+  const statsRef = useRef(stats);
+  const isAuthenticatedRef = useRef(isAuthenticated);
+  const dailyCompletionCacheRef = useRef(null);
+  const hasInitializedRef = useRef(false);
 
   // Controle de gesto de arrastar para marcar "X"
   const dragStateRef = useRef({
     isPointerDown: false,
     isDraggingX: false,
     startCell: null,
-    visitedCells: new Set()
+    visitedCells: new Set(),
   });
 
   useEffect(() => {
@@ -146,14 +153,12 @@ export default function Morcegos() {
   }, [errorCells]);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STATS_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.DAILY) setStats(parsed);
-      }
-    } catch (e) {}
-  }, []);
+    statsRef.current = stats;
+  }, [stats]);
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -170,13 +175,10 @@ export default function Morcegos() {
     setTimeout(() => setToast((curr) => (curr === msg ? "" : curr)), duration);
   }, []);
 
-  const recordGameResult = useCallback((won, remainingLives, modeId, finalTime) => {
-    if (modeId === "DAILY") {
-      markDailyAsCompleted("morcegos-gruta");
-    }
-
-    setStats((prev) => {
-      const curr = prev[modeId] || INITIAL_STATS[modeId];
+  const recordGameResult = useCallback(
+    async (won, remainingLives, modeId, finalTime, finalBoard) => {
+      const prevStats = statsRef.current;
+      const curr = prevStats[modeId] || INITIAL_STATS[modeId];
       const newPlayed = curr.played + 1;
       const newWon = won ? curr.won + 1 : curr.won;
       const newStreak = won ? curr.currentStreak + 1 : 0;
@@ -193,8 +195,8 @@ export default function Morcegos() {
         newLivesDist[remainingLives] = (newLivesDist[remainingLives] || 0) + 1;
       }
 
-      const updated = {
-        ...prev,
+      const updatedStats = {
+        ...prevStats,
         [modeId]: {
           played: newPlayed,
           won: newWon,
@@ -202,18 +204,65 @@ export default function Morcegos() {
           maxStreak: newMaxStreak,
           bestTime: newBestTime,
           lastTime: finalTime,
-          livesDist: newLivesDist
-        }
+          livesDist: newLivesDist,
+        },
       };
 
-      try {
-        localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(updated));
-      } catch (e) {}
-      return updated;
-    });
+      setStats(updatedStats);
+      statsRef.current = updatedStats;
 
-    setTimeout(() => setShowStatsModal(true), 900);
-  }, []);
+      if (modeId === "DAILY") {
+        dailyCompletionCacheRef.current = {
+          won,
+          score: finalTime,
+          state: {
+            board: finalBoard,
+            lives: remainingLives,
+            gameStatus: won ? "WON" : "LOST",
+            timer: finalTime,
+          },
+        };
+      }
+
+      // Salva no PostgreSQL somente se estiver autenticado
+      if (isAuthenticatedRef.current) {
+        const { dateKey } = getDailyInfo();
+        try {
+          const res = await saveGameCompletion({
+            gameId: "morcegos-gruta",
+            mode: modeId === "DAILY" ? "daily" : "infinite",
+            dateKey: modeId === "DAILY" ? dateKey : undefined,
+            won,
+            attempts: LIVES - remainingLives,
+            score: finalTime,
+            state:
+              modeId === "DAILY"
+                ? {
+                    board: finalBoard,
+                    lives: remainingLives,
+                    gameStatus: won ? "WON" : "LOST",
+                    timer: finalTime,
+                  }
+                : null,
+            extra: updatedStats,
+          });
+
+          if (res?.progress?.stats?.["morcegos-gruta"]?.extra) {
+            const serverStats = mergeWithInitialStats(
+              res.progress.stats["morcegos-gruta"].extra
+            );
+            setStats(serverStats);
+            statsRef.current = serverStats;
+          }
+        } catch (err) {
+          console.error("Erro ao salvar progresso no servidor:", err);
+        }
+      }
+
+      setTimeout(() => setShowStatsModal(true), 900);
+    },
+    []
+  );
 
   const buildPuzzleData = useCallback((currentSize, rng) => {
     let attempts = 0;
@@ -263,7 +312,7 @@ export default function Morcegos() {
                 [0, 1],
                 [1, 0],
                 [0, -1],
-                [-1, 0]
+                [-1, 0],
               ];
               for (const [dr, dc] of neighbors) {
                 const nr = r + dr;
@@ -328,8 +377,32 @@ export default function Morcegos() {
     return { regions: fallbackRegions, solution: fallbackSolution };
   }, []);
 
+  const applyDailyCompletionToBoard = useCallback((completionEntry, generatedSolution, modeSize) => {
+    const savedState = completionEntry?.state;
+    if (savedState && Array.isArray(savedState.board)) {
+      setBoard(savedState.board);
+      setLives(savedState.lives ?? (completionEntry.won ? LIVES : 0));
+      setGameStatus(savedState.gameStatus || (completionEntry.won ? "WON" : "LOST"));
+      setTimer(savedState.timer ?? completionEntry.score ?? 0);
+    } else {
+      // Fallback caso o registro diário exista sem tabuleiro salvo
+      const fallbackBoard = Array(modeSize)
+        .fill(null)
+        .map((_, r) =>
+          Array(modeSize)
+            .fill(0)
+            .map((__, c) => (completionEntry.won && generatedSolution?.[r]?.[c] ? 2 : 0))
+        );
+      setBoard(fallbackBoard);
+      setLives(completionEntry.won ? LIVES : 0);
+      setGameStatus(completionEntry.won ? "WON" : "LOST");
+      setTimer(completionEntry.score ?? 0);
+    }
+    setTimeout(() => setShowStatsModal(true), 450);
+  }, []);
+
   const initGame = useCallback(
-    (mode) => {
+    (mode, overrideDailyEntry = undefined) => {
       setActiveMode(mode);
       setIsModeDropdownOpen(false);
       Object.values(validationTimers.current).forEach(clearTimeout);
@@ -339,7 +412,7 @@ export default function Morcegos() {
         isPointerDown: false,
         isDraggingX: false,
         startCell: null,
-        visitedCells: new Set()
+        visitedCells: new Set(),
       };
       setErrorCells([]);
 
@@ -352,24 +425,13 @@ export default function Morcegos() {
       setRegions(generatedRegions);
       solutionRef.current = generatedSolution;
 
-      if (mode.id === "DAILY") {
-        try {
-          const savedDaily = localStorage.getItem(DAILY_STATE_KEY);
-          if (savedDaily) {
-            const parsed = JSON.parse(savedDaily);
-            if (parsed.dateKey === dateKey && parsed.board) {
-              setBoard(parsed.board);
-              setLives(parsed.lives ?? LIVES);
-              setGameStatus(parsed.gameStatus || "PLAYING");
-              setTimer(parsed.timer || 0);
-              if (parsed.gameStatus && parsed.gameStatus !== "PLAYING") {
-                markDailyAsCompleted("morcegos-gruta");
-                setTimeout(() => setShowStatsModal(true), 500);
-              }
-              return;
-            }
-          }
-        } catch (e) {}
+      if (mode.id === "DAILY" && isAuthenticatedRef.current) {
+        const entry =
+          overrideDailyEntry !== undefined ? overrideDailyEntry : dailyCompletionCacheRef.current;
+        if (entry) {
+          applyDailyCompletionToBoard(entry, generatedSolution, mode.size);
+          return;
+        }
       }
 
       setBoard(
@@ -381,16 +443,59 @@ export default function Morcegos() {
       setTimer(0);
       setGameStatus("PLAYING");
     },
-    [buildPuzzleData]
+    [applyDailyCompletionToBoard, buildPuzzleData]
   );
 
+  // Inicializa o jogo assim que o status da sessão NextAuth estiver definido
   useEffect(() => {
-    initGame(GAME_MODES.DAILY);
+    if (status === "loading") return;
+
+    let cancelled = false;
+
+    async function bootstrap() {
+      if (status === "authenticated") {
+        try {
+          const data = await fetchPlayerProgress();
+          if (cancelled) return;
+
+          if (data?.authenticated && data?.progress) {
+            const p = data.progress;
+            const serverStats = mergeWithInitialStats(p.stats?.["morcegos-gruta"]?.extra);
+            setStats(serverStats);
+            statsRef.current = serverStats;
+
+            const todayCompletion = p.dailyStates?.["morcegos-gruta"] || null;
+            dailyCompletionCacheRef.current = todayCompletion;
+            initGame(GAME_MODES.DAILY, todayCompletion);
+            return;
+          }
+        } catch (err) {
+          console.error("Erro ao carregar progresso do Caça Morcegos:", err);
+        }
+      } else {
+        setStats(INITIAL_STATS);
+        statsRef.current = INITIAL_STATS;
+        dailyCompletionCacheRef.current = null;
+      }
+
+      if (!cancelled) {
+        initGame(GAME_MODES.DAILY, null);
+      }
+    }
+
+    bootstrap();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [status, initGame]);
+
+  useEffect(() => {
     const countdownTimer = setInterval(() => setSecondsRemaining(getSecondsUntilMidnight()), 1000);
     return () => clearInterval(countdownTimer);
-  }, [initGame]);
+  }, []);
 
-  // Cronômetro silencioso + persistência do modo Diário
+  // Cronômetro silencioso durante a partida
   useEffect(() => {
     if (gameStatus !== "PLAYING") return;
     const interval = setInterval(() => {
@@ -399,49 +504,12 @@ export default function Morcegos() {
     return () => clearInterval(interval);
   }, [gameStatus]);
 
-  useEffect(() => {
-    if (activeMode.id !== "DAILY" || !board.length) return;
-    const { dateKey } = getDailyInfo();
-    try {
-      localStorage.setItem(
-        DAILY_STATE_KEY,
-        JSON.stringify({
-          dateKey,
-          board,
-          lives,
-          gameStatus,
-          timer
-        })
-      );
-    } catch (e) {}
-  }, [activeMode.id, board, lives, gameStatus, timer]);
-
   const formatMatchTime = (secs) => {
     if (secs === null || secs === undefined) return "--:--";
     const m = Math.floor(secs / 60);
     const s = secs % 60;
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
-
-  const saveDailyProgress = useCallback((updatedBoard, updatedLives, updatedStatus) => {
-    if (activeModeRef.current.id !== "DAILY") return;
-    const { dateKey } = getDailyInfo();
-    try {
-      localStorage.setItem(
-        DAILY_STATE_KEY,
-        JSON.stringify({
-          dateKey,
-          board: updatedBoard,
-          lives: updatedLives,
-          gameStatus: updatedStatus,
-          timer: timerRef.current
-        })
-      );
-      if (updatedStatus !== "PLAYING") {
-        markDailyAsCompleted("morcegos-gruta");
-      }
-    } catch (e) {}
-  }, []);
 
   const validateMove = useCallback(
     (r, c, valToValidate) => {
@@ -469,18 +537,20 @@ export default function Morcegos() {
           const nextStatus = nextLives <= 0 ? "LOST" : "PLAYING";
 
           setLives(nextLives);
-          if (nextStatus === "LOST") {
-            setGameStatus("LOST");
-            showToastMsg("Suas vidas acabaram!", 3000);
-            recordGameResult(false, 0, activeModeRef.current.id, timerRef.current);
-          }
 
+          let revertedBoard = null;
           setBoard((currB) => {
             const revertB = currB.map((row) => [...row]);
             revertB[r][c] = 0;
-            saveDailyProgress(revertB, nextLives, nextStatus);
+            revertedBoard = revertB;
             return revertB;
           });
+
+          if (nextStatus === "LOST") {
+            setGameStatus("LOST");
+            showToastMsg("Suas vidas acabaram!", 3000);
+            recordGameResult(false, 0, activeModeRef.current.id, timerRef.current, revertedBoard);
+          }
 
           setErrorCells((prev) => prev.filter((e) => !(e.r === r && e.c === c)));
           isAnimating.current = false;
@@ -498,21 +568,18 @@ export default function Morcegos() {
           if (valToValidate === 2 && batCount === boardSize) {
             setGameStatus("WON");
             showToastMsg("Incrível! A Gruta está limpa!", 2500);
-            saveDailyProgress(currB, livesRef.current, "WON");
-            recordGameResult(true, livesRef.current, activeModeRef.current.id, timerRef.current);
-          } else {
-            saveDailyProgress(currB, livesRef.current, "PLAYING");
+            recordGameResult(true, livesRef.current, activeModeRef.current.id, timerRef.current, currB);
           }
           return currB;
         });
       }
     },
-    [recordGameResult, saveDailyProgress, showToastMsg]
+    [recordGameResult, showToastMsg]
   );
 
   // Agenda ou cancela a validação de uma célula específica
   const scheduleCellValidation = useCallback(
-    (r, c, newVal, updatedBoard) => {
+    (r, c, newVal) => {
       const timerKey = `${r}-${c}`;
       if (validationTimers.current[timerKey]) {
         clearTimeout(validationTimers.current[timerKey]);
@@ -523,11 +590,9 @@ export default function Morcegos() {
         validationTimers.current[timerKey] = setTimeout(() => {
           validateMove(r, c, newVal);
         }, VALIDATION_DELAY_MS);
-      } else {
-        saveDailyProgress(updatedBoard, livesRef.current, "PLAYING");
       }
     },
-    [validateMove, saveDailyProgress]
+    [validateMove]
   );
 
   // Ciclo de 3 toques: vazio (0) -> "X" (1) -> Morcego (2) -> vazio (0)
@@ -548,7 +613,7 @@ export default function Morcegos() {
         const nextVal = (currentVal + 1) % 3;
         newB[r][c] = nextVal;
 
-        scheduleCellValidation(r, c, nextVal, newB);
+        scheduleCellValidation(r, c, nextVal);
         return newB;
       });
     },
@@ -566,7 +631,7 @@ export default function Morcegos() {
         if (prev[r][c] !== 0) return prev;
         const newB = prev.map((row) => [...row]);
         newB[r][c] = 1;
-        scheduleCellValidation(r, c, 1, newB);
+        scheduleCellValidation(r, c, 1);
         return newB;
       });
     },
@@ -584,7 +649,7 @@ export default function Morcegos() {
       isPointerDown: true,
       isDraggingX: false,
       startCell: { r, c },
-      visitedCells: new Set([key])
+      visitedCells: new Set([key]),
     };
   };
 
@@ -612,7 +677,6 @@ export default function Morcegos() {
     const drag = dragStateRef.current;
     if (!drag.isPointerDown) return;
 
-    // Necessário para telas touch (mobile), onde pointerenter não dispara durante o deslize
     const target = document.elementFromPoint(e.clientX, e.clientY);
     const cellEl = target?.closest?.("[data-row][data-col]");
     if (!cellEl) return;
@@ -629,7 +693,6 @@ export default function Morcegos() {
       const drag = dragStateRef.current;
       if (!drag.isPointerDown) return;
 
-      // Se não houve arraste para outras células, executa o toque normal (1x -> X, 2x -> Morcego, 3x -> Vazio)
       if (!drag.isDraggingX && drag.startCell) {
         cycleCellState(drag.startCell.r, drag.startCell.c);
       }
@@ -638,7 +701,7 @@ export default function Morcegos() {
         isPointerDown: false,
         isDraggingX: false,
         startCell: null,
-        visitedCells: new Set()
+        visitedCells: new Set(),
       };
     };
 
@@ -667,7 +730,7 @@ export default function Morcegos() {
           ? "none"
           : regions[r + 1][c] !== currentReg
           ? "3px solid #051329"
-          : "1px solid rgba(0,0,0,0.15)"
+          : "1px solid rgba(0,0,0,0.15)",
     };
   };
 
@@ -717,7 +780,7 @@ export default function Morcegos() {
       {/* Cabeçalho Unificado (Padrão Termo) */}
       <header className="morcegos-header">
         <div className="morcegos-header-left">
-          <a href="/jogos" className="morcegos-header-btn morcegos-header-back-btn">
+          <Link href="/jogos" className="morcegos-header-btn morcegos-header-back-btn">
             <svg
               width="16"
               height="16"
@@ -731,7 +794,7 @@ export default function Morcegos() {
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
             <span className="morcegos-hide-mobile">JOGOS</span>
-          </a>
+          </Link>
 
           <div className="morcegos-dropdown-container" ref={dropdownRef}>
             <button
@@ -752,7 +815,7 @@ export default function Morcegos() {
                 strokeLinejoin="round"
                 style={{
                   transform: isModeDropdownOpen ? "rotate(180deg)" : "rotate(0)",
-                  transition: "transform 0.2s"
+                  transition: "transform 0.2s",
                 }}
               >
                 <polyline points="6 9 12 15 18 9"></polyline>
@@ -851,7 +914,7 @@ export default function Morcegos() {
               className={`morcegos-board ${gameStatus !== "PLAYING" ? "board-locked" : ""}`}
               style={{
                 gridTemplateColumns: `repeat(${activeMode.size}, 1fr)`,
-                gridTemplateRows: `repeat(${activeMode.size}, 1fr)`
+                gridTemplateRows: `repeat(${activeMode.size}, 1fr)`,
               }}
               onPointerMove={handleBoardPointerMove}
             >
@@ -891,6 +954,16 @@ export default function Morcegos() {
               ✕
             </button>
             <h2 className="morcegos-stats-title">ESTATÍSTICAS - {activeMode.label.toUpperCase()}</h2>
+
+            {/* Chamada para Guest salvar progresso */}
+            {isGuest && (
+              <div className="morcegos-guest-save-box">
+                <p>Faça login para salvar seu progresso, estatísticas e acender a Tocha da Gruta.</p>
+                <Link href="/login" className="morcegos-guest-login-btn">
+                  Fazer login para salvar
+                </Link>
+              </div>
+            )}
 
             <h3 className="morcegos-dist-title">PROGRESSO</h3>
             <div className="morcegos-stats-grid">
@@ -971,7 +1044,7 @@ export default function Morcegos() {
                         width:
                           currentStats.played > 0
                             ? Math.max((totalLosses / maxDistCount) * 100, 7) + "%"
-                            : "7%"
+                            : "7%",
                       }}
                     >
                       {totalLosses}

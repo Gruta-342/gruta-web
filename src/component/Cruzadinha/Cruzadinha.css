@@ -977,9 +977,47 @@ body:has(.cz-page-shell)::-webkit-scrollbar {
   font-size: 15px;
   font-weight: 800;
   margin-top: 0;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   text-transform: uppercase;
   color: white;
+}
+
+/* Chamada de login para Guest */
+.cz-guest-save-box {
+  background: rgba(0, 210, 255, 0.09);
+  border: 1px solid rgba(0, 210, 255, 0.35);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.cz-guest-save-box p {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: #cfd8dc;
+  line-height: 1.4;
+}
+
+.cz-guest-login-btn {
+  display: inline-block;
+  width: 100%;
+  box-sizing: border-box;
+  background: #00d2ff;
+  color: #051329;
+  border-radius: 6px;
+  padding: 9px 14px;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: 0.4px;
+  transition: all 0.2s ease;
+}
+
+.cz-guest-login-btn:hover {
+  background: #38ddff;
+  box-shadow: 0 0 14px rgba(0, 210, 255, 0.45);
 }
 
 .cz-dist-title {

@@ -2,115 +2,34 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { fetchPlayerProgress, PLAYER_PROGRESS_EVENT } from "../../lib/playerClient";
 import "./JogosOnline.css";
 
-const SHARED_DAILY_LOG_KEY = "gruta_daily_completed_log";
-const TORCH_STORAGE_KEY = "gruta_player_torch";
+const DEFAULT_DAILY = {
+  "termo-gruta": false,
+  "cruzadinha-gruta": false,
+  "morcegos-gruta": false,
+};
 
-function getIsoDateOffset(daysOffset = 0) {
-  const date = new Date();
-  date.setDate(date.getDate() + daysOffset);
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-function getTodayIsoKey() {
-  return getIsoDateOffset(0);
-}
-
-function computeTorchState() {
-  const today = getIsoDateOffset(0);
-  const yesterday = getIsoDateOffset(-1);
-
-  let completedToday = false;
-  try {
-    const rawLog = localStorage.getItem(SHARED_DAILY_LOG_KEY);
-    const log = rawLog ? JSON.parse(rawLog) : {};
-    if (
-      log["termo-gruta"] === today ||
-      log["cruzadinha-gruta"] === today ||
-      log["morcegos-gruta"] === today
-    ) {
-      completedToday = true;
-    }
-    if (!completedToday) {
-      const czRaw = localStorage.getItem("gruta_cruzadinha_daily_state");
-      if (czRaw) {
-        const czParsed = JSON.parse(czRaw);
-        if (czParsed?.dateKey === today && czParsed?.isGameOver) {
-          completedToday = true;
-        }
-      }
-    }
-  } catch (e) {}
-
-  let stored = { currentDays: 0, recordDays: 0, lastLitDate: null };
-  try {
-    const raw = localStorage.getItem(TORCH_STORAGE_KEY);
-    if (raw) {
-      stored = { ...stored, ...JSON.parse(raw) };
-    }
-  } catch (e) {}
-
-  let currentDays = Number(stored.currentDays) || 0;
-  let recordDays = Number(stored.recordDays) || 0;
-  let lastLitDate = stored.lastLitDate || null;
-  let isLitToday = false;
-
-  if (lastLitDate === today) {
-    currentDays = Math.max(1, currentDays);
-    isLitToday = true;
-  } else if (completedToday) {
-    if (lastLitDate === yesterday) {
-      currentDays = currentDays + 1;
-    } else {
-      currentDays = 1;
-    }
-    lastLitDate = today;
-    isLitToday = true;
-  } else if (lastLitDate === yesterday) {
-    isLitToday = false;
-  } else {
-    currentDays = 0;
-    isLitToday = false;
-  }
-
-  if (currentDays > recordDays) {
-    recordDays = currentDays;
-  }
-
-  const strength = currentDays >= 60 ? 3 : currentDays >= 30 ? 2 : 1;
-
-  try {
-    localStorage.setItem(
-      TORCH_STORAGE_KEY,
-      JSON.stringify({ currentDays, recordDays, lastLitDate })
-    );
-  } catch (e) {}
-
-  return {
-    currentDays,
-    recordDays,
-    strength,
-    isLitToday
-  };
-}
+const DEFAULT_TORCH = {
+  currentDays: 0,
+  recordDays: 0,
+  strength: 1,
+  isLitToday: false,
+};
 
 export default function JogosOnline() {
   const router = useRouter();
-  const [dailyCompleted, setDailyCompleted] = useState({
-    "termo-gruta": false,
-    "cruzadinha-gruta": false,
-    "morcegos-gruta": false
-  });
-  const [torchData, setTorchData] = useState({
-    currentDays: 0,
-    recordDays: 0,
-    strength: 1,
-    isLitToday: false
-  });
+  const { status } = useSession();
+
+  const isAuthenticated = status === "authenticated";
+  const isGuest = status === "unauthenticated";
+
+  const [level, setLevel] = useState(1);
+  const [coins, setCoins] = useState(0);
+  const [dailyCompleted, setDailyCompleted] = useState(DEFAULT_DAILY);
+  const [torchData, setTorchData] = useState(DEFAULT_TORCH);
   const [showTorchModal, setShowTorchModal] = useState(false);
   const [toastMsg, setToastMsg] = useState(null);
 
@@ -121,36 +40,36 @@ export default function JogosOnline() {
     }, 2400);
   }, []);
 
-  const refreshStatus = useCallback(() => {
-    if (typeof window === "undefined") return;
-    const today = getTodayIsoKey();
+  const refreshStatus = useCallback(async () => {
+    if (status === "loading") return;
 
-    try {
-      const rawLog = localStorage.getItem(SHARED_DAILY_LOG_KEY);
-      const log = rawLog ? JSON.parse(rawLog) : {};
-
-      let cruzadinhaDone = log["cruzadinha-gruta"] === today;
-      if (!cruzadinhaDone) {
-        const czRaw = localStorage.getItem("gruta_cruzadinha_daily_state");
-        if (czRaw) {
-          const czParsed = JSON.parse(czRaw);
-          if (czParsed?.dateKey === today && czParsed?.isGameOver) {
-            cruzadinhaDone = true;
-          }
-        }
-      }
-
-      setDailyCompleted({
-        "termo-gruta": log["termo-gruta"] === today,
-        "cruzadinha-gruta": cruzadinhaDone,
-        "morcegos-gruta": log["morcegos-gruta"] === today
-      });
-    } catch (e) {
-      console.error("Erro ao verificar status diário:", e);
+    if (status !== "authenticated") {
+      setLevel(1);
+      setCoins(0);
+      setDailyCompleted(DEFAULT_DAILY);
+      setTorchData(DEFAULT_TORCH);
+      return;
     }
 
-    setTorchData(computeTorchState());
-  }, []);
+    try {
+      const data = await fetchPlayerProgress();
+      if (data?.authenticated && data?.progress) {
+        const p = data.progress;
+        setLevel(p.level || 1);
+        setCoins(p.coins || 0);
+        setDailyCompleted({
+          ...DEFAULT_DAILY,
+          ...(p.dailyCompleted || {}),
+        });
+        setTorchData({
+          ...DEFAULT_TORCH,
+          ...(p.torch || {}),
+        });
+      }
+    } catch (e) {
+      console.error("Erro ao verificar status do jogador:", e);
+    }
+  }, [status]);
 
   useEffect(() => {
     refreshStatus();
@@ -162,12 +81,12 @@ export default function JogosOnline() {
     };
 
     window.addEventListener("focus", handleVisibilityOrFocus);
-    window.addEventListener("storage", refreshStatus);
+    window.addEventListener(PLAYER_PROGRESS_EVENT, refreshStatus);
     document.addEventListener("visibilitychange", handleVisibilityOrFocus);
 
     return () => {
       window.removeEventListener("focus", handleVisibilityOrFocus);
-      window.removeEventListener("storage", refreshStatus);
+      window.removeEventListener(PLAYER_PROGRESS_EVENT, refreshStatus);
       document.removeEventListener("visibilitychange", handleVisibilityOrFocus);
     };
   }, [refreshStatus]);
@@ -179,7 +98,7 @@ export default function JogosOnline() {
       image: "/assets/games/termo.jpg",
       status: "playable",
       hasDaily: true,
-      action: () => router.push("/jogos/termo")
+      action: () => router.push("/jogos/termo"),
     },
     {
       id: "cruzadinha-gruta",
@@ -187,7 +106,7 @@ export default function JogosOnline() {
       image: "/assets/games/cruzadinha.jpg",
       status: "playable",
       hasDaily: true,
-      action: () => router.push("/jogos/cruzadinha")
+      action: () => router.push("/jogos/cruzadinha"),
     },
     {
       id: "morcegos-gruta",
@@ -195,7 +114,7 @@ export default function JogosOnline() {
       image: "/assets/games/morcegos.jpg",
       status: "playable",
       hasDaily: true,
-      action: () => router.push("/jogos/morcegos")
+      action: () => router.push("/jogos/morcegos"),
     },
     {
       id: "dados-gruta",
@@ -203,8 +122,8 @@ export default function JogosOnline() {
       image: "/assets/games/d20.jpg",
       status: "playable",
       hasDaily: false,
-      action: () => router.push("/jogos/dados")
-    }
+      action: () => router.push("/jogos/dados"),
+    },
   ];
 
   const nextMilestone = torchData.strength === 1 ? 30 : torchData.strength === 2 ? 60 : 60;
@@ -217,13 +136,33 @@ export default function JogosOnline() {
     <section className="jogos-online-page">
       {toastMsg && <div className="jogos-toast">{toastMsg}</div>}
 
+      {/* Aviso para visitante (Guest) */}
+      {isGuest && (
+        <div className="jogos-guest-banner">
+          <div className="jogos-guest-banner-text">
+            <strong>Modo Visitante:</strong> você pode jogar livremente, mas seu progresso e a Tocha não ficam salvos.
+          </div>
+          <button
+            type="button"
+            className="jogos-guest-login-btn"
+            onClick={() => router.push("/login")}
+          >
+            Fazer login para salvar
+          </button>
+        </div>
+      )}
+
       {/* Barra de 3 Indicadores (Mobile — abaixo do cabeçalho) */}
       <div className="jogos-mobile-indicators-bar">
         {/* 1. Nível */}
         <button
           type="button"
           className="jogos-mob-ind-card ind-level"
-          onClick={() => showToast("Sistema de Nível em breve!")}
+          onClick={() =>
+            isGuest
+              ? showToast("Faça login para evoluir seu nível!")
+              : showToast("Sistema de Nível em breve!")
+          }
         >
           <span className="jogos-mob-ind-icon">
             <svg
@@ -239,7 +178,7 @@ export default function JogosOnline() {
               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
           </span>
-          <span className="jogos-mob-ind-value">Nv. 1</span>
+          <span className="jogos-mob-ind-value">Nv. {level}</span>
         </button>
 
         {/* 2. Tocha */}
@@ -263,7 +202,11 @@ export default function JogosOnline() {
         <button
           type="button"
           className="jogos-mob-ind-card ind-coins"
-          onClick={() => showToast("Sistema de Moedas em breve!")}
+          onClick={() =>
+            isGuest
+              ? showToast("Faça login para acumular moedas!")
+              : showToast("Sistema de Moedas em breve!")
+          }
         >
           <span className="jogos-mob-ind-icon">
             <svg
@@ -281,14 +224,14 @@ export default function JogosOnline() {
               <line x1="9.5" y1="10.5" x2="14.5" y2="10.5" />
             </svg>
           </span>
-          <span className="jogos-mob-ind-value">0</span>
+          <span className="jogos-mob-ind-value">{coins}</span>
         </button>
       </div>
 
       {/* Grid de Jogos */}
       <div className="playable-games-grid">
         {grutaPlayableGames.map((game) => {
-          const isDailyDone = game.hasDaily && dailyCompleted[game.id];
+          const isDailyDone = isAuthenticated && game.hasDaily && dailyCompleted[game.id];
 
           return (
             <div key={game.id} className="playable-card" onClick={game.action}>
@@ -360,11 +303,29 @@ export default function JogosOnline() {
               </div>
               <h2 className="jogos-torch-modal-title">TOCHA DA GRUTA</h2>
               <span className={`jogos-torch-status-tag ${torchData.isLitToday ? "lit" : ""}`}>
-                {torchData.isLitToday
+                {isGuest
+                  ? "FAÇA LOGIN PARA ACENDER A TOCHA"
+                  : torchData.isLitToday
                   ? "ACESA HOJE"
                   : "APAGADA HOJE • COMPLETE UM DIÁRIO"}
               </span>
             </div>
+
+            {isGuest && (
+              <div className="jogos-torch-guest-box">
+                <p>Entre na sua conta para salvar sua sequência de dias e sincronizar entre seus dispositivos.</p>
+                <button
+                  type="button"
+                  className="jogos-guest-login-btn full"
+                  onClick={() => {
+                    setShowTorchModal(false);
+                    router.push("/login");
+                  }}
+                >
+                  Fazer login
+                </button>
+              </div>
+            )}
 
             <div className="jogos-torch-stats-row">
               <div className="jogos-torch-stat-card">

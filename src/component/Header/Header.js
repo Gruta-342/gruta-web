@@ -3,110 +3,27 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { fetchPlayerProgress, PLAYER_PROGRESS_EVENT } from "../../lib/playerClient";
 import "./Header.css";
 import AuthButton from "../AuthButton/AuthButton";
 
-const SHARED_DAILY_LOG_KEY = "gruta_daily_completed_log";
-const TORCH_STORAGE_KEY = "gruta_player_torch";
-
-function getIsoDateOffset(daysOffset = 0) {
-  const date = new Date();
-  date.setDate(date.getDate() + daysOffset);
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-function hasCompletedAnyDailyToday(todayKey) {
-  try {
-    const rawLog = localStorage.getItem(SHARED_DAILY_LOG_KEY);
-    const log = rawLog ? JSON.parse(rawLog) : {};
-    if (
-      log["termo-gruta"] === todayKey ||
-      log["cruzadinha-gruta"] === todayKey ||
-      log["morcegos-gruta"] === todayKey
-    ) {
-      return true;
-    }
-
-    const czRaw = localStorage.getItem("gruta_cruzadinha_daily_state");
-    if (czRaw) {
-      const czParsed = JSON.parse(czRaw);
-      if (czParsed?.dateKey === todayKey && czParsed?.isGameOver) {
-        return true;
-      }
-    }
-  } catch (e) {}
-  return false;
-}
-
-function computeTorchState() {
-  const today = getIsoDateOffset(0);
-  const yesterday = getIsoDateOffset(-1);
-  const completedToday = hasCompletedAnyDailyToday(today);
-
-  let stored = { currentDays: 0, recordDays: 0, lastLitDate: null };
-  try {
-    const raw = localStorage.getItem(TORCH_STORAGE_KEY);
-    if (raw) {
-      stored = { ...stored, ...JSON.parse(raw) };
-    }
-  } catch (e) {}
-
-  let currentDays = Number(stored.currentDays) || 0;
-  let recordDays = Number(stored.recordDays) || 0;
-  let lastLitDate = stored.lastLitDate || null;
-  let isLitToday = false;
-
-  if (lastLitDate === today) {
-    currentDays = Math.max(1, currentDays);
-    isLitToday = true;
-  } else if (completedToday) {
-    if (lastLitDate === yesterday) {
-      currentDays = currentDays + 1;
-    } else {
-      currentDays = 1;
-    }
-    lastLitDate = today;
-    isLitToday = true;
-  } else if (lastLitDate === yesterday) {
-    isLitToday = false;
-  } else {
-    currentDays = 0;
-    isLitToday = false;
-  }
-
-  if (currentDays > recordDays) {
-    recordDays = currentDays;
-  }
-
-  const strength = currentDays >= 60 ? 3 : currentDays >= 30 ? 2 : 1;
-
-  try {
-    localStorage.setItem(
-      TORCH_STORAGE_KEY,
-      JSON.stringify({ currentDays, recordDays, lastLitDate })
-    );
-  } catch (e) {}
-
-  return {
-    currentDays,
-    recordDays,
-    strength,
-    isLitToday
-  };
-}
+const DEFAULT_TORCH = {
+  currentDays: 0,
+  recordDays: 0,
+  strength: 1,
+  isLitToday: false,
+};
 
 export default function Header() {
+  const { status } = useSession();
+  const isGuest = status === "unauthenticated";
+
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [torchData, setTorchData] = useState({
-    currentDays: 0,
-    recordDays: 0,
-    strength: 1,
-    isLitToday: false
-  });
+  const [level, setLevel] = useState(1);
+  const [coins, setCoins] = useState(0);
+  const [torchData, setTorchData] = useState(DEFAULT_TORCH);
   const [showTorchModal, setShowTorchModal] = useState(false);
   const [headerToast, setHeaderToast] = useState(null);
 
@@ -115,10 +32,31 @@ export default function Header() {
   const isJogosHub = normalizedPath === "/jogos";
   const isSobre = normalizedPath.includes("/sobre");
 
-  const syncTorch = useCallback(() => {
-    if (typeof window === "undefined") return;
-    setTorchData(computeTorchState());
-  }, []);
+  const syncPlayerHeader = useCallback(async () => {
+    if (status === "loading") return;
+
+    if (status !== "authenticated") {
+      setLevel(1);
+      setCoins(0);
+      setTorchData(DEFAULT_TORCH);
+      return;
+    }
+
+    try {
+      const data = await fetchPlayerProgress();
+      if (data?.authenticated && data?.progress) {
+        const p = data.progress;
+        setLevel(p.level || 1);
+        setCoins(p.coins || 0);
+        setTorchData({
+          ...DEFAULT_TORCH,
+          ...(p.torch || {}),
+        });
+      }
+    } catch (e) {
+      console.error("Erro ao sincronizar indicadores no Header:", e);
+    }
+  }, [status]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -130,24 +68,24 @@ export default function Header() {
 
   useEffect(() => {
     if (!isJogosHub) return;
-    syncTorch();
+    syncPlayerHeader();
 
     const handleRefresh = () => {
       if (document.visibilityState === "visible") {
-        syncTorch();
+        syncPlayerHeader();
       }
     };
 
     window.addEventListener("focus", handleRefresh);
-    window.addEventListener("storage", syncTorch);
+    window.addEventListener(PLAYER_PROGRESS_EVENT, syncPlayerHeader);
     document.addEventListener("visibilitychange", handleRefresh);
 
     return () => {
       window.removeEventListener("focus", handleRefresh);
-      window.removeEventListener("storage", syncTorch);
+      window.removeEventListener(PLAYER_PROGRESS_EVENT, syncPlayerHeader);
       document.removeEventListener("visibilitychange", handleRefresh);
     };
-  }, [isJogosHub, syncTorch]);
+  }, [isJogosHub, syncPlayerHeader]);
 
   // Oculta o cabeçalho completamente nas subpáginas de jogos (/jogos/termo, etc.)
   if (normalizedPath.startsWith("/jogos/")) return null;
@@ -164,7 +102,7 @@ export default function Header() {
     { name: "ACERVO", path: "/acervo" },
     { name: "JOGOS", path: "/jogos" },
     { name: "GALERIA", path: "/galeria" },
-    { name: "SOBRE", path: "/sobre" }
+    { name: "SOBRE", path: "/sobre" },
   ];
 
   const headerClass = `header-container ${
@@ -214,7 +152,11 @@ export default function Header() {
                 <button
                   type="button"
                   className="gruta-ind-pill ind-level"
-                  onClick={() => showQuickToast("Sistema de Nível em breve!")}
+                  onClick={() =>
+                    isGuest
+                      ? showQuickToast("Faça login para evoluir seu nível!")
+                      : showQuickToast("Sistema de Nível em breve!")
+                  }
                   title="Nível do Jogador"
                 >
                   <span className="gruta-ind-icon-circle">
@@ -231,7 +173,7 @@ export default function Header() {
                       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                     </svg>
                   </span>
-                  <span className="gruta-ind-value">Nv. 1</span>
+                  <span className="gruta-ind-value">Nv. {level}</span>
                 </button>
 
                 {/* 2. Tocha */}
@@ -239,7 +181,7 @@ export default function Header() {
                   type="button"
                   className={`gruta-ind-pill ind-torch ${torchData.isLitToday ? "lit" : ""}`}
                   onClick={() => {
-                    syncTorch();
+                    syncPlayerHeader();
                     setShowTorchModal(true);
                   }}
                   title="Tocha da Gruta — Clique para ver detalhes"
@@ -262,7 +204,11 @@ export default function Header() {
                 <button
                   type="button"
                   className="gruta-ind-pill ind-coins"
-                  onClick={() => showQuickToast("Sistema de Moedas em breve!")}
+                  onClick={() =>
+                    isGuest
+                      ? showQuickToast("Faça login para acumular moedas!")
+                      : showQuickToast("Sistema de Moedas em breve!")
+                  }
                   title="Moedas da Gruta"
                 >
                   <span className="gruta-ind-icon-circle">
@@ -281,7 +227,7 @@ export default function Header() {
                       <line x1="9.5" y1="10.5" x2="14.5" y2="10.5" />
                     </svg>
                   </span>
-                  <span className="gruta-ind-value">0</span>
+                  <span className="gruta-ind-value">{coins}</span>
                 </button>
               </div>
             ) : (
@@ -354,11 +300,28 @@ export default function Header() {
               </div>
               <h2 className="gruta-torch-modal-title">TOCHA DA GRUTA</h2>
               <span className={`gruta-torch-status-tag ${torchData.isLitToday ? "lit" : ""}`}>
-                {torchData.isLitToday
+                {isGuest
+                  ? "FAÇA LOGIN PARA ACENDER A TOCHA"
+                  : torchData.isLitToday
                   ? "ACESA HOJE"
                   : "APAGADA HOJE • COMPLETE UM DIÁRIO"}
               </span>
             </div>
+
+            {isGuest && (
+              <div className="gruta-torch-guest-box">
+                <p>
+                  Entre na sua conta para salvar sua sequência de dias e sincronizar entre seus dispositivos.
+                </p>
+                <Link
+                  href="/login"
+                  className="gruta-torch-login-btn"
+                  onClick={() => setShowTorchModal(false)}
+                >
+                  Fazer login
+                </Link>
+              </div>
+            )}
 
             <div className="gruta-torch-stats-row">
               <div className="gruta-torch-stat-card">

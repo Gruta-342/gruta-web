@@ -2,20 +2,20 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { fetchPlayerProgress, saveGameCompletion } from "../../lib/playerClient";
+import { getBrazilDateKey } from "../../lib/playerDate";
 import "./Cruzadinha.css";
 import {
   generateCrosswordPuzzle,
-  THEME_LABELS
+  THEME_LABELS,
 } from "../../lib/cruzadinhaGenerator.js";
-
-const STATS_STORAGE_KEY = "gruta_cruzadinha_stats";
-const DAILY_STATE_STORAGE_KEY = "gruta_cruzadinha_daily_state";
 
 const MODE_LABELS = {
   daily: "Diário",
   easy: "Fácil",
   medium: "Médio",
-  hard: "Difícil"
+  hard: "Difícil",
 };
 
 const INITIAL_MODE_STATS = {
@@ -24,29 +24,36 @@ const INITIAL_MODE_STATS = {
   currentStreak: 0,
   maxStreak: 0,
   bestTime: null,
-  lastTime: null
+  lastTime: null,
 };
 
 const INITIAL_STATS = {
   daily: { ...INITIAL_MODE_STATS },
   easy: { ...INITIAL_MODE_STATS },
   medium: { ...INITIAL_MODE_STATS },
-  hard: { ...INITIAL_MODE_STATS }
+  hard: { ...INITIAL_MODE_STATS },
 };
 
+function mergeWithInitialStats(savedExtra) {
+  if (!savedExtra || typeof savedExtra !== "object") return INITIAL_STATS;
+  return {
+    daily: { ...INITIAL_MODE_STATS, ...(savedExtra.daily || {}) },
+    easy: { ...INITIAL_MODE_STATS, ...(savedExtra.easy || {}) },
+    medium: { ...INITIAL_MODE_STATS, ...(savedExtra.medium || {}) },
+    hard: { ...INITIAL_MODE_STATS, ...(savedExtra.hard || {}) },
+  };
+}
+
 function getTodayKey() {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
+  return getBrazilDateKey(0);
 }
 
 function getDailyPuzzleNumber() {
-  const epoch = new Date(2026, 0, 1).getTime();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const diffDays = Math.floor((today.getTime() - epoch) / (1000 * 60 * 60 * 24));
+  const dateKey = getBrazilDateKey(0);
+  const [y, m, d] = dateKey.split("-").map(Number);
+  const epoch = Date.UTC(2026, 0, 1);
+  const todayUtc = Date.UTC(y, m - 1, d);
+  const diffDays = Math.floor((todayUtc - epoch) / 86400000);
   return Math.max(1, diffDays + 1);
 }
 
@@ -81,18 +88,11 @@ function generateDeterministicDailyPuzzle(dateKey) {
   }
 }
 
-function markDailyAsCompleted(gameId) {
-  try {
-    const now = new Date();
-    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    const raw = localStorage.getItem("gruta_daily_completed_log");
-    const log = raw ? JSON.parse(raw) : {};
-    log[gameId] = today;
-    localStorage.setItem("gruta_daily_completed_log", JSON.stringify(log));
-  } catch (e) {}
-}
-
 export default function Cruzadinha() {
+  const { status } = useSession();
+  const isAuthenticated = status === "authenticated";
+  const isGuest = status === "unauthenticated";
+
   const [gameMode, setGameMode] = useState("daily"); // "daily" | "easy" | "medium" | "hard"
   const [theme, setTheme] = useState("random");
   const [puzzle, setPuzzle] = useState(null);
@@ -128,43 +128,42 @@ export default function Cruzadinha() {
   const themeDropdownRef = useRef(null);
   const diffDropdownRef = useRef(null);
 
-  const isDaily = gameMode === "daily";
+  const timerRef = useRef(0);
+  const gameModeRef = useRef(gameMode);
+  const statsRef = useRef(stats);
+  const isAuthenticatedRef = useRef(isAuthenticated);
+  const dailyCompletionCacheRef = useRef(null);
+  const hasInitializedRef = useRef(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STATS_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.daily) {
-          setStats({
-            daily: { ...INITIAL_MODE_STATS, ...parsed.daily },
-            easy: { ...INITIAL_MODE_STATS, ...parsed.easy },
-            medium: { ...INITIAL_MODE_STATS, ...parsed.medium },
-            hard: { ...INITIAL_MODE_STATS, ...parsed.hard }
-          });
-        } else if (typeof parsed.played === "number") {
-          setStats({
-            ...INITIAL_STATS,
-            daily: {
-              ...INITIAL_MODE_STATS,
-              played: parsed.played || 0,
-              won: parsed.won || 0,
-              currentStreak: parsed.won > 0 ? 1 : 0,
-              maxStreak: parsed.won > 0 ? 1 : 0,
-              bestTime: parsed.bestTime ?? null,
-              lastTime: parsed.lastTime ?? null
-            }
-          });
-        }
-      }
-    } catch (e) {
-      console.error("Erro ao carregar estatísticas", e);
-    }
+    timerRef.current = timer;
+  }, [timer]);
+
+  useEffect(() => {
+    gameModeRef.current = gameMode;
+  }, [gameMode]);
+
+  useEffect(() => {
+    statsRef.current = stats;
+  }, [stats]);
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
+
+  const isDaily = gameMode === "daily";
+
+  const showToast = useCallback((msg) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage((current) => (current === msg ? null : current));
+    }, 2800);
   }, []);
 
-  const updateStats = useCallback((won, timeTaken, modeKey) => {
-    setStats((prev) => {
-      const curr = prev[modeKey] || INITIAL_MODE_STATS;
+  const recordGameResult = useCallback(
+    async (won, timeTaken, modeKey, finalGrid, wordsCount) => {
+      const prevStats = statsRef.current;
+      const curr = prevStats[modeKey] || INITIAL_MODE_STATS;
       const newPlayed = curr.played + 1;
       const newWon = won ? curr.won + 1 : curr.won;
       const newCurrentStreak = won ? curr.currentStreak + 1 : 0;
@@ -176,54 +175,77 @@ export default function Cruzadinha() {
           : Math.min(prevBest, timeTaken)
         : prevBest;
 
-      const updated = {
-        ...prev,
+      const updatedStats = {
+        ...prevStats,
         [modeKey]: {
           played: newPlayed,
           won: newWon,
           currentStreak: newCurrentStreak,
           maxStreak: newMaxStreak,
           bestTime: newBest,
-          lastTime: timeTaken
-        }
+          lastTime: timeTaken,
+        },
       };
 
-      try {
-        localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(updated));
-      } catch (e) {}
-      return updated;
-    });
-  }, []);
+      setStats(updatedStats);
+      statsRef.current = updatedStats;
 
-  const showToast = useCallback((msg) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage((current) => (current === msg ? null : current));
-    }, 2800);
-  }, []);
-
-  const saveDailyProgress = useCallback(
-    (gridData, elapsedSeconds, over, wonFlag, surrenderedFlag) => {
-      try {
-        const payload = {
-          dateKey: getTodayKey(),
-          userGrid: gridData,
-          timer: elapsedSeconds,
-          isGameOver: over,
-          gameWon: wonFlag,
-          surrendered: surrenderedFlag
+      if (modeKey === "daily") {
+        dailyCompletionCacheRef.current = {
+          won,
+          score: timeTaken,
+          state: {
+            userGrid: finalGrid,
+            timer: timeTaken,
+            isGameOver: true,
+            gameWon: won,
+            surrendered: !won,
+          },
         };
-        localStorage.setItem(DAILY_STATE_STORAGE_KEY, JSON.stringify(payload));
-        if (over) {
-          markDailyAsCompleted("cruzadinha-gruta");
+      }
+
+      if (isAuthenticatedRef.current) {
+        const todayKey = getTodayKey();
+        try {
+          const res = await saveGameCompletion({
+            gameId: "cruzadinha-gruta",
+            mode: modeKey === "daily" ? "daily" : "infinite",
+            dateKey: modeKey === "daily" ? todayKey : undefined,
+            won,
+            attempts: wordsCount,
+            score: timeTaken,
+            state:
+              modeKey === "daily"
+                ? {
+                    userGrid: finalGrid,
+                    timer: timeTaken,
+                    isGameOver: true,
+                    gameWon: won,
+                    surrendered: !won,
+                  }
+                : null,
+            extra: updatedStats,
+          });
+
+          if (res?.progress?.stats?.["cruzadinha-gruta"]?.extra) {
+            const serverStats = mergeWithInitialStats(
+              res.progress.stats["cruzadinha-gruta"].extra
+            );
+            setStats(serverStats);
+            statsRef.current = serverStats;
+          }
+        } catch (err) {
+          console.error("Erro ao salvar progresso da Cruzadinha:", err);
         }
-      } catch (e) {}
+      }
+
+      setTimeout(() => setShowStatsModal(true), 900);
     },
     []
   );
 
   const startNewGame = useCallback(
-    (targetMode = gameMode, targetTheme = theme) => {
+    (targetMode = gameMode, targetTheme = theme, overrideDailyEntry = undefined) => {
       try {
         const dailyMode = targetMode === "daily";
         const resolvedTheme = dailyMode ? "random" : targetTheme;
@@ -242,35 +264,49 @@ export default function Cruzadinha() {
         clueItemRefs.current = {};
 
         let restoredDaily = null;
-        if (dailyMode) {
-          try {
-            const rawSaved = localStorage.getItem(DAILY_STATE_STORAGE_KEY);
-            if (rawSaved) {
-              const parsed = JSON.parse(rawSaved);
-              if (
-                parsed &&
-                parsed.dateKey === todayKey &&
-                Array.isArray(parsed.userGrid) &&
-                parsed.userGrid.length === p.rows &&
-                parsed.userGrid[0]?.length === p.cols
-              ) {
-                restoredDaily = parsed;
-              }
+        if (dailyMode && isAuthenticatedRef.current) {
+          const entry =
+            overrideDailyEntry !== undefined
+              ? overrideDailyEntry
+              : dailyCompletionCacheRef.current;
+
+          if (entry) {
+            const savedState = entry.state || {};
+            if (
+              Array.isArray(savedState.userGrid) &&
+              savedState.userGrid.length === p.rows &&
+              savedState.userGrid[0]?.length === p.cols
+            ) {
+              restoredDaily = {
+                userGrid: savedState.userGrid,
+                timer: savedState.timer ?? entry.score ?? 0,
+                isGameOver: true,
+                gameWon: Boolean(savedState.gameWon ?? entry.won),
+                surrendered: Boolean(savedState.surrendered ?? !entry.won),
+              };
+            } else {
+              const fallbackGrid = p.grid.map((row) =>
+                row.map((cell) => (cell.isBlock ? "" : cell.solution))
+              );
+              restoredDaily = {
+                userGrid: fallbackGrid,
+                timer: entry.score ?? 0,
+                isGameOver: true,
+                gameWon: Boolean(entry.won),
+                surrendered: !entry.won,
+              };
             }
-          } catch (e) {}
+          }
         }
 
         if (restoredDaily) {
           setUserGrid(restoredDaily.userGrid);
-          setTimer(restoredDaily.timer || 0);
-          setIsGameOver(Boolean(restoredDaily.isGameOver));
-          setGameWon(Boolean(restoredDaily.gameWon));
-          setSurrendered(Boolean(restoredDaily.surrendered));
-          setIsTimerRunning(!restoredDaily.isGameOver);
-          if (restoredDaily.isGameOver) {
-            markDailyAsCompleted("cruzadinha-gruta");
-            setTimeout(() => setShowStatsModal(true), 600);
-          }
+          setTimer(restoredDaily.timer);
+          setIsGameOver(true);
+          setGameWon(restoredDaily.gameWon);
+          setSurrendered(restoredDaily.surrendered);
+          setIsTimerRunning(false);
+          setTimeout(() => setShowStatsModal(true), 500);
         } else {
           const emptyUserGrid = Array(p.rows)
             .fill(null)
@@ -303,13 +339,55 @@ export default function Cruzadinha() {
     [gameMode, theme, showToast]
   );
 
+  // Inicializa assim que o estado da sessão estiver definido
   useEffect(() => {
-    startNewGame("daily", "random");
+    if (status === "loading") return;
+
+    let cancelled = false;
+
+    async function bootstrap() {
+      if (status === "authenticated") {
+        try {
+          const data = await fetchPlayerProgress();
+          if (cancelled) return;
+
+          if (data?.authenticated && data?.progress) {
+            const p = data.progress;
+            const serverStats = mergeWithInitialStats(p.stats?.["cruzadinha-gruta"]?.extra);
+            setStats(serverStats);
+            statsRef.current = serverStats;
+
+            const todayCompletion = p.dailyStates?.["cruzadinha-gruta"] || null;
+            dailyCompletionCacheRef.current = todayCompletion;
+            startNewGame("daily", "random", todayCompletion);
+            return;
+          }
+        } catch (err) {
+          console.error("Erro ao carregar progresso da Cruzadinha:", err);
+        }
+      } else {
+        setStats(INITIAL_STATS);
+        statsRef.current = INITIAL_STATS;
+        dailyCompletionCacheRef.current = null;
+      }
+
+      if (!cancelled) {
+        startNewGame("daily", "random", null);
+      }
+    }
+
+    bootstrap();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [status, startNewGame]);
+
+  useEffect(() => {
     const countdownInterval = setInterval(() => {
       setSecondsRemaining(getSecondsUntilMidnight());
     }, 1000);
     return () => clearInterval(countdownInterval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -321,13 +399,6 @@ export default function Cruzadinha() {
     }
     return () => clearInterval(interval);
   }, [isTimerRunning, isGameOver]);
-
-  // Persiste progresso do modo Diário continuamente
-  useEffect(() => {
-    if (isDaily && puzzle && userGrid.length > 0) {
-      saveDailyProgress(userGrid, timer, isGameOver, gameWon, surrendered);
-    }
-  }, [isDaily, puzzle, userGrid, timer, isGameOver, gameWon, surrendered, saveDailyProgress]);
 
   const formatTime = (secs) => {
     if (secs === null || secs === undefined) return "--:--";
@@ -377,7 +448,7 @@ export default function Cruzadinha() {
     if (isOutOfView) {
       clueEl.scrollIntoView({
         behavior: "smooth",
-        block: "nearest"
+        block: "nearest",
       });
     }
   }, [currentWord]);
@@ -540,22 +611,24 @@ export default function Cruzadinha() {
 
       if (allFilled) {
         if (allCorrect) {
+          const elapsedTime = timerRef.current;
           setIsGameOver(true);
           setGameWon(true);
           setIsTimerRunning(false);
-          updateStats(true, timer, gameMode);
-          if (isDaily) {
-            saveDailyProgress(currentUserGrid, timer, true, true, false);
-            markDailyAsCompleted("cruzadinha-gruta");
-          }
+          recordGameResult(
+            true,
+            elapsedTime,
+            gameModeRef.current,
+            currentUserGrid,
+            puzzle.words.length
+          );
           showToast("Sensacional! Você desvendou a cruzadinha!");
-          setTimeout(() => setShowStatsModal(true), 900);
         } else {
           showToast("A grade está completa, mas ainda há letras incorretas!");
         }
       }
     },
-    [puzzle, timer, gameMode, updateStats, showToast, isDaily, saveDailyProgress]
+    [puzzle, recordGameResult, showToast]
   );
 
   const handleInputCharacter = useCallback(
@@ -649,7 +722,7 @@ export default function Cruzadinha() {
       currentWord,
       userGrid,
       solvedCellsSet,
-      checkVictoryCondition
+      checkVictoryCondition,
     ]
   );
 
@@ -790,11 +863,11 @@ export default function Cruzadinha() {
     toggleDirection,
     handleBackspace,
     handleArrowMove,
-    handleInputCharacter
+    handleInputCharacter,
   ]);
 
   const handleGiveUp = useCallback(() => {
-    if (isGameOver) return;
+    if (isGameOver || !puzzle) return;
     if (!confirmGiveUp) {
       setConfirmGiveUp(true);
       if (giveUpTimeoutRef.current) clearTimeout(giveUpTimeoutRef.current);
@@ -804,6 +877,7 @@ export default function Cruzadinha() {
       return;
     }
 
+    const elapsedTime = timerRef.current;
     setConfirmGiveUp(false);
     setIsGameOver(true);
     setSurrendered(true);
@@ -813,14 +887,15 @@ export default function Cruzadinha() {
       row.map((cell) => (cell.isBlock ? "" : cell.solution))
     );
     setUserGrid(revealedGrid);
-    updateStats(false, timer, gameMode);
-    if (isDaily) {
-      saveDailyProgress(revealedGrid, timer, true, false, true);
-      markDailyAsCompleted("cruzadinha-gruta");
-    }
+    recordGameResult(
+      false,
+      elapsedTime,
+      gameModeRef.current,
+      revealedGrid,
+      puzzle.words.length
+    );
     showToast("Respostas reveladas. Mais sorte na próxima!");
-    setTimeout(() => setShowStatsModal(true), 900);
-  }, [isGameOver, confirmGiveUp, puzzle, timer, gameMode, updateStats, showToast, isDaily, saveDailyProgress]);
+  }, [isGameOver, confirmGiveUp, puzzle, recordGameResult, showToast]);
 
   const handleShare = async () => {
     const dayNum = getDailyPuzzleNumber();
@@ -895,7 +970,7 @@ export default function Cruzadinha() {
   const keyboardRows = [
     ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
     ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-    ["CLUES", "Z", "X", "C", "V", "B", "N", "M", "BKSP"]
+    ["CLUES", "Z", "X", "C", "V", "B", "N", "M", "BKSP"],
   ];
 
   const currentModeStats = stats[gameMode] || INITIAL_MODE_STATS;
@@ -1017,7 +1092,7 @@ export default function Cruzadinha() {
                   strokeLinejoin="round"
                   style={{
                     transform: diffDropdownOpen ? "rotate(180deg)" : "rotate(0)",
-                    transition: "transform 0.2s"
+                    transition: "transform 0.2s",
                   }}
                 >
                   <polyline points="6 9 12 15 18 9"></polyline>
@@ -1188,7 +1263,7 @@ export default function Cruzadinha() {
                 style={{
                   "--cz-cols": puzzle.cols,
                   "--cz-rows": puzzle.rows,
-                  gridTemplateColumns: `repeat(${puzzle.cols}, var(--cell-size))`
+                  gridTemplateColumns: `repeat(${puzzle.cols}, var(--cell-size))`,
                 }}
               >
                 {puzzle.grid.map((row, r) =>
@@ -1465,6 +1540,17 @@ export default function Cruzadinha() {
                 ESTATÍSTICAS - {(MODE_LABELS[gameMode] || "Diário").toUpperCase()}
               </h2>
 
+              {isGuest && (
+                <div className="cz-guest-save-box">
+                  <p>
+                    Faça login para salvar seu progresso, estatísticas e acender a Tocha da Gruta.
+                  </p>
+                  <Link href="/login" className="cz-guest-login-btn">
+                    Fazer login para salvar
+                  </Link>
+                </div>
+              )}
+
               <h3 className="cz-dist-title">PROGRESSO</h3>
               <div className="cz-stats-grid">
                 <div className="cz-stat-box">
@@ -1520,7 +1606,7 @@ export default function Cruzadinha() {
                           width:
                             currentModeStats.played > 0
                               ? `${Math.max((currentModeStats.won / maxResultCount) * 100, 7)}%`
-                              : "7%"
+                              : "7%",
                         }}
                       >
                         {currentModeStats.won}
@@ -1538,7 +1624,7 @@ export default function Cruzadinha() {
                           width:
                             currentModeStats.played > 0
                               ? `${Math.max((totalLosses / maxResultCount) * 100, 7)}%`
-                              : "7%"
+                              : "7%",
                         }}
                       >
                         {totalLosses}

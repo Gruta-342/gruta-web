@@ -1,31 +1,58 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { fetchPlayerProgress, saveGameCompletion } from "../../lib/playerClient";
+import { getBrazilDateKey } from "../../lib/playerDate";
 import "./Termo.css";
 import {
   getDailyWord,
   getRandomWords,
   normalizeWord,
   getSecondsUntilNextWord,
-  VALID_GUESSES
+  VALID_GUESSES,
 } from "./words";
-
-const STATS_STORAGE_KEY = "gruta_termo_stats";
-const STATE_STORAGE_KEY = "gruta_termo_game_state";
 
 const GAME_MODES = {
   DAILY: { id: "DAILY", words: 1, length: 6, attempts: 6, label: "Desafio Diário" },
   NORMAL: { id: "NORMAL", words: 1, length: 5, attempts: 6, label: "Normal (5L)" },
   DOUBLE: { id: "DOUBLE", words: 2, length: 5, attempts: 7, label: "Duplo" },
-  QUAD: { id: "QUAD", words: 4, length: 5, attempts: 9, label: "Quarteto" }
+  QUAD: { id: "QUAD", words: 4, length: 5, attempts: 9, label: "Quarteto" },
 };
 
 const INITIAL_STATS = {
   DAILY: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, guesses: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 } },
   NORMAL: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, guesses: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 } },
   DOUBLE: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, guesses: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 } },
-  QUAD: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, guesses: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 } }
+  QUAD: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, guesses: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 } },
 };
+
+function mergeWithInitialStats(savedExtra) {
+  if (!savedExtra || typeof savedExtra !== "object") return INITIAL_STATS;
+  return {
+    DAILY: {
+      ...INITIAL_STATS.DAILY,
+      ...(savedExtra.DAILY || {}),
+      guesses: { ...INITIAL_STATS.DAILY.guesses, ...(savedExtra.DAILY?.guesses || {}) },
+    },
+    NORMAL: {
+      ...INITIAL_STATS.NORMAL,
+      ...(savedExtra.NORMAL || {}),
+      guesses: { ...INITIAL_STATS.NORMAL.guesses, ...(savedExtra.NORMAL?.guesses || {}) },
+    },
+    DOUBLE: {
+      ...INITIAL_STATS.DOUBLE,
+      ...(savedExtra.DOUBLE || {}),
+      guesses: { ...INITIAL_STATS.DOUBLE.guesses, ...(savedExtra.DOUBLE?.guesses || {}) },
+    },
+    QUAD: {
+      ...INITIAL_STATS.QUAD,
+      ...(savedExtra.QUAD || {}),
+      guesses: { ...INITIAL_STATS.QUAD.guesses, ...(savedExtra.QUAD?.guesses || {}) },
+    },
+  };
+}
 
 function evaluateGuess(guess, target) {
   const result = Array(guess.length).fill("absent");
@@ -53,18 +80,11 @@ function evaluateGuess(guess, target) {
   return result;
 }
 
-function markDailyAsCompleted(gameId) {
-  try {
-    const now = new Date();
-    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    const raw = localStorage.getItem("gruta_daily_completed_log");
-    const log = raw ? JSON.parse(raw) : {};
-    log[gameId] = today;
-    localStorage.setItem("gruta_daily_completed_log", JSON.stringify(log));
-  } catch (e) {}
-}
-
 export default function Termo() {
+  const { status } = useSession();
+  const isAuthenticated = status === "authenticated";
+  const isGuest = status === "unauthenticated";
+
   const [activeMode, setActiveMode] = useState(GAME_MODES.DAILY);
   const [secretWords, setSecretWords] = useState([]);
   const [dayNumber, setDayNumber] = useState(0);
@@ -88,14 +108,45 @@ export default function Termo() {
   const [secondsRemaining, setSecondsRemaining] = useState(getSecondsUntilNextWord());
   const [timer, setTimer] = useState(0);
   const timerRef = useRef(0);
+  const statsRef = useRef(stats);
+  const isAuthenticatedRef = useRef(isAuthenticated);
+  const dailyCompletionCacheRef = useRef(null);
+  const hasInitializedRef = useRef(false);
 
   useEffect(() => {
     timerRef.current = timer;
   }, [timer]);
 
-  const gameStateRef = useRef({ currentGuessArray, activeCol, guesses, gameStatus, activeMode, secretWords, solvedBoards, dayNumber });
   useEffect(() => {
-    gameStateRef.current = { currentGuessArray, activeCol, guesses, gameStatus, activeMode, secretWords, solvedBoards, dayNumber };
+    statsRef.current = stats;
+  }, [stats]);
+
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
+
+  const gameStateRef = useRef({
+    currentGuessArray,
+    activeCol,
+    guesses,
+    gameStatus,
+    activeMode,
+    secretWords,
+    solvedBoards,
+    dayNumber,
+  });
+
+  useEffect(() => {
+    gameStateRef.current = {
+      currentGuessArray,
+      activeCol,
+      guesses,
+      gameStatus,
+      activeMode,
+      secretWords,
+      solvedBoards,
+      dayNumber,
+    };
   }, [currentGuessArray, activeCol, guesses, gameStatus, activeMode, secretWords, solvedBoards, dayNumber]);
 
   useEffect(() => {
@@ -108,22 +159,12 @@ export default function Termo() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const showToast = (msg, duration = 2000) => {
+  const showToast = useCallback((msg, duration = 2000) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(""), duration);
-  };
-
-  useEffect(() => {
-    try {
-      const savedStats = localStorage.getItem(STATS_STORAGE_KEY);
-      if (savedStats) {
-        const parsed = JSON.parse(savedStats);
-        if (parsed.DAILY) setStats(parsed);
-      }
-    } catch (e) {}
+    setTimeout(() => setToastMessage((curr) => (curr === msg ? "" : curr)), duration);
   }, []);
 
-  const initGame = useCallback((mode) => {
+  const initGame = useCallback((mode, overrideDailyEntry = undefined) => {
     setActiveMode(mode);
     setIsModeDropdownOpen(false);
 
@@ -132,26 +173,33 @@ export default function Termo() {
       setSecretWords([daily.word]);
       setDayNumber(daily.dayNumber);
 
-      try {
-        const savedState = localStorage.getItem(STATE_STORAGE_KEY);
-        if (savedState) {
-          const parsed = JSON.parse(savedState);
-          if (parsed.dayNumber === daily.dayNumber) {
-            setGuesses(parsed.guesses || []);
-            setGameStatus(parsed.gameStatus || "IN_PROGRESS");
-            setSolvedBoards(parsed.gameStatus === "WON" ? [0] : []);
-            setCurrentGuessArray(Array(mode.length).fill(""));
-            setActiveCol(0);
-            setTimer(parsed.timer || 0);
+      if (isAuthenticatedRef.current) {
+        const entry =
+          overrideDailyEntry !== undefined
+            ? overrideDailyEntry
+            : dailyCompletionCacheRef.current;
 
-            if (parsed.gameStatus !== "IN_PROGRESS") {
-              markDailyAsCompleted("termo-gruta");
-              setTimeout(() => setShowStatsModal(true), 600);
-            }
-            return;
-          }
+        if (entry) {
+          const savedState = entry.state || {};
+          const restoredGuesses = Array.isArray(savedState.guesses)
+            ? savedState.guesses
+            : entry.won
+            ? [daily.word]
+            : [];
+          const restoredStatus =
+            savedState.gameStatus || (entry.won ? "WON" : "LOST");
+          const restoredTimer = savedState.timer ?? entry.score ?? 0;
+
+          setGuesses(restoredGuesses);
+          setGameStatus(restoredStatus);
+          setSolvedBoards(restoredStatus === "WON" ? [0] : []);
+          setCurrentGuessArray(Array(mode.length).fill(""));
+          setActiveCol(0);
+          setTimer(restoredTimer);
+          setTimeout(() => setShowStatsModal(true), 500);
+          return;
         }
-      } catch (e) {}
+      }
     } else {
       setSecretWords(getRandomWords(mode.words, mode.length));
     }
@@ -164,13 +212,56 @@ export default function Termo() {
     setGameStatus("IN_PROGRESS");
   }, []);
 
+  // Inicializa assim que o estado da sessão estiver definido
   useEffect(() => {
-    initGame(GAME_MODES.DAILY);
+    if (status === "loading") return;
+
+    let cancelled = false;
+
+    async function bootstrap() {
+      if (status === "authenticated") {
+        try {
+          const data = await fetchPlayerProgress();
+          if (cancelled) return;
+
+          if (data?.authenticated && data?.progress) {
+            const p = data.progress;
+            const serverStats = mergeWithInitialStats(p.stats?.["termo-gruta"]?.extra);
+            setStats(serverStats);
+            statsRef.current = serverStats;
+
+            const todayCompletion = p.dailyStates?.["termo-gruta"] || null;
+            dailyCompletionCacheRef.current = todayCompletion;
+            initGame(GAME_MODES.DAILY, todayCompletion);
+            return;
+          }
+        } catch (err) {
+          console.error("Erro ao carregar progresso do Termo:", err);
+        }
+      } else {
+        setStats(INITIAL_STATS);
+        statsRef.current = INITIAL_STATS;
+        dailyCompletionCacheRef.current = null;
+      }
+
+      if (!cancelled) {
+        initGame(GAME_MODES.DAILY, null);
+      }
+    }
+
+    bootstrap();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [status, initGame]);
+
+  useEffect(() => {
     const countdownTimer = setInterval(() => setSecondsRemaining(getSecondsUntilNextWord()), 1000);
     return () => clearInterval(countdownTimer);
-  }, [initGame]);
+  }, []);
 
-  // Cronômetro silencioso + persistência contínua do modo Diário
+  // Cronômetro silencioso durante a partida
   useEffect(() => {
     if (gameStatus !== "IN_PROGRESS") return;
     const interval = setInterval(() => {
@@ -178,21 +269,6 @@ export default function Termo() {
     }, 1000);
     return () => clearInterval(interval);
   }, [gameStatus]);
-
-  useEffect(() => {
-    if (activeMode.id !== "DAILY" || !dayNumber) return;
-    try {
-      localStorage.setItem(
-        STATE_STORAGE_KEY,
-        JSON.stringify({
-          dayNumber,
-          guesses,
-          gameStatus,
-          timer
-        })
-      );
-    } catch (e) {}
-  }, [activeMode.id, dayNumber, guesses, gameStatus, timer]);
 
   const formatMatchTime = (secs) => {
     if (secs === null || secs === undefined) return "--:--";
@@ -208,13 +284,10 @@ export default function Termo() {
     return `${hours}:${minutes}:${seconds}`;
   };
 
-  const handleGameEnd = (won, attemptsCount, modeId, finalTime) => {
-    if (modeId === "DAILY") {
-      markDailyAsCompleted("termo-gruta");
-    }
-
-    setStats((prev) => {
-      const currentModeStats = prev[modeId] || INITIAL_STATS[modeId];
+  const handleGameEnd = useCallback(
+    async (won, attemptsCount, modeId, finalTime, finalGuesses, finalStatus, currentDayNum) => {
+      const prevStats = statsRef.current;
+      const currentModeStats = prevStats[modeId] || INITIAL_STATS[modeId];
 
       const newPlayed = currentModeStats.played + 1;
       const newWon = won ? currentModeStats.won + 1 : currentModeStats.won;
@@ -231,7 +304,7 @@ export default function Termo() {
       if (won) newGuesses[attemptsCount] = (newGuesses[attemptsCount] || 0) + 1;
 
       const updatedStats = {
-        ...prev,
+        ...prevStats,
         [modeId]: {
           played: newPlayed,
           won: newWon,
@@ -239,27 +312,74 @@ export default function Termo() {
           maxStreak: newMaxStreak,
           bestTime: newBestTime,
           lastTime: finalTime,
-          guesses: newGuesses
-        }
+          guesses: newGuesses,
+        },
       };
 
-      try {
-        localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(updatedStats));
-      } catch (e) {}
-      return updatedStats;
-    });
+      setStats(updatedStats);
+      statsRef.current = updatedStats;
 
-    setTimeout(() => setShowStatsModal(true), 1200);
-  };
+      if (modeId === "DAILY") {
+        dailyCompletionCacheRef.current = {
+          won,
+          attempts: attemptsCount,
+          score: finalTime,
+          state: {
+            dayNumber: currentDayNum,
+            guesses: finalGuesses,
+            gameStatus: finalStatus,
+            timer: finalTime,
+          },
+        };
+      }
+
+      if (isAuthenticatedRef.current) {
+        const dateKey = getBrazilDateKey(0);
+        try {
+          const res = await saveGameCompletion({
+            gameId: "termo-gruta",
+            mode: modeId === "DAILY" ? "daily" : "infinite",
+            dateKey: modeId === "DAILY" ? dateKey : undefined,
+            won,
+            attempts: attemptsCount,
+            score: finalTime,
+            state:
+              modeId === "DAILY"
+                ? {
+                    dayNumber: currentDayNum,
+                    guesses: finalGuesses,
+                    gameStatus: finalStatus,
+                    timer: finalTime,
+                  }
+                : null,
+            extra: updatedStats,
+          });
+
+          if (res?.progress?.stats?.["termo-gruta"]?.extra) {
+            const serverStats = mergeWithInitialStats(
+              res.progress.stats["termo-gruta"].extra
+            );
+            setStats(serverStats);
+            statsRef.current = serverStats;
+          }
+        } catch (err) {
+          console.error("Erro ao salvar progresso do Termo:", err);
+        }
+      }
+
+      setTimeout(() => setShowStatsModal(true), 1200);
+    },
+    []
+  );
 
   const handleShare = async () => {
     const blockEmojis = guesses
       .map((guess) => {
         const evaluation = evaluateGuess(guess, secretWords[0]);
         return evaluation
-          .map((status) => {
-            if (status === "correct") return "🟩";
-            if (status === "present") return "🟨";
+          .map((tileStatus) => {
+            if (tileStatus === "correct") return "🟩";
+            if (tileStatus === "present") return "🟨";
             return "⬛";
           })
           .join("");
@@ -282,7 +402,15 @@ export default function Termo() {
   };
 
   const submitGuess = useCallback(() => {
-    const { currentGuessArray, guesses, gameStatus, activeMode, secretWords, solvedBoards, dayNumber } = gameStateRef.current;
+    const {
+      currentGuessArray,
+      guesses,
+      gameStatus,
+      activeMode,
+      secretWords,
+      solvedBoards,
+      dayNumber,
+    } = gameStateRef.current;
     if (gameStatus !== "IN_PROGRESS") return;
 
     if (currentGuessArray.includes("")) {
@@ -326,26 +454,17 @@ export default function Termo() {
 
     const elapsedTime = timerRef.current;
 
-    if (activeMode.id === "DAILY") {
-      try {
-        localStorage.setItem(
-          STATE_STORAGE_KEY,
-          JSON.stringify({
-            dayNumber,
-            guesses: updatedGuesses,
-            gameStatus: newStatus,
-            timer: elapsedTime
-          })
-        );
-        if (newStatus !== "IN_PROGRESS") {
-          markDailyAsCompleted("termo-gruta");
-        }
-      } catch (e) {}
-    }
-
     if (newStatus === "WON") {
       showToast("Sensacional! Você venceu!", 2500);
-      handleGameEnd(true, updatedGuesses.length, activeMode.id, elapsedTime);
+      handleGameEnd(
+        true,
+        updatedGuesses.length,
+        activeMode.id,
+        elapsedTime,
+        updatedGuesses,
+        newStatus,
+        dayNumber
+      );
     } else if (newStatus === "LOST") {
       const missedWords = secretWords.filter((_, idx) => !newSolvedBoards.includes(idx));
       const message =
@@ -354,9 +473,17 @@ export default function Termo() {
           : `Que pena! A palavra era ${missedWords[0]}`;
 
       showToast(message, 4000);
-      handleGameEnd(false, updatedGuesses.length, activeMode.id, elapsedTime);
+      handleGameEnd(
+        false,
+        updatedGuesses.length,
+        activeMode.id,
+        elapsedTime,
+        updatedGuesses,
+        newStatus,
+        dayNumber
+      );
     }
-  }, []);
+  }, [handleGameEnd, showToast]);
 
   const typeChar = useCallback((char) => {
     const { currentGuessArray, activeCol, gameStatus, activeMode } = gameStateRef.current;
@@ -428,14 +555,18 @@ export default function Termo() {
     const map = {};
     guesses.forEach((guess) => {
       secretWords.forEach((word, idx) => {
-        if (solvedBoards.includes(idx) && guesses.indexOf(guess) > guesses.findIndex((g) => g === word)) return;
+        if (
+          solvedBoards.includes(idx) &&
+          guesses.indexOf(guess) > guesses.findIndex((g) => g === word)
+        )
+          return;
         const evaluation = evaluateGuess(guess, word);
         for (let i = 0; i < guess.length; i++) {
           const letter = guess[i];
-          const status = evaluation[i];
-          if (status === "correct") map[letter] = "correct";
-          else if (status === "present" && map[letter] !== "correct") map[letter] = "present";
-          else if (status === "absent" && !map[letter]) map[letter] = "absent";
+          const tileStatus = evaluation[i];
+          if (tileStatus === "correct") map[letter] = "correct";
+          else if (tileStatus === "present" && map[letter] !== "correct") map[letter] = "present";
+          else if (tileStatus === "absent" && !map[letter]) map[letter] = "absent";
         }
       });
     });
@@ -443,7 +574,10 @@ export default function Termo() {
   }, [guesses, secretWords, solvedBoards]);
 
   const currentModeStats = stats[activeMode.id] || INITIAL_STATS[activeMode.id];
-  const winPercentage = currentModeStats.played > 0 ? Math.round((currentModeStats.won / currentModeStats.played) * 100) : 0;
+  const winPercentage =
+    currentModeStats.played > 0
+      ? Math.round((currentModeStats.won / currentModeStats.played) * 100)
+      : 0;
   const maxGuessCount = Math.max(...Object.values(currentModeStats.guesses), 1);
   const totalLosses = currentModeStats.played - currentModeStats.won;
 
@@ -460,14 +594,27 @@ export default function Termo() {
 
       <header className="termo-header">
         <div className="header-left">
-          <a href="/jogos" className="header-btn header-back-btn">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <Link href="/jogos" className="header-btn header-back-btn">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
             <span className="hide-mobile">JOGOS</span>
-          </a>
+          </Link>
           <div className="mode-dropdown-container" ref={dropdownRef}>
-            <button className="header-btn" onClick={() => setIsModeDropdownOpen(!isModeDropdownOpen)}>
+            <button
+              type="button"
+              className="header-btn"
+              onClick={() => setIsModeDropdownOpen(!isModeDropdownOpen)}
+            >
               <span className="hide-mobile">MODO: </span>
               {activeMode.id === "DAILY" ? "DIÁRIO" : activeMode.label.toUpperCase()}
               <svg
@@ -479,7 +626,10 @@ export default function Termo() {
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                style={{ transform: isModeDropdownOpen ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" }}
+                style={{
+                  transform: isModeDropdownOpen ? "rotate(180deg)" : "rotate(0)",
+                  transition: "transform 0.2s",
+                }}
               >
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
@@ -487,7 +637,12 @@ export default function Termo() {
             {isModeDropdownOpen && (
               <div className="mode-dropdown-menu">
                 {Object.values(GAME_MODES).map((m) => (
-                  <button key={m.id} className={`dropdown-item ${activeMode.id === m.id ? "active" : ""}`} onClick={() => initGame(m)}>
+                  <button
+                    key={m.id}
+                    type="button"
+                    className={`dropdown-item ${activeMode.id === m.id ? "active" : ""}`}
+                    onClick={() => initGame(m)}
+                  >
                     {m.id === "DAILY" ? "DIÁRIO" : m.label.toUpperCase()}
                   </button>
                 ))}
@@ -498,19 +653,39 @@ export default function Termo() {
 
         <div className="header-center">
           <h1 className="termo-title">TERMO</h1>
-          <span className="termo-day-tag">{activeMode.id === "DAILY" ? `#${dayNumber} DA GRUTA` : "MODO INFINITO"}</span>
+          <span className="termo-day-tag">
+            {activeMode.id === "DAILY" ? `#${dayNumber} DA GRUTA` : "MODO INFINITO"}
+          </span>
         </div>
 
         <div className="header-right">
           <button type="button" className="termo-icon-btn" onClick={() => setShowHelpModal(true)}>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="12" cy="12" r="10" />
               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
               <line x1="12" y1="17" x2="12.01" y2="17" />
             </svg>
           </button>
           <button type="button" className="termo-icon-btn" onClick={() => setShowStatsModal(true)}>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <line x1="18" y1="20" x2="18" y2="10" />
               <line x1="12" y1="20" x2="12" y2="4" />
               <line x1="6" y1="20" x2="6" y2="14" />
@@ -527,20 +702,42 @@ export default function Termo() {
               {Array.from({ length: activeMode.attempts }).map((_, rowIndex) => {
                 const isCurrentRow = rowIndex === guesses.length;
                 const isGuessedRow = rowIndex < guesses.length;
-                const guessWord = isGuessedRow ? guesses[rowIndex] : isCurrentRow && !isSolved ? currentGuessArray : Array(activeMode.length).fill("");
+                const guessWord = isGuessedRow
+                  ? guesses[rowIndex]
+                  : isCurrentRow && !isSolved
+                  ? currentGuessArray
+                  : Array(activeMode.length).fill("");
                 const evaluation = isGuessedRow ? evaluateGuess(guessWord, secretWord) : [];
 
                 return (
-                  <div key={rowIndex} className={`termo-row len-${activeMode.length} ${isCurrentRow && shakeRow && !isSolved ? "shake" : ""}`}>
+                  <div
+                    key={rowIndex}
+                    className={`termo-row len-${activeMode.length} ${
+                      isCurrentRow && shakeRow && !isSolved ? "shake" : ""
+                    }`}
+                  >
                     {Array.from({ length: activeMode.length }).map((_, colIndex) => {
                       const letter = guessWord[colIndex] || "";
-                      const status = isGuessedRow ? evaluation[colIndex] : "";
-                      const isSelected = isCurrentRow && colIndex === activeCol && gameStatus === "IN_PROGRESS" && !isSolved;
+                      const tileStatus = isGuessedRow ? evaluation[colIndex] : "";
+                      const isSelected =
+                        isCurrentRow &&
+                        colIndex === activeCol &&
+                        gameStatus === "IN_PROGRESS" &&
+                        !isSolved;
                       return (
                         <div
                           key={colIndex}
-                          onClick={() => isCurrentRow && gameStatus === "IN_PROGRESS" && !isSolved && setActiveCol(colIndex)}
-                          className={`termo-tile ${status} ${letter && isCurrentRow && !isSolved ? "active" : ""} ${isGuessedRow ? "revealed" : ""} ${isSelected ? "selected-tile" : ""}`}
+                          onClick={() =>
+                            isCurrentRow &&
+                            gameStatus === "IN_PROGRESS" &&
+                            !isSolved &&
+                            setActiveCol(colIndex)
+                          }
+                          className={`termo-tile ${tileStatus} ${
+                            letter && isCurrentRow && !isSolved ? "active" : ""
+                          } ${isGuessedRow ? "revealed" : ""} ${
+                            isSelected ? "selected-tile" : ""
+                          }`}
                         >
                           {letter}
                         </div>
@@ -558,7 +755,7 @@ export default function Termo() {
         {[
           ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
           ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-          ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "BACKSPACE"]
+          ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "BACKSPACE"],
         ].map((row, rIdx) => (
           <div key={rIdx} className="termo-kb-row">
             {row.map((key) => {
@@ -566,6 +763,7 @@ export default function Termo() {
               return (
                 <button
                   key={key}
+                  type="button"
                   className={`termo-key ${isSpc ? "key-special" : ""} ${keyStatuses[key] || ""}`}
                   onClick={() => {
                     if (gameStatus !== "IN_PROGRESS") return;
@@ -575,7 +773,16 @@ export default function Termo() {
                   }}
                 >
                   {key === "BACKSPACE" ? (
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="20"
+                      height="20"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
                       <line x1="18" y1="9" x2="12" y2="15" />
                       <line x1="12" y1="9" x2="18" y2="15" />
@@ -593,10 +800,25 @@ export default function Termo() {
       {showStatsModal && (
         <div className="termo-modal-overlay" onClick={() => setShowStatsModal(false)}>
           <div className="termo-stats-modal" onClick={(e) => e.stopPropagation()}>
-            <button type="button" className="termo-modal-close-btn" onClick={() => setShowStatsModal(false)}>
+            <button
+              type="button"
+              className="termo-modal-close-btn"
+              onClick={() => setShowStatsModal(false)}
+            >
               ✕
             </button>
             <h2 className="termo-stats-title">ESTATÍSTICAS - {activeMode.label.toUpperCase()}</h2>
+
+            {isGuest && (
+              <div className="termo-guest-save-box">
+                <p>
+                  Faça login para salvar seu progresso, estatísticas e acender a Tocha da Gruta.
+                </p>
+                <Link href="/login" className="termo-guest-login-btn">
+                  Fazer login para salvar
+                </Link>
+              </div>
+            )}
 
             <h3 className="termo-dist-title">PROGRESSO</h3>
             <div className="termo-stats-grid">
@@ -650,13 +872,19 @@ export default function Termo() {
                   const num = i + 1;
                   const count = currentModeStats.guesses[num] || 0;
                   const isWinningAttempt = gameStatus === "WON" && guesses.length === num;
-                  const barWidth = currentModeStats.played > 0 ? Math.max((count / maxGuessCount) * 100, 7) : 7;
+                  const barWidth =
+                    currentModeStats.played > 0
+                      ? Math.max((count / maxGuessCount) * 100, 7)
+                      : 7;
 
                   return (
                     <div key={num} className="termo-dist-row">
                       <span className="termo-dist-num">{num}</span>
                       <div className="termo-dist-bar-wrapper">
-                        <div className={`termo-dist-bar ${isWinningAttempt ? "highlight" : ""}`} style={{ width: `${barWidth}%` }}>
+                        <div
+                          className={`termo-dist-bar ${isWinningAttempt ? "highlight" : ""}`}
+                          style={{ width: `${barWidth}%` }}
+                        >
                           {count}
                         </div>
                       </div>
@@ -667,8 +895,15 @@ export default function Termo() {
                   <span className="termo-dist-num">💀</span>
                   <div className="termo-dist-bar-wrapper">
                     <div
-                      className={`termo-dist-bar ${gameStatus === "LOST" ? "loss-highlight" : "loss-bar"}`}
-                      style={{ width: currentModeStats.played > 0 ? Math.max((totalLosses / maxGuessCount) * 100, 7) + "%" : "7%" }}
+                      className={`termo-dist-bar ${
+                        gameStatus === "LOST" ? "loss-highlight" : "loss-bar"
+                      }`}
+                      style={{
+                        width:
+                          currentModeStats.played > 0
+                            ? Math.max((totalLosses / maxGuessCount) * 100, 7) + "%"
+                            : "7%",
+                      }}
                     >
                       {totalLosses}
                     </div>
@@ -685,9 +920,18 @@ export default function Termo() {
                 </div>
                 {gameStatus !== "IN_PROGRESS" && (
                   <div className="termo-footer-col align-right">
-                    <button className="termo-share-btn" onClick={handleShare}>
+                    <button type="button" className="termo-share-btn" onClick={handleShare}>
                       compartilhe
-                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg
+                        viewBox="0 0 24 24"
+                        width="18"
+                        height="18"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
                         <circle cx="18" cy="5" r="3" />
                         <circle cx="6" cy="12" r="3" />
                         <circle cx="18" cy="19" r="3" />
@@ -700,7 +944,11 @@ export default function Termo() {
               </div>
             ) : (
               gameStatus !== "IN_PROGRESS" && (
-                <button onClick={() => initGame(activeMode)} className="termo-play-again-btn">
+                <button
+                  type="button"
+                  onClick={() => initGame(activeMode)}
+                  className="termo-play-again-btn"
+                >
                   JOGAR NOVAMENTE
                 </button>
               )
@@ -712,12 +960,19 @@ export default function Termo() {
       {showHelpModal && (
         <div className="termo-modal-overlay" onClick={() => setShowHelpModal(false)}>
           <div className="termo-stats-modal" onClick={(e) => e.stopPropagation()}>
-            <button type="button" className="termo-modal-close-btn" onClick={() => setShowHelpModal(false)}>
+            <button
+              type="button"
+              className="termo-modal-close-btn"
+              onClick={() => setShowHelpModal(false)}
+            >
               ✕
             </button>
             <h2 className="termo-stats-title">COMO JOGAR</h2>
             <div className="termo-help-body">
-              <p>Descubra a palavra certa. A cada tentativa, as peças mudam de cor para indicar o quão perto você chegou.</p>
+              <p>
+                Descubra a palavra certa. A cada tentativa, as peças mudam de cor para indicar o
+                quão perto você chegou.
+              </p>
               <p>
                 <strong>Dica:</strong> Os modos infinitos geram novas palavras automaticamente!
               </p>
