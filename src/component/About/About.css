@@ -3,9 +3,11 @@
 /* ======================================================== */
 .about-section {
   width: 100%;
+  max-width: 100%;
   margin: 0 auto;
   color: white;
   padding: 0;
+  overflow-x: clip;
 }
 
 .content-wrapper {
@@ -59,12 +61,12 @@
 }
 
 /* ======================================================== */
-/* --- 1. INTRODUÇÃO COM GIF CONTROLADO POR SCROLL          */
+/* --- 1. INTRODUÇÃO CINEMATOGRÁFICA CONTROLADA POR SCROLL  */
 /* ======================================================== */
 .about-scroll-intro {
   position: relative;
   width: 100%;
-  height: 240vh;
+  height: 300vh;
 }
 
 .about-sticky-stage {
@@ -75,6 +77,13 @@
   height: 100dvh;
   overflow: hidden;
   background-color: #051329;
+}
+
+.about-media-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .about-gif-fallback,
@@ -109,76 +118,89 @@
   background:
     linear-gradient(
       180deg,
-      rgba(5, 19, 41, 0.72) 0%,
-      rgba(5, 19, 41, 0.28) 38%,
-      rgba(5, 19, 41, 0.35) 75%,
+      rgba(5, 19, 41, 0.78) 0%,
+      rgba(5, 19, 41, 0.22) 32%,
+      rgba(5, 19, 41, 0.25) 68%,
       #051329 100%
     ),
     radial-gradient(
       circle at center,
-      rgba(5, 19, 41, 0.18) 0%,
-      rgba(2, 10, 26, 0.68) 100%
+      rgba(5, 19, 41, 0.1) 0%,
+      rgba(2, 10, 26, 0.65) 100%
     );
 }
 
-.about-hero-overlay {
-  position: relative;
-  z-index: 4;
-  width: 100%;
-  height: 100%;
-  max-width: 1200px;
+.about-sky-header {
+  position: absolute;
+  top: 165px;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  max-width: 920px;
   margin: 0 auto;
-  padding: 165px 24px 70px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  box-sizing: border-box;
+  padding: 0 24px;
+  text-align: center;
   will-change: transform, opacity;
-}
-
-.about-hero-card {
-  max-width: 650px;
-  background: rgba(5, 19, 41, 0.62);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(0, 210, 255, 0.28);
-  border-radius: 16px;
-  padding: 32px 34px;
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
-  text-align: left;
-  font-size: 18px;
-  line-height: 1.6;
-  color: #cfd8dc;
 }
 
 .about-title {
   color: #00d2ff;
   font-size: 42px;
-  letter-spacing: 1.5px;
-  margin-top: 0;
-  margin-bottom: 22px;
-  line-height: 1.2;
-  text-shadow: 0 2px 14px rgba(0, 210, 255, 0.35);
+  letter-spacing: 1.2px;
+  margin: 0;
+  line-height: 1.22;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.9), 0 0 18px rgba(0, 210, 255, 0.45);
 }
 
-.about-hero-card p {
-  margin-bottom: 14px;
+.about-phrases-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 150px 24px 70px;
+  pointer-events: none;
 }
 
-.about-hero-card p:last-child {
-  margin-bottom: 0;
+.about-story-banner {
+  position: absolute;
+  width: 100%;
+  max-width: 780px;
+  padding: 20px 36px;
+  text-align: center;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 145, 220, 0.26) 30%,
+    rgba(0, 175, 255, 0.34) 50%,
+    rgba(0, 145, 220, 0.26) 70%,
+    transparent 100%
+  );
+  border-bottom: 2px solid;
+  border-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 210, 255, 0.55) 25%,
+    #00d2ff 50%,
+    rgba(0, 210, 255, 0.55) 75%,
+    transparent 100%
+  ) 1;
+  will-change: transform, opacity;
 }
 
-.highlight-text {
+.about-story-banner p {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.55;
   color: #ffffff;
-  font-weight: bold;
-  font-size: 20px;
-  font-style: italic;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
 }
 
 .about-scroll-cue {
   position: absolute;
-  bottom: 24px;
+  bottom: 26px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
@@ -187,11 +209,13 @@
   align-items: center;
   gap: 4px;
   color: #00d2ff;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
   text-transform: uppercase;
   pointer-events: none;
+  white-space: nowrap;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
   animation: aboutScrollBounce 1.8s infinite ease-in-out;
 }
 
@@ -204,6 +228,13 @@
   }
 }
 
+/* No Desktop, esconde o deck acoplado do mobile para não sobrepor o céu */
+@media (min-width: 769px) {
+  .members-in-stage {
+    display: none;
+  }
+}
+
 /* ======================================================== */
 /* --- 2. DEQUE DE MEMBROS E MODAIS ---                     */
 /* ======================================================== */
@@ -211,10 +242,10 @@
   position: relative;
   width: 100%;
   max-width: 800px;
-  height: 350px; 
+  height: 350px;
   margin: 0 auto;
   z-index: 10;
-  --deck-scale: 1; 
+  --deck-scale: 1;
 }
 
 .deck-card {
@@ -229,7 +260,7 @@
   box-shadow: -5px 10px 20px rgba(0, 0, 0, 0.7);
   cursor: pointer;
   transform: translate(
-    calc(-50% + (var(--tx) * 1px * var(--deck-scale))), 
+    calc(-50% + (var(--tx) * 1px * var(--deck-scale))),
     calc(var(--ty) * 1px * var(--deck-scale))
   ) rotate(calc(var(--rot) * 1deg));
 }
@@ -243,11 +274,11 @@
 
 .members-deck-container .deck-card:hover:not(.active) {
   transform: translate(
-    calc(-50% + (var(--tx) * 1px * var(--deck-scale))), 
+    calc(-50% + (var(--tx) * 1px * var(--deck-scale))),
     calc((var(--ty) * 1px * var(--deck-scale)) - 25px)
   ) rotate(calc(var(--rot) * 1deg)) scale(1.05) !important;
   border-color: var(--theme-color);
-  box-shadow: 0 10px 30px rgba(33, 150, 243, 0.6); 
+  box-shadow: 0 10px 30px rgba(33, 150, 243, 0.6);
 }
 
 .members-deck-container .deck-card.active {
@@ -258,10 +289,10 @@
 
 .character-panel {
   position: relative;
-  z-index: 5; 
+  z-index: 5;
   max-width: 650px;
-  margin: 160px auto 40px; 
-  min-height: 120px; 
+  margin: 160px auto 40px;
+  min-height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -280,8 +311,8 @@
 .holographic-scroll {
   background: rgba(8, 26, 56, 0.8);
   border: 1px solid var(--theme-color, #00d2ff);
-  box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.05), 0 5px 15px rgba(0,0,0,0.5);
-  padding: 60px 40px 30px; 
+  box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.05), 0 5px 15px rgba(0, 0, 0, 0.5);
+  padding: 60px 40px 30px;
   border-radius: 12px;
   text-align: center;
   backdrop-filter: blur(5px);
@@ -379,7 +410,7 @@
 
 .estatuto-btn:hover {
   background-color: #00d2ff;
-  color: #020a1a; 
+  color: #020a1a;
   box-shadow: 0 0 20px rgba(0, 210, 255, 0.5);
   transform: translateY(-3px);
 }
@@ -388,6 +419,7 @@
   border-color: #a0aab5;
   color: #a0aab5;
 }
+
 .estatuto-btn.cancel:hover {
   background-color: #a0aab5;
   color: #020a1a;
@@ -399,9 +431,9 @@
   border: 1px solid rgba(0, 210, 255, 0.3);
   border-radius: 12px;
   padding: 40px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   animation: fadeInEstatuto 0.5s ease forwards;
-  text-align: left; 
+  text-align: left;
 }
 
 @keyframes fadeInEstatuto {
@@ -505,7 +537,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(2, 10, 26, 0.85); 
+  background: rgba(2, 10, 26, 0.85);
   backdrop-filter: blur(8px);
   animation: fadeInOverlay 0.3s ease;
 }
@@ -552,69 +584,150 @@
 }
 
 /* ======================================================== */
-/* --- RESPONSIVIDADE MOBILE ---                            */
+/* --- RESPONSIVIDADE TABLET / WEB ESTREITO ---             */
 /* ======================================================== */
-@media (max-width: 768px) {
-  .content-wrapper {
-    padding: 20px 15px 90px;
-  }
-
-  /* --- 1. INTRODUÇÃO MOBILE --- */
-  .about-scroll-intro {
-    height: 210vh;
-  }
-
-  .about-hero-overlay {
-    padding: 92px 16px 64px;
-    align-items: flex-end;
-    justify-content: center;
-  }
-
-  .about-hero-card {
-    padding: 22px 20px;
-    font-size: 15px;
-    line-height: 1.5;
-  }
-
-  .about-title {
-    font-size: 26px;
-    margin-bottom: 14px;
-    text-align: center;
-  }
-
-  .highlight-text {
-    font-size: 17px;
-  }
-
-  .about-scroll-cue {
-    bottom: 14px;
-    font-size: 11px;
-  }
-  
-  /* --- 2. DECK MOBILE --- */
+@media (max-width: 900px) {
   .members-deck-container {
-    --deck-scale: 0.55; 
-    height: 180px;      
-    display: block; 
+    --deck-scale: 0.72;
+    height: 270px;
   }
 
   .deck-card {
-    width: 120px;       
+    width: 170px;
+  }
+}
+
+/* ======================================================== */
+/* --- RESPONSIVIDADE MOBILE ---                            */
+/* ======================================================== */
+@media (max-width: 768px) {
+  .members-desktop-only {
+    display: none;
+  }
+
+  .content-wrapper {
+    padding: 0 15px 90px;
+  }
+
+  /* --- 1. PALCO UNIFICADO MOBILE --- */
+  .about-scroll-intro {
+    height: 260vh;
+  }
+
+  .about-sticky-stage {
+    position: sticky;
+    top: 64px;
+    height: calc(100dvh - 64px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 8px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .about-sky-header {
+    position: relative;
+    top: auto;
+    padding: 8px 16px 12px;
+    opacity: 1 !important;
+    transform: none !important;
+    flex-shrink: 0;
+  }
+
+  .about-title {
+    font-size: 24px;
+    line-height: 1.25;
+  }
+
+  .about-media-frame {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    flex-shrink: 0;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.75);
+  }
+
+  .about-phrases-stage {
+    padding: 10px 12px;
+  }
+
+  .about-story-banner {
+    padding: 12px 18px;
+    max-width: 95%;
+  }
+
+  .about-story-banner p {
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .about-scroll-cue {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    margin-top: 12px;
+    font-size: 12px;
+    flex-shrink: 0;
+    animation: aboutScrollBounceMobile 1.8s infinite ease-in-out;
+  }
+
+  @keyframes aboutScrollBounceMobile {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(5px);
+    }
+  }
+
+  .members-in-stage {
+    width: 100%;
+    padding: 0 15px 12px;
+    box-sizing: border-box;
+    margin-top: auto;
+  }
+
+  .section-subtitle {
+    margin-top: 12px;
+    font-size: 22px;
+    text-align: center;
+  }
+
+  .section-tagline {
+    font-size: 14px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  /* --- 2. DECK MOBILE --- */
+  .members-deck-container {
+    --deck-scale: 0.42;
+    height: 155px;
+    display: block;
+  }
+
+  .deck-card {
+    width: 105px;
   }
 
   .members-deck-container .deck-card.active {
-    transform: translate(-50%, 110px) scale(1.3) rotate(0deg) !important; 
+    transform: translate(-50%, 100px) scale(1.3) rotate(0deg) !important;
   }
 
   .members-deck-container:not(.has-active) .deck-card {
     animation: mobileWave 4.5s infinite ease-in-out;
-    animation-delay: calc(var(--idx) * 0.2s); 
+    animation-delay: calc(var(--idx) * 0.2s);
   }
 
   @keyframes mobileWave {
     0%, 100% {
       transform: translate(
-        calc(-50% + (var(--tx) * 1px * var(--deck-scale))), 
+        calc(-50% + (var(--tx) * 1px * var(--deck-scale))),
         calc(var(--ty) * 1px * var(--deck-scale))
       ) rotate(calc(var(--rot) * 1deg));
       border-color: transparent;
@@ -622,7 +735,7 @@
     }
     10% {
       transform: translate(
-        calc(-50% + (var(--tx) * 1px * var(--deck-scale))), 
+        calc(-50% + (var(--tx) * 1px * var(--deck-scale))),
         calc((var(--ty) * 1px * var(--deck-scale)) - 15px)
       ) rotate(calc(var(--rot) * 1deg)) scale(1.1);
       border-color: var(--theme-color);
@@ -630,7 +743,7 @@
     }
     20% {
       transform: translate(
-        calc(-50% + (var(--tx) * 1px * var(--deck-scale))), 
+        calc(-50% + (var(--tx) * 1px * var(--deck-scale))),
         calc(var(--ty) * 1px * var(--deck-scale))
       ) rotate(calc(var(--rot) * 1deg));
       border-color: transparent;
@@ -639,34 +752,27 @@
   }
 
   .character-panel {
-    margin-top: 80px; 
-    min-height: 250px; 
+    margin-top: 65px;
+    min-height: 0;
   }
-  
+
+  .character-panel.visible {
+    min-height: 200px;
+  }
+
   .holographic-scroll {
-    padding: 85px 25px 40px; 
-  }
-
-  .section-subtitle {
-    font-size: 24px;
-    text-align: center;
-  }
-
-  .section-tagline {
-    font-size: 16px;
-    margin-bottom: 30px;
-    text-align: center;
+    padding: 80px 20px 35px;
   }
 
   /* --- 3. ESTATUTO MOBILE --- */
   .estatuto-open {
     padding: 25px 15px;
   }
-  
+
   .estatuto-header h2 {
     font-size: 26px;
   }
-  
+
   .estatuto-btn {
     font-size: 16px;
     padding: 12px 20px;
@@ -675,17 +781,18 @@
 
   /* --- 4. ATIVIDADES MOBILE --- */
   .activities-grid {
-    gap: 15px; 
+    grid-template-columns: 1fr;
+    gap: 15px;
   }
 
   .activity-card {
-    padding: 20px 15px; 
+    padding: 20px 15px;
   }
-  
+
   .modal-buttons {
     flex-direction: column;
   }
-  
+
   .modal-buttons .estatuto-btn {
     width: 100%;
   }

@@ -331,7 +331,6 @@ export default function About() {
       canvas.height = targetH;
     }
 
-    // Equivalente a object-fit: cover no canvas
     const scale = Math.max(targetW / frame.width, targetH / frame.height);
     const drawW = frame.width * scale;
     const drawH = frame.height * scale;
@@ -342,14 +341,14 @@ export default function About() {
     ctx.drawImage(frame, offsetX, offsetY, drawW, drawH);
   }, []);
 
-  // Carrega e decodifica /assets/gruta.gif parado no primeiro frame
   useEffect(() => {
     let cancelled = false;
 
     decodeGifToCanvases("/assets/gruta.gif")
       .then((frames) => {
         if (cancelled || !frames.length) return;
-        framesRef.current = frames;
+        const reversedFrames = [...frames].reverse();
+        framesRef.current = reversedFrames;
         currentFrameRef.current = 0;
         setGifReady(true);
         drawFrame(0);
@@ -363,7 +362,6 @@ export default function About() {
     };
   }, [drawFrame]);
 
-  // Atualiza o frame do GIF conforme o usuário rola para baixo ou para cima
   useEffect(() => {
     const handleScroll = () => {
       if (rafIdRef.current) cancelAnimationFrame(rafIdRef.current);
@@ -460,53 +458,137 @@ export default function About() {
     setModalType(null);
   };
 
-  // Suaviza a saída do texto apenas nos últimos 20% do scroll da introdução
-  const textFade =
-    scrollProgress <= 0.78
-      ? 1
-      : Math.max(0, 1 - (scrollProgress - 0.78) / 0.22);
+  const getStepStyle = (progress, start, end, isFirst = false) => {
+    const fadeInDuration = 0.08;
+    const fadeOutDuration = 0.08;
+
+    let opacity = 0;
+    let translateY = 18;
+
+    if (isFirst && progress <= start + fadeInDuration) {
+      opacity = 1;
+      translateY = 0;
+    } else if (progress >= start && progress <= end) {
+      if (progress < start + fadeInDuration) {
+        const t = (progress - start) / fadeInDuration;
+        opacity = t;
+        translateY = 18 * (1 - t);
+      } else if (progress > end - fadeOutDuration) {
+        const t = (end - progress) / fadeOutDuration;
+        opacity = t;
+        translateY = -14 * (1 - t);
+      } else {
+        opacity = 1;
+        translateY = 0;
+      }
+    }
+
+    return {
+      opacity: Math.max(0, Math.min(1, opacity)),
+      transform: `translateY(${translateY}px)`,
+      pointerEvents: opacity > 0.2 ? "auto" : "none",
+    };
+  };
+
+  const titleStyle = getStepStyle(scrollProgress, 0, 0.48, true);
+  const phrase1Style = getStepStyle(scrollProgress, 0, 0.34, true);
+  const phrase2Style = getStepStyle(scrollProgress, 0.32, 0.66, false);
+  const phrase3Style = getStepStyle(scrollProgress, 0.64, 0.96, false);
+
+  const renderDeck = () => (
+    <>
+      <h2 className="section-subtitle center">Membros da Gruta</h2>
+      <p className="section-tagline center">Escolha sua carta. As mentes brilhantes (e altamente questionáveis) por trás da mesa.</p>
+      
+      <div className={`members-deck-container ${activeCard ? 'has-active' : ''}`}>
+        {members.map((member, index) => {
+          const isActive = activeCard?.id === member.id;
+          let transformVars = {};
+          let zIndex = index + 1; 
+
+          if (!activeCard) {
+            transformVars = spread6[index];
+          } else if (isActive) {
+            transformVars = { tx: 0, ty: 170, rot: 0 };
+            zIndex = 20; 
+          } else {
+            const unselectedIdx = members.filter(m => m.id !== activeCard.id).findIndex(m => m.id === member.id);
+            transformVars = spread5[unselectedIdx];
+          }
+
+          return (
+            <div 
+              key={member.id} 
+              className={`deck-card ${isActive ? 'active' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation(); 
+                setActiveCard(isActive ? null : member);
+              }}
+              style={{ 
+                '--theme-color': member.color,
+                '--tx': transformVars.tx,    
+                '--ty': transformVars.ty,    
+                '--rot': transformVars.rot,  
+                '--idx': index,              
+                zIndex: zIndex
+              }}
+            >
+              <img src={member.img} alt={member.name} className="member-image" />
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
 
   return (
     <section className="about-section" onClick={() => setActiveCard(null)}>
       
-      {/* --- NOVA INTRODUÇÃO COM GIF CONTROLADO PELO SCROLL --- */}
+      {/* --- INTRODUÇÃO CINEMATOGRÁFICA CONTROLADA PELO SCROLL --- */}
       <div className="about-scroll-intro" ref={introTrackRef}>
         <div className="about-sticky-stage">
-          {!gifReady && (
-            <img
-              src="/assets/gruta.gif"
-              alt="Entrada da Gruta"
-              className="about-gif-fallback"
+          <div className="about-sky-header" style={titleStyle}>
+            <h1 className="about-title">
+              Entre, role um dado
+              <br />
+              e aceite o seu destino!
+            </h1>
+          </div>
+
+          <div className="about-media-frame">
+            {!gifReady && (
+              <img
+                src="/assets/gruta.gif"
+                alt="Entrada da Gruta"
+                className="about-gif-fallback"
+              />
+            )}
+            <canvas
+              ref={canvasRef}
+              className={`about-gif-canvas ${gifReady ? "ready" : ""}`}
             />
-          )}
-          <canvas
-            ref={canvasRef}
-            className={`about-gif-canvas ${gifReady ? "ready" : ""}`}
-          />
+            <div className="about-stage-vignette" />
 
-          <div className="about-stage-vignette" />
+            <div className="about-phrases-stage">
+              <div className="about-story-banner" style={phrase1Style}>
+                <p>
+                  A Gruta é onde a gente discute teorias, resolve mistério, inventa história,
+                  joga conversa fora e ri alto sem medo de ser feliz.
+                </p>
+              </div>
 
-          <div
-            className="about-hero-overlay"
-            style={{
-              opacity: textFade,
-              transform: `translateY(${-scrollProgress * 28}px)`
-            }}
-          >
-            <div className="about-hero-card">
-              <h1 className="about-title">
-                Entre, jogue um dado e aceite o seu destino.
-              </h1>
-              <p>
-                A Gruta é onde a gente discute teorias, resolve mistério, inventa história, 
-                joga conversa fora e ri alto sem medo de ser feliz.
-              </p>
-              <p className="highlight-text">
-                Aqui a gente leva a zoeira a sério — mas só ela mesmo.
-              </p>
-              <p>
-                Na Gruta, nada é planejado... mas tudo faz parte do plano, as vezes do B, do C ou do D.
-              </p>
+              <div className="about-story-banner" style={phrase2Style}>
+                <p>
+                  Aqui a gente leva a zoeira a sério — mas só ela mesmo.
+                </p>
+              </div>
+
+              <div className="about-story-banner" style={phrase3Style}>
+                <p>
+                  Na Gruta, nada é planejado... mas tudo faz parte do plano, às vezes do B,
+                  do C ou do D.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -514,10 +596,10 @@ export default function About() {
             className="about-scroll-cue"
             style={{ opacity: Math.max(0, 1 - scrollProgress * 6) }}
           >
-            <span>Role para explorar a Gruta</span>
+            <span>Role e conheça a Gruta</span>
             <svg
-              width="20"
-              height="20"
+              width="22"
+              height="22"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -528,65 +610,30 @@ export default function About() {
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </div>
+
+          {/* Deck acoplado no palco apenas no Mobile */}
+          <div className="members-section members-in-stage">
+            {renderDeck()}
+          </div>
         </div>
       </div>
 
       <div className="content-wrapper">
-        
-        {/* --- DECK DE MEMBROS --- */}
-        <div className="members-section">
-          <h2 className="section-subtitle center">Membros da Gruta</h2>
-          <p className="section-tagline center">Escolha sua carta. As mentes brilhantes (e altamente questionáveis) por trás da mesa.</p>
-          
-          <div className={`members-deck-container ${activeCard ? 'has-active' : ''}`}>
-            {members.map((member, index) => {
-              const isActive = activeCard?.id === member.id;
-              let transformVars = {};
-              let zIndex = index + 1; 
+        {/* Deck no fluxo normal apenas no Desktop */}
+        <div className="members-section members-desktop-only">
+          {renderDeck()}
+        </div>
 
-              if (!activeCard) {
-                transformVars = spread6[index];
-              } else if (isActive) {
-                transformVars = { tx: 0, ty: 170, rot: 0 };
-                zIndex = 20; 
-              } else {
-                const unselectedIdx = members.filter(m => m.id !== activeCard.id).findIndex(m => m.id === member.id);
-                transformVars = spread5[unselectedIdx];
-              }
-
-              return (
-                <div 
-                  key={member.id} 
-                  className={`deck-card ${isActive ? 'active' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation(); 
-                    setActiveCard(isActive ? null : member);
-                  }}
-                  style={{ 
-                    '--theme-color': member.color,
-                    '--tx': transformVars.tx,    
-                    '--ty': transformVars.ty,    
-                    '--rot': transformVars.rot,  
-                    '--idx': index,              
-                    zIndex: zIndex
-                  }}
-                >
-                  <img src={member.img} alt={member.name} className="member-image" />
-                </div>
-              );
-            })}
-          </div>
-
-          <div className={`character-panel ${activeCard ? 'visible' : ''}`}>
-            {activeCard && (
-              <div className="holographic-scroll" style={{ '--theme-color': activeCard.color }}>
-                <h3 className="character-title" style={{ color: activeCard.color }}>
-                  {activeCard.name} <span className="character-alias">— {activeCard.alias}</span>
-                </h3>
-                <p className="character-flavor">{activeCard.flavor}</p>
-              </div>
-            )}
-          </div>
+        {/* Painel de descrição da carta selecionada */}
+        <div className={`character-panel ${activeCard ? 'visible' : ''}`}>
+          {activeCard && (
+            <div className="holographic-scroll" style={{ '--theme-color': activeCard.color }}>
+              <h3 className="character-title" style={{ color: activeCard.color }}>
+                {activeCard.name} <span className="character-alias">— {activeCard.alias}</span>
+              </h3>
+              <p className="character-flavor">{activeCard.flavor}</p>
+            </div>
+          )}
         </div>
 
         <div className="about-separator"></div>
