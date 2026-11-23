@@ -5,15 +5,15 @@
   width: 100%;
   margin: 0 auto;
   color: white;
-  padding: 20px 20px;
-  max-width: 1200px;
+  padding: 0;
 }
 
 .content-wrapper {
   position: relative;
-  z-index: 15; 
-  padding-top: 40px; 
-  padding-bottom: 60px;
+  z-index: 15;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px 80px;
   background-color: transparent;
 }
 
@@ -59,61 +59,149 @@
 }
 
 /* ======================================================== */
-/* --- 1. INTRODUÇÃO (HERO) ORIGINAL ---                    */
+/* --- 1. INTRODUÇÃO COM GIF CONTROLADO POR SCROLL          */
 /* ======================================================== */
-.about-hero {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 50px;
-  margin-bottom: 60px;
+.about-scroll-intro {
+  position: relative;
+  width: 100%;
+  height: 240vh;
 }
 
-.about-text-container {
-  flex: 1;
+.about-sticky-stage {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #051329;
+}
+
+.about-gif-fallback,
+.about-gif-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.about-gif-fallback {
+  object-fit: cover;
+  z-index: 1;
+}
+
+.about-gif-canvas {
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.about-gif-canvas.ready {
+  opacity: 1;
+}
+
+.about-stage-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(5, 19, 41, 0.72) 0%,
+      rgba(5, 19, 41, 0.28) 38%,
+      rgba(5, 19, 41, 0.35) 75%,
+      #051329 100%
+    ),
+    radial-gradient(
+      circle at center,
+      rgba(5, 19, 41, 0.18) 0%,
+      rgba(2, 10, 26, 0.68) 100%
+    );
+}
+
+.about-hero-overlay {
+  position: relative;
+  z-index: 4;
+  width: 100%;
+  height: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 165px 24px 70px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  will-change: transform, opacity;
+}
+
+.about-hero-card {
+  max-width: 650px;
+  background: rgba(5, 19, 41, 0.62);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 210, 255, 0.28);
+  border-radius: 16px;
+  padding: 32px 34px;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.65);
   text-align: left;
   font-size: 18px;
   line-height: 1.6;
-  color: #a0aab5;
+  color: #cfd8dc;
 }
 
 .about-title {
   color: #00d2ff;
-  font-size: 48px;
-  letter-spacing: 2px;
-  margin-bottom: 30px;
+  font-size: 42px;
+  letter-spacing: 1.5px;
+  margin-top: 0;
+  margin-bottom: 22px;
   line-height: 1.2;
+  text-shadow: 0 2px 14px rgba(0, 210, 255, 0.35);
 }
 
-.mobile-only-title {
-  display: none;
+.about-hero-card p {
+  margin-bottom: 14px;
 }
 
-.about-text-container p {
-  margin-bottom: 15px;
+.about-hero-card p:last-child {
+  margin-bottom: 0;
 }
 
 .highlight-text {
-  color: white;
+  color: #ffffff;
   font-weight: bold;
   font-size: 20px;
   font-style: italic;
 }
 
-.about-media-container {
-  flex: 1;
-  max-width: 550px;
-  aspect-ratio: 4 / 3;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+.about-scroll-cue {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #00d2ff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  pointer-events: none;
+  animation: aboutScrollBounce 1.8s infinite ease-in-out;
 }
 
-.about-media {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+@keyframes aboutScrollBounce {
+  0%, 100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, 7px);
+  }
 }
 
 /* ======================================================== */
@@ -467,37 +555,40 @@
 /* --- RESPONSIVIDADE MOBILE ---                            */
 /* ======================================================== */
 @media (max-width: 768px) {
-  
-  .about-section {
-    padding: 30px 15px 90px; 
+  .content-wrapper {
+    padding: 20px 15px 90px;
   }
 
-  /* --- 1. MÁGICA DA INTRODUÇÃO MOBILE (Original) --- */
-  .desktop-only-title {
-    display: none !important;
+  /* --- 1. INTRODUÇÃO MOBILE --- */
+  .about-scroll-intro {
+    height: 210vh;
   }
 
-  .mobile-only-title {
-    display: block !important;
-    text-align: center;
-    font-size: 28px;
-    margin-bottom: 25px;
+  .about-hero-overlay {
+    padding: 92px 16px 64px;
+    align-items: flex-end;
+    justify-content: center;
   }
 
-  .about-hero {
-    flex-direction: column-reverse; 
-    gap: 25px;
-    margin-bottom: 40px;
-  }
-  
-  .about-text-container {
-    text-align: left; 
-    font-size: 16px; 
+  .about-hero-card {
+    padding: 22px 20px;
+    font-size: 15px;
     line-height: 1.5;
   }
 
+  .about-title {
+    font-size: 26px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+
   .highlight-text {
-    font-size: 18px;
+    font-size: 17px;
+  }
+
+  .about-scroll-cue {
+    bottom: 14px;
+    font-size: 11px;
   }
   
   /* --- 2. DECK MOBILE --- */

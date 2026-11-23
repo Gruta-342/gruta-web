@@ -8,9 +8,9 @@ export default function FloatingSocials() {
   const pathname = usePathname();
   
   const isPainelAdmin = pathname?.startsWith("/admin");
-  const isJogos = pathname?.includes("/jogos/");
+  const isJogos = pathname?.includes("/jogos");
 
-  // Se estivermos no Painel Admin ou no dentro de algum jogo online, não renderiza os botões
+  // Se estivermos no Painel Admin, Jogos, ou  dentro de algum jogo online, não renderiza os botões
   if (isPainelAdmin || isJogos) {
     return null;
   }

@@ -21,10 +21,10 @@ const GAME_MODES = {
 };
 
 const INITIAL_STATS = {
-  DAILY: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guesses: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 } },
-  NORMAL: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guesses: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 } },
-  DOUBLE: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guesses: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 } },
-  QUAD: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guesses: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 } }
+  DAILY: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, guesses: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 } },
+  NORMAL: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, guesses: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 } },
+  DOUBLE: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, guesses: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0 } },
+  QUAD: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, guesses: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 } }
 };
 
 function evaluateGuess(guess, target) {
@@ -86,6 +86,12 @@ export default function Termo() {
 
   const [stats, setStats] = useState(INITIAL_STATS);
   const [secondsRemaining, setSecondsRemaining] = useState(getSecondsUntilNextWord());
+  const [timer, setTimer] = useState(0);
+  const timerRef = useRef(0);
+
+  useEffect(() => {
+    timerRef.current = timer;
+  }, [timer]);
 
   const gameStateRef = useRef({ currentGuessArray, activeCol, guesses, gameStatus, activeMode, secretWords, solvedBoards, dayNumber });
   useEffect(() => {
@@ -136,6 +142,7 @@ export default function Termo() {
             setSolvedBoards(parsed.gameStatus === "WON" ? [0] : []);
             setCurrentGuessArray(Array(mode.length).fill(""));
             setActiveCol(0);
+            setTimer(parsed.timer || 0);
 
             if (parsed.gameStatus !== "IN_PROGRESS") {
               markDailyAsCompleted("termo-gruta");
@@ -153,14 +160,46 @@ export default function Termo() {
     setSolvedBoards([]);
     setCurrentGuessArray(Array(mode.length).fill(""));
     setActiveCol(0);
+    setTimer(0);
     setGameStatus("IN_PROGRESS");
   }, []);
 
   useEffect(() => {
     initGame(GAME_MODES.DAILY);
-    const timer = setInterval(() => setSecondsRemaining(getSecondsUntilNextWord()), 1000);
-    return () => clearInterval(timer);
+    const countdownTimer = setInterval(() => setSecondsRemaining(getSecondsUntilNextWord()), 1000);
+    return () => clearInterval(countdownTimer);
   }, [initGame]);
+
+  // Cronômetro silencioso + persistência contínua do modo Diário
+  useEffect(() => {
+    if (gameStatus !== "IN_PROGRESS") return;
+    const interval = setInterval(() => {
+      setTimer((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [gameStatus]);
+
+  useEffect(() => {
+    if (activeMode.id !== "DAILY" || !dayNumber) return;
+    try {
+      localStorage.setItem(
+        STATE_STORAGE_KEY,
+        JSON.stringify({
+          dayNumber,
+          guesses,
+          gameStatus,
+          timer
+        })
+      );
+    } catch (e) {}
+  }, [activeMode.id, dayNumber, guesses, gameStatus, timer]);
+
+  const formatMatchTime = (secs) => {
+    if (secs === null || secs === undefined) return "--:--";
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
 
   const formatCountdown = (secs) => {
     const hours = String(Math.floor(secs / 3600)).padStart(2, "0");
@@ -169,7 +208,7 @@ export default function Termo() {
     return `${hours}:${minutes}:${seconds}`;
   };
 
-  const handleGameEnd = (won, attemptsCount, modeId) => {
+  const handleGameEnd = (won, attemptsCount, modeId, finalTime) => {
     if (modeId === "DAILY") {
       markDailyAsCompleted("termo-gruta");
     }
@@ -181,13 +220,27 @@ export default function Termo() {
       const newWon = won ? currentModeStats.won + 1 : currentModeStats.won;
       const newCurrentStreak = won ? currentModeStats.currentStreak + 1 : 0;
       const newMaxStreak = Math.max(currentModeStats.maxStreak, newCurrentStreak);
+      const prevBest = currentModeStats.bestTime ?? null;
+      const newBestTime = won
+        ? prevBest === null
+          ? finalTime
+          : Math.min(prevBest, finalTime)
+        : prevBest;
       const newGuesses = { ...currentModeStats.guesses };
 
       if (won) newGuesses[attemptsCount] = (newGuesses[attemptsCount] || 0) + 1;
 
       const updatedStats = {
         ...prev,
-        [modeId]: { played: newPlayed, won: newWon, currentStreak: newCurrentStreak, maxStreak: newMaxStreak, guesses: newGuesses }
+        [modeId]: {
+          played: newPlayed,
+          won: newWon,
+          currentStreak: newCurrentStreak,
+          maxStreak: newMaxStreak,
+          bestTime: newBestTime,
+          lastTime: finalTime,
+          guesses: newGuesses
+        }
       };
 
       try {
@@ -271,6 +324,8 @@ export default function Termo() {
     setActiveCol(0);
     setGameStatus(newStatus);
 
+    const elapsedTime = timerRef.current;
+
     if (activeMode.id === "DAILY") {
       try {
         localStorage.setItem(
@@ -278,7 +333,8 @@ export default function Termo() {
           JSON.stringify({
             dayNumber,
             guesses: updatedGuesses,
-            gameStatus: newStatus
+            gameStatus: newStatus,
+            timer: elapsedTime
           })
         );
         if (newStatus !== "IN_PROGRESS") {
@@ -289,7 +345,7 @@ export default function Termo() {
 
     if (newStatus === "WON") {
       showToast("Sensacional! Você venceu!", 2500);
-      handleGameEnd(true, updatedGuesses.length, activeMode.id);
+      handleGameEnd(true, updatedGuesses.length, activeMode.id, elapsedTime);
     } else if (newStatus === "LOST") {
       const missedWords = secretWords.filter((_, idx) => !newSolvedBoards.includes(idx));
       const message =
@@ -298,7 +354,7 @@ export default function Termo() {
           : `Que pena! A palavra era ${missedWords[0]}`;
 
       showToast(message, 4000);
-      handleGameEnd(false, updatedGuesses.length, activeMode.id);
+      handleGameEnd(false, updatedGuesses.length, activeMode.id, elapsedTime);
     }
   }, []);
 
@@ -390,6 +446,13 @@ export default function Termo() {
   const winPercentage = currentModeStats.played > 0 ? Math.round((currentModeStats.won / currentModeStats.played) * 100) : 0;
   const maxGuessCount = Math.max(...Object.values(currentModeStats.guesses), 1);
   const totalLosses = currentModeStats.played - currentModeStats.won;
+
+  const matchTimeToShow =
+    gameStatus !== "IN_PROGRESS"
+      ? timer > 0
+        ? timer
+        : (currentModeStats.lastTime ?? null)
+      : (currentModeStats.lastTime ?? null);
 
   return (
     <div className="termo-wrapper">
@@ -559,6 +622,23 @@ export default function Termo() {
                   melhor
                   <br />
                   sequência
+                </span>
+              </div>
+            </div>
+
+            <div className="termo-time-stats-row">
+              <div className="termo-time-stat-pill">
+                <span className="termo-time-stat-label">
+                  {gameStatus !== "IN_PROGRESS" ? "tempo da partida" : "última partida"}
+                </span>
+                <span className="termo-time-stat-value">
+                  {formatMatchTime(matchTimeToShow)}
+                </span>
+              </div>
+              <div className="termo-time-stat-pill">
+                <span className="termo-time-stat-label">melhor tempo</span>
+                <span className="termo-time-stat-value">
+                  {formatMatchTime(currentModeStats.bestTime ?? null)}
                 </span>
               </div>
             </div>

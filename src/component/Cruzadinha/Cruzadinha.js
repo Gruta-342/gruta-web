@@ -5,7 +5,6 @@ import Link from "next/link";
 import "./Cruzadinha.css";
 import {
   generateCrosswordPuzzle,
-  DIFFICULTY_CONFIG,
   THEME_LABELS
 } from "../../lib/cruzadinhaGenerator.js";
 
@@ -17,6 +16,22 @@ const MODE_LABELS = {
   easy: "Fácil",
   medium: "Médio",
   hard: "Difícil"
+};
+
+const INITIAL_MODE_STATS = {
+  played: 0,
+  won: 0,
+  currentStreak: 0,
+  maxStreak: 0,
+  bestTime: null,
+  lastTime: null
+};
+
+const INITIAL_STATS = {
+  daily: { ...INITIAL_MODE_STATS },
+  easy: { ...INITIAL_MODE_STATS },
+  medium: { ...INITIAL_MODE_STATS },
+  hard: { ...INITIAL_MODE_STATS }
 };
 
 function getTodayKey() {
@@ -33,6 +48,12 @@ function getDailyPuzzleNumber() {
   today.setHours(0, 0, 0, 0);
   const diffDays = Math.floor((today.getTime() - epoch) / (1000 * 60 * 60 * 24));
   return Math.max(1, diffDays + 1);
+}
+
+function getSecondsUntilMidnight() {
+  const now = new Date();
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  return Math.max(0, Math.floor((tomorrow - now) / 1000));
 }
 
 function createSeededRandom(seedStr) {
@@ -92,18 +113,14 @@ export default function Cruzadinha() {
   // Modals & Dropdowns
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showStatsModal, setShowStatsModal] = useState(false);
-  const [showWinModal, setShowWinModal] = useState(false);
   const [showMobileCluesModal, setShowMobileCluesModal] = useState(false);
   const [themeDropdownOpen, setThemeDropdownOpen] = useState(false);
   const [diffDropdownOpen, setDiffDropdownOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
 
-  // Stats
-  const [stats, setStats] = useState({
-    played: 0,
-    won: 0,
-    bestTime: null
-  });
+  // Stats & Countdown
+  const [stats, setStats] = useState(INITIAL_STATS);
+  const [secondsRemaining, setSecondsRemaining] = useState(getSecondsUntilMidnight());
 
   const boardRef = useRef(null);
   const cluesAsideRef = useRef(null);
@@ -112,36 +129,69 @@ export default function Cruzadinha() {
   const diffDropdownRef = useRef(null);
 
   const isDaily = gameMode === "daily";
-  const effectiveDifficulty = isDaily ? "hard" : gameMode;
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STATS_STORAGE_KEY);
       if (saved) {
-        setStats(JSON.parse(saved));
+        const parsed = JSON.parse(saved);
+        if (parsed.daily) {
+          setStats({
+            daily: { ...INITIAL_MODE_STATS, ...parsed.daily },
+            easy: { ...INITIAL_MODE_STATS, ...parsed.easy },
+            medium: { ...INITIAL_MODE_STATS, ...parsed.medium },
+            hard: { ...INITIAL_MODE_STATS, ...parsed.hard }
+          });
+        } else if (typeof parsed.played === "number") {
+          setStats({
+            ...INITIAL_STATS,
+            daily: {
+              ...INITIAL_MODE_STATS,
+              played: parsed.played || 0,
+              won: parsed.won || 0,
+              currentStreak: parsed.won > 0 ? 1 : 0,
+              maxStreak: parsed.won > 0 ? 1 : 0,
+              bestTime: parsed.bestTime ?? null,
+              lastTime: parsed.lastTime ?? null
+            }
+          });
+        }
       }
     } catch (e) {
       console.error("Erro ao carregar estatísticas", e);
     }
   }, []);
 
-  const updateStats = useCallback((won, timeTaken) => {
+  const updateStats = useCallback((won, timeTaken, modeKey) => {
     setStats((prev) => {
-      const newPlayed = prev.played + 1;
-      const newWon = won ? prev.won + 1 : prev.won;
-      let newBest = prev.bestTime;
-      if (won) {
-        newBest = newBest === null ? timeTaken : Math.min(newBest, timeTaken);
-      }
-      const newStats = {
-        played: newPlayed,
-        won: newWon,
-        bestTime: newBest
+      const curr = prev[modeKey] || INITIAL_MODE_STATS;
+      const newPlayed = curr.played + 1;
+      const newWon = won ? curr.won + 1 : curr.won;
+      const newCurrentStreak = won ? curr.currentStreak + 1 : 0;
+      const newMaxStreak = Math.max(curr.maxStreak, newCurrentStreak);
+      const prevBest = curr.bestTime ?? null;
+      const newBest = won
+        ? prevBest === null
+          ? timeTaken
+          : Math.min(prevBest, timeTaken)
+        : prevBest;
+
+      const updated = {
+        ...prev,
+        [modeKey]: {
+          played: newPlayed,
+          won: newWon,
+          currentStreak: newCurrentStreak,
+          maxStreak: newMaxStreak,
+          bestTime: newBest,
+          lastTime: timeTaken
+        }
       };
+
       try {
-        localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(newStats));
+        localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(updated));
       } catch (e) {}
-      return newStats;
+      return updated;
     });
   }, []);
 
@@ -219,6 +269,7 @@ export default function Cruzadinha() {
           setIsTimerRunning(!restoredDaily.isGameOver);
           if (restoredDaily.isGameOver) {
             markDailyAsCompleted("cruzadinha-gruta");
+            setTimeout(() => setShowStatsModal(true), 600);
           }
         } else {
           const emptyUserGrid = Array(p.rows)
@@ -243,7 +294,6 @@ export default function Cruzadinha() {
         }
 
         setConfirmGiveUp(false);
-        setShowWinModal(false);
         setShowMobileCluesModal(false);
       } catch (err) {
         console.error("Erro ao inicializar jogo:", err);
@@ -255,6 +305,10 @@ export default function Cruzadinha() {
 
   useEffect(() => {
     startNewGame("daily", "random");
+    const countdownInterval = setInterval(() => {
+      setSecondsRemaining(getSecondsUntilMidnight());
+    }, 1000);
+    return () => clearInterval(countdownInterval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -276,9 +330,17 @@ export default function Cruzadinha() {
   }, [isDaily, puzzle, userGrid, timer, isGameOver, gameWon, surrendered, saveDailyProgress]);
 
   const formatTime = (secs) => {
+    if (secs === null || secs === undefined) return "--:--";
     const m = Math.floor(secs / 60);
     const s = secs % 60;
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const formatCountdown = (secs) => {
+    const hours = String(Math.floor(secs / 3600)).padStart(2, "0");
+    const minutes = String(Math.floor((secs % 3600) / 60)).padStart(2, "0");
+    const seconds = String(secs % 60).padStart(2, "0");
+    return `${hours}:${minutes}:${seconds}`;
   };
 
   useEffect(() => {
@@ -481,18 +543,19 @@ export default function Cruzadinha() {
           setIsGameOver(true);
           setGameWon(true);
           setIsTimerRunning(false);
-          setShowWinModal(true);
-          updateStats(true, timer);
+          updateStats(true, timer, gameMode);
           if (isDaily) {
             saveDailyProgress(currentUserGrid, timer, true, true, false);
             markDailyAsCompleted("cruzadinha-gruta");
           }
+          showToast("Sensacional! Você desvendou a cruzadinha!");
+          setTimeout(() => setShowStatsModal(true), 900);
         } else {
           showToast("A grade está completa, mas ainda há letras incorretas!");
         }
       }
     },
-    [puzzle, timer, updateStats, showToast, isDaily, saveDailyProgress]
+    [puzzle, timer, gameMode, updateStats, showToast, isDaily, saveDailyProgress]
   );
 
   const handleInputCharacter = useCallback(
@@ -612,7 +675,6 @@ export default function Cruzadinha() {
       const prevC = isVert ? currentWord.c : currentWord.c + step;
 
       if (solvedCellsSet.has(`${prevR}-${prevC}`)) {
-        // Ignora células já acertadas (verdes)
         continue;
       }
 
@@ -659,7 +721,6 @@ export default function Cruzadinha() {
       if (
         showHelpModal ||
         showStatsModal ||
-        showWinModal ||
         showMobileCluesModal ||
         diffDropdownOpen ||
         themeDropdownOpen
@@ -722,7 +783,6 @@ export default function Cruzadinha() {
   }, [
     showHelpModal,
     showStatsModal,
-    showWinModal,
     showMobileCluesModal,
     diffDropdownOpen,
     themeDropdownOpen,
@@ -753,13 +813,34 @@ export default function Cruzadinha() {
       row.map((cell) => (cell.isBlock ? "" : cell.solution))
     );
     setUserGrid(revealedGrid);
-    updateStats(false, timer);
+    updateStats(false, timer, gameMode);
     if (isDaily) {
       saveDailyProgress(revealedGrid, timer, true, false, true);
       markDailyAsCompleted("cruzadinha-gruta");
     }
     showToast("Respostas reveladas. Mais sorte na próxima!");
-  }, [isGameOver, confirmGiveUp, puzzle, timer, updateStats, showToast, isDaily, saveDailyProgress]);
+    setTimeout(() => setShowStatsModal(true), 900);
+  }, [isGameOver, confirmGiveUp, puzzle, timer, gameMode, updateStats, showToast, isDaily, saveDailyProgress]);
+
+  const handleShare = async () => {
+    const dayNum = getDailyPuzzleNumber();
+    const totalWords = puzzle?.words.length || 0;
+    const outcomeText = gameWon
+      ? `🏆 ${formatTime(timer)} (${totalWords}/${totalWords} palavras)`
+      : `💀 Desistiu • ${formatTime(timer)}`;
+    const shareText = `Joguei Cruzadinha na Gruta\n#${dayNum} ${outcomeText}\n\ngruta342.app/jogos/cruzadinha`;
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      showToast("Copiado para a área de transferência!");
+    } catch (e) {}
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Cruzadinha da Gruta", text: shareText });
+      } catch (e) {}
+    }
+  };
 
   const isCellInActiveWord = useCallback(
     (r, c) => {
@@ -816,6 +897,20 @@ export default function Cruzadinha() {
     ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
     ["CLUES", "Z", "X", "C", "V", "B", "N", "M", "BKSP"]
   ];
+
+  const currentModeStats = stats[gameMode] || INITIAL_MODE_STATS;
+  const winPercentage =
+    currentModeStats.played > 0
+      ? Math.round((currentModeStats.won / currentModeStats.played) * 100)
+      : 0;
+  const totalLosses = Math.max(0, currentModeStats.played - currentModeStats.won);
+  const maxResultCount = Math.max(currentModeStats.won, totalLosses, 1);
+
+  const matchTimeToShow = isGameOver
+    ? timer > 0
+      ? timer
+      : (currentModeStats.lastTime ?? null)
+    : (currentModeStats.lastTime ?? null);
 
   const renderCluesColumns = (closeOnSelect = false) => (
     <>
@@ -1008,7 +1103,7 @@ export default function Cruzadinha() {
           </div>
         </header>
 
-        {/* Toolbar: Seletor de Tema (oculto no Diário), Cronômetro, Novo Jogo (oculto no Diário) e Desistir */}
+        {/* Toolbar: Seletor de Tema (oculto no Diário), Novo Jogo (oculto no Diário) e Desistir */}
         <div className="cz-toolbar">
           <div className="cz-theme-selector-wrap" ref={themeDropdownRef}>
             {isDaily ? (
@@ -1061,21 +1156,6 @@ export default function Cruzadinha() {
           </div>
 
           <div className="cz-toolbar-right">
-            <div className="cz-timer-pill" title="Tempo da Partida">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-              <span>{formatTime(timer)}</span>
-            </div>
-
             {!isDaily && (
               <button
                 type="button"
@@ -1302,63 +1382,6 @@ export default function Cruzadinha() {
           </div>
         )}
 
-        {/* MODAL: VITÓRIA */}
-        {showWinModal && (
-          <div className="cz-modal-overlay" onClick={() => setShowWinModal(false)}>
-            <div className="cz-modal-card win-card" onClick={(e) => e.stopPropagation()}>
-              <div className="cz-win-trophy">🏆</div>
-              <h2 className="cz-modal-title">Parabéns!</h2>
-              <p className="cz-modal-desc">
-                {isDaily
-                  ? `Você concluiu o Desafio Diário #${getDailyPuzzleNumber()}!`
-                  : "Você desvendou toda a cruzadinha com maestria!"}
-              </p>
-
-              <div className="cz-win-stats-grid">
-                <div className="cz-win-stat-box">
-                  <span className="cz-win-stat-val">{formatTime(timer)}</span>
-                  <span className="cz-win-stat-lbl">Tempo</span>
-                </div>
-                <div className="cz-win-stat-box">
-                  <span className="cz-win-stat-val">{puzzle?.words.length || 0}</span>
-                  <span className="cz-win-stat-lbl">Palavras</span>
-                </div>
-                <div className="cz-win-stat-box">
-                  <span className="cz-win-stat-val">
-                    {isDaily ? "Diário" : DIFFICULTY_CONFIG[effectiveDifficulty]?.name}
-                  </span>
-                  <span className="cz-win-stat-lbl">Modo</span>
-                </div>
-              </div>
-
-              {isDaily ? (
-                <button
-                  type="button"
-                  className="cz-btn-modal-action"
-                  onClick={() => {
-                    setShowWinModal(false);
-                    setGameMode("easy");
-                    startNewGame("easy", theme);
-                  }}
-                >
-                  🎲 Jogar Modo Livre
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="cz-btn-modal-action"
-                  onClick={() => {
-                    setShowWinModal(false);
-                    startNewGame(gameMode, theme);
-                  }}
-                >
-                  🔄 Jogar Novamente
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
         {/* MODAL: COMO JOGAR */}
         {showHelpModal && (
           <div className="cz-modal-overlay" onClick={() => setShowHelpModal(false)}>
@@ -1427,49 +1450,148 @@ export default function Cruzadinha() {
           </div>
         )}
 
-        {/* MODAL: ESTATÍSTICAS */}
+        {/* MODAL: ESTATÍSTICAS (PADRÃO CAÇA MORCEGOS & TERMO) */}
         {showStatsModal && (
           <div className="cz-modal-overlay" onClick={() => setShowStatsModal(false)}>
-            <div className="cz-modal-card stats-card" onClick={(e) => e.stopPropagation()}>
-              <div className="cz-modal-header">
-                <h3>ESTATÍSTICAS</h3>
-                <button
-                  type="button"
-                  className="cz-modal-close"
-                  onClick={() => setShowStatsModal(false)}
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="cz-stats-row">
-                <div className="cz-stat-box">
-                  <span className="cz-stat-num">{stats.played}</span>
-                  <span className="cz-stat-label">Jogadas</span>
-                </div>
-                <div className="cz-stat-box">
-                  <span className="cz-stat-num">{stats.won}</span>
-                  <span className="cz-stat-label">Vitórias</span>
-                </div>
-                <div className="cz-stat-box">
-                  <span className="cz-stat-num">
-                    {stats.played > 0 ? Math.round((stats.won / stats.played) * 100) : 0}%
-                  </span>
-                  <span className="cz-stat-label">% Vitórias</span>
-                </div>
-                <div className="cz-stat-box">
-                  <span className="cz-stat-num">
-                    {stats.bestTime !== null ? formatTime(stats.bestTime) : "--:--"}
-                  </span>
-                  <span className="cz-stat-label">Melhor Tempo</span>
-                </div>
-              </div>
+            <div className="cz-stats-modal" onClick={(e) => e.stopPropagation()}>
               <button
                 type="button"
-                className="cz-btn-modal-action"
+                className="cz-modal-close-btn"
                 onClick={() => setShowStatsModal(false)}
               >
-                Fechar
+                ✕
               </button>
+              <h2 className="cz-stats-title">
+                ESTATÍSTICAS - {(MODE_LABELS[gameMode] || "Diário").toUpperCase()}
+              </h2>
+
+              <h3 className="cz-dist-title">PROGRESSO</h3>
+              <div className="cz-stats-grid">
+                <div className="cz-stat-box">
+                  <span className="cz-stat-value">{currentModeStats.played}</span>
+                  <span className="cz-stat-label">jogos</span>
+                </div>
+                <div className="cz-stat-box">
+                  <span className="cz-stat-value">{winPercentage}%</span>
+                  <span className="cz-stat-label">de vitórias</span>
+                </div>
+                <div className="cz-stat-box">
+                  <span className="cz-stat-value">{currentModeStats.currentStreak}</span>
+                  <span className="cz-stat-label">
+                    sequência
+                    <br />
+                    de vitórias
+                  </span>
+                </div>
+                <div className="cz-stat-box">
+                  <span className="cz-stat-value">{currentModeStats.maxStreak}</span>
+                  <span className="cz-stat-label">
+                    melhor
+                    <br />
+                    sequência
+                  </span>
+                </div>
+              </div>
+
+              <div className="cz-time-stats-row">
+                <div className="cz-time-stat-pill">
+                  <span className="cz-time-stat-label">
+                    {isGameOver ? "tempo da partida" : "última partida"}
+                  </span>
+                  <span className="cz-time-stat-value">{formatTime(matchTimeToShow)}</span>
+                </div>
+                <div className="cz-time-stat-pill">
+                  <span className="cz-time-stat-label">melhor tempo</span>
+                  <span className="cz-time-stat-value">
+                    {formatTime(currentModeStats.bestTime ?? null)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="cz-dist-section">
+                <h3 className="cz-dist-title">HISTÓRICO DE RESULTADOS</h3>
+                <div className="cz-dist-graph">
+                  <div className="cz-dist-row">
+                    <span className="cz-dist-num">🏆</span>
+                    <div className="cz-dist-bar-wrapper">
+                      <div
+                        className={`cz-dist-bar ${isGameOver && gameWon ? "highlight" : ""}`}
+                        style={{
+                          width:
+                            currentModeStats.played > 0
+                              ? `${Math.max((currentModeStats.won / maxResultCount) * 100, 7)}%`
+                              : "7%"
+                        }}
+                      >
+                        {currentModeStats.won}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="cz-dist-row">
+                    <span className="cz-dist-num">💀</span>
+                    <div className="cz-dist-bar-wrapper">
+                      <div
+                        className={`cz-dist-bar ${
+                          isGameOver && !gameWon ? "loss-highlight" : "loss-bar"
+                        }`}
+                        style={{
+                          width:
+                            currentModeStats.played > 0
+                              ? `${Math.max((totalLosses / maxResultCount) * 100, 7)}%`
+                              : "7%"
+                        }}
+                      >
+                        {totalLosses}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {isDaily ? (
+                <div className="cz-stats-footer">
+                  <div className="cz-footer-col">
+                    <span className="cz-next-label">próxima cruzadinha em</span>
+                    <div className="cz-countdown">{formatCountdown(secondsRemaining)}</div>
+                  </div>
+                  {isGameOver && (
+                    <div className="cz-footer-col align-right">
+                      <button type="button" className="cz-share-btn" onClick={handleShare}>
+                        compartilhe
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="18"
+                          height="18"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <circle cx="18" cy="5" r="3" />
+                          <circle cx="6" cy="12" r="3" />
+                          <circle cx="18" cy="19" r="3" />
+                          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                          <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                isGameOver && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowStatsModal(false);
+                      startNewGame(gameMode, theme);
+                    }}
+                    className="cz-play-again-btn"
+                  >
+                    JOGAR NOVAMENTE
+                  </button>
+                )
+              )}
             </div>
           </div>
         )}

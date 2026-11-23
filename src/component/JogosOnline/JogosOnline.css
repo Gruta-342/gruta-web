@@ -1,54 +1,29 @@
 .jogos-online-page {
-  padding: 40px 20px 90px;
+  padding: 28px 20px 90px;
   max-width: 1200px;
   margin: 0 auto;
   color: white;
 }
 
-/* Header */
-.jogos-online-header {
-  text-align: center;
-  margin-bottom: 50px;
+.jogos-toast {
+  position: fixed;
+  top: 84px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #00d2ff;
+  color: #051329;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  z-index: 99999;
+  box-shadow: 0 8px 24px rgba(0, 210, 255, 0.35);
+  pointer-events: none;
 }
 
-.jogos-online-title {
-  font-size: 40px;
-  color: #00d2ff;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-bottom: 12px;
-}
-
-.jogos-online-intro {
-  color: #a0aab5;
-  font-size: 18px;
-  max-width: 720px;
-  margin: 0 auto 20px;
-  line-height: 1.5;
-}
-
-/* Seções de Jogos */
-.jogos-section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 25px;
-  border-bottom: 1px solid rgba(0, 210, 255, 0.2);
-  padding-bottom: 12px;
-}
-
-.jogos-section-title {
-  font-size: 24px;
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin: 0;
-}
-
-.jogos-section-tagline {
-  color: #8a9fc4;
-  font-size: 14px;
-  margin-top: 4px;
+/* Barra Mobile dos 3 Indicadores (oculta no Desktop, pois fica no Header) */
+.jogos-mobile-indicators-bar {
+  display: none;
 }
 
 /* Grid de Jogos Próprios Jogáveis */
@@ -158,20 +133,276 @@
   pointer-events: none;
 }
 
-/* Responsividade */
+/* ======================================================== */
+/* MODAL DA TOCHA (MOBILE)                                  */
+/* ======================================================== */
+.jogos-torch-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 8, 18, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
+
+.jogos-torch-modal {
+  background: #071731;
+  border: 1px solid rgba(0, 210, 255, 0.35);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.75);
+  border-radius: 14px;
+  width: 92%;
+  max-width: 400px;
+  padding: 24px 20px;
+  color: #ffffff;
+  position: relative;
+}
+
+.jogos-torch-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #8a9fc4;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.jogos-torch-modal-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.jogos-torch-big-flame {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.14);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.jogos-torch-big-flame.lit {
+  background: rgba(255, 145, 0, 0.18);
+  color: #ff9100;
+  border-color: rgba(255, 145, 0, 0.55);
+  box-shadow: 0 0 22px rgba(255, 145, 0, 0.35);
+}
+
+.jogos-torch-modal-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #ffffff;
+}
+
+.jogos-torch-status-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.16);
+  color: #94a3b8;
+}
+
+.jogos-torch-status-tag.lit {
+  background: rgba(255, 145, 0, 0.2);
+  color: #ffb703;
+  border: 1px solid rgba(255, 145, 0, 0.4);
+}
+
+.jogos-torch-stats-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.jogos-torch-stat-card {
+  background: rgba(14, 38, 77, 0.6);
+  border: 1px solid rgba(0, 210, 255, 0.22);
+  border-radius: 10px;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.jogos-torch-stat-num {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.jogos-torch-stat-label {
+  font-size: 11px;
+  color: #8a9fc4;
+  line-height: 1.2;
+}
+
+.jogos-torch-strength-box {
+  background: rgba(10, 28, 59, 0.75);
+  border: 1px solid rgba(0, 210, 255, 0.22);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.jogos-torch-strength-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.jogos-torch-strength-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  color: #8a9fc4;
+}
+
+.jogos-torch-strength-badge {
+  font-size: 12px;
+  font-weight: 900;
+  color: #ffb703;
+}
+
+.jogos-torch-strength-segments {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.jogos-torch-segment {
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.jogos-torch-segment.active {
+  background: linear-gradient(90deg, #ff9100, #ffb703);
+  box-shadow: 0 0 10px rgba(255, 145, 0, 0.45);
+}
+
+.jogos-torch-progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.jogos-torch-progress-fill {
+  height: 100%;
+  background: #00d2ff;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.jogos-torch-milestone-text {
+  margin: 0;
+  font-size: 11px;
+  color: #9fb3d1;
+  line-height: 1.35;
+}
+
+/* ======================================================== */
+/* RESPONSIVIDADE MOBILE (ATÉ 768px)                        */
+/* ======================================================== */
 @media (max-width: 768px) {
-  .jogos-online-title {
-    font-size: 30px;
+  .jogos-online-page {
+    padding: 14px 16px 90px;
+  }
+
+  .jogos-mobile-indicators-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .jogos-mob-ind-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(10, 33, 71, 0.78);
+    border: 1px solid rgba(0, 210, 255, 0.28);
+    border-radius: 12px;
+    padding: 8px 12px 8px 8px;
+    color: #e6f1ff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .jogos-mob-ind-card:active {
+    transform: scale(0.97);
+    border-color: #00d2ff;
+  }
+
+  .jogos-mob-ind-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .jogos-mob-ind-card.ind-level .jogos-mob-ind-icon {
+    background: rgba(0, 210, 255, 0.18);
+    color: #00d2ff;
+  }
+
+  .jogos-mob-ind-card.ind-torch .jogos-mob-ind-icon {
+    background: rgba(148, 163, 184, 0.16);
+    color: #94a3b8;
+  }
+
+  .jogos-mob-ind-card.ind-torch.lit {
+    border-color: rgba(255, 145, 0, 0.55);
+    box-shadow: 0 0 12px rgba(255, 145, 0, 0.18);
+  }
+
+  .jogos-mob-ind-card.ind-torch.lit .jogos-mob-ind-icon {
+    background: rgba(255, 145, 0, 0.22);
+    color: #ff9100;
+  }
+
+  .jogos-mob-ind-card.ind-torch.lit .jogos-mob-ind-value {
+    color: #ffb703;
+  }
+
+  .jogos-mob-ind-card.ind-coins .jogos-mob-ind-icon {
+    background: rgba(250, 204, 21, 0.18);
+    color: #facc15;
+  }
+
+  .jogos-mob-ind-value {
+    font-size: 14px;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
   }
 
   .playable-games-grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 16px;
-  }
-
-  .jogos-section-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
   }
 }

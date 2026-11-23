@@ -349,7 +349,13 @@ body:has(.morcegos-wrapper)::-webkit-scrollbar {
   position: relative;
   max-height: 85dvh;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   box-sizing: border-box;
+}
+
+.morcegos-stats-modal::-webkit-scrollbar {
+  display: none;
 }
 
 .morcegos-modal-close-btn {
@@ -386,13 +392,48 @@ body:has(.morcegos-wrapper)::-webkit-scrollbar {
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .morcegos-stat-box {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+}
+
+.morcegos-time-stats-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.morcegos-time-stat-pill {
+  background: rgba(14, 38, 77, 0.55);
+  border: 1px solid rgba(0, 210, 255, 0.22);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.morcegos-time-stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #8a9fc4;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.morcegos-time-stat-value {
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.1;
+  color: #00d2ff;
+  font-variant-numeric: tabular-nums;
 }
 
 .morcegos-stat-value {

@@ -27,9 +27,9 @@ const LIVES = 3;
 const VALIDATION_DELAY_MS = 520;
 
 const INITIAL_STATS = {
-  DAILY: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, livesDist: { 3: 0, 2: 0, 1: 0 } },
-  NORMAL: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, livesDist: { 3: 0, 2: 0, 1: 0 } },
-  HARD: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, livesDist: { 3: 0, 2: 0, 1: 0 } }
+  DAILY: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, livesDist: { 3: 0, 2: 0, 1: 0 } },
+  NORMAL: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, livesDist: { 3: 0, 2: 0, 1: 0 } },
+  HARD: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, bestTime: null, lastTime: null, livesDist: { 3: 0, 2: 0, 1: 0 } }
 };
 
 const BatSvg = () => (
@@ -100,6 +100,12 @@ export default function Morcegos() {
 
   const [stats, setStats] = useState(INITIAL_STATS);
   const [secondsRemaining, setSecondsRemaining] = useState(getSecondsUntilMidnight());
+  const [timer, setTimer] = useState(0);
+  const timerRef = useRef(0);
+
+  useEffect(() => {
+    timerRef.current = timer;
+  }, [timer]);
 
   const dropdownRef = useRef(null);
   const isAnimating = useRef(false);
@@ -164,7 +170,7 @@ export default function Morcegos() {
     setTimeout(() => setToast((curr) => (curr === msg ? "" : curr)), duration);
   }, []);
 
-  const recordGameResult = useCallback((won, remainingLives, modeId) => {
+  const recordGameResult = useCallback((won, remainingLives, modeId, finalTime) => {
     if (modeId === "DAILY") {
       markDailyAsCompleted("morcegos-gruta");
     }
@@ -175,6 +181,12 @@ export default function Morcegos() {
       const newWon = won ? curr.won + 1 : curr.won;
       const newStreak = won ? curr.currentStreak + 1 : 0;
       const newMaxStreak = Math.max(curr.maxStreak, newStreak);
+      const prevBest = curr.bestTime ?? null;
+      const newBestTime = won
+        ? prevBest === null
+          ? finalTime
+          : Math.min(prevBest, finalTime)
+        : prevBest;
       const newLivesDist = { ...curr.livesDist };
 
       if (won && remainingLives >= 1 && remainingLives <= 3) {
@@ -188,6 +200,8 @@ export default function Morcegos() {
           won: newWon,
           currentStreak: newStreak,
           maxStreak: newMaxStreak,
+          bestTime: newBestTime,
+          lastTime: finalTime,
           livesDist: newLivesDist
         }
       };
@@ -347,6 +361,7 @@ export default function Morcegos() {
               setBoard(parsed.board);
               setLives(parsed.lives ?? LIVES);
               setGameStatus(parsed.gameStatus || "PLAYING");
+              setTimer(parsed.timer || 0);
               if (parsed.gameStatus && parsed.gameStatus !== "PLAYING") {
                 markDailyAsCompleted("morcegos-gruta");
                 setTimeout(() => setShowStatsModal(true), 500);
@@ -363,6 +378,7 @@ export default function Morcegos() {
           .map(() => Array(mode.size).fill(0))
       );
       setLives(LIVES);
+      setTimer(0);
       setGameStatus("PLAYING");
     },
     [buildPuzzleData]
@@ -370,9 +386,42 @@ export default function Morcegos() {
 
   useEffect(() => {
     initGame(GAME_MODES.DAILY);
-    const timer = setInterval(() => setSecondsRemaining(getSecondsUntilMidnight()), 1000);
-    return () => clearInterval(timer);
+    const countdownTimer = setInterval(() => setSecondsRemaining(getSecondsUntilMidnight()), 1000);
+    return () => clearInterval(countdownTimer);
   }, [initGame]);
+
+  // Cronômetro silencioso + persistência do modo Diário
+  useEffect(() => {
+    if (gameStatus !== "PLAYING") return;
+    const interval = setInterval(() => {
+      setTimer((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [gameStatus]);
+
+  useEffect(() => {
+    if (activeMode.id !== "DAILY" || !board.length) return;
+    const { dateKey } = getDailyInfo();
+    try {
+      localStorage.setItem(
+        DAILY_STATE_KEY,
+        JSON.stringify({
+          dateKey,
+          board,
+          lives,
+          gameStatus,
+          timer
+        })
+      );
+    } catch (e) {}
+  }, [activeMode.id, board, lives, gameStatus, timer]);
+
+  const formatMatchTime = (secs) => {
+    if (secs === null || secs === undefined) return "--:--";
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
 
   const saveDailyProgress = useCallback((updatedBoard, updatedLives, updatedStatus) => {
     if (activeModeRef.current.id !== "DAILY") return;
@@ -384,7 +433,8 @@ export default function Morcegos() {
           dateKey,
           board: updatedBoard,
           lives: updatedLives,
-          gameStatus: updatedStatus
+          gameStatus: updatedStatus,
+          timer: timerRef.current
         })
       );
       if (updatedStatus !== "PLAYING") {
@@ -422,7 +472,7 @@ export default function Morcegos() {
           if (nextStatus === "LOST") {
             setGameStatus("LOST");
             showToastMsg("Suas vidas acabaram!", 3000);
-            recordGameResult(false, 0, activeModeRef.current.id);
+            recordGameResult(false, 0, activeModeRef.current.id, timerRef.current);
           }
 
           setBoard((currB) => {
@@ -449,7 +499,7 @@ export default function Morcegos() {
             setGameStatus("WON");
             showToastMsg("Incrível! A Gruta está limpa!", 2500);
             saveDailyProgress(currB, livesRef.current, "WON");
-            recordGameResult(true, livesRef.current, activeModeRef.current.id);
+            recordGameResult(true, livesRef.current, activeModeRef.current.id, timerRef.current);
           } else {
             saveDailyProgress(currB, livesRef.current, "PLAYING");
           }
@@ -652,6 +702,13 @@ export default function Morcegos() {
     currentStats.played > 0 ? Math.round((currentStats.won / currentStats.played) * 100) : 0;
   const totalLosses = currentStats.played - currentStats.won;
   const maxDistCount = Math.max(...Object.values(currentStats.livesDist), totalLosses, 1);
+
+  const matchTimeToShow =
+    gameStatus !== "PLAYING"
+      ? timer > 0
+        ? timer
+        : (currentStats.lastTime ?? null)
+      : (currentStats.lastTime ?? null);
 
   return (
     <div className="morcegos-wrapper">
@@ -859,6 +916,23 @@ export default function Morcegos() {
                   melhor
                   <br />
                   sequência
+                </span>
+              </div>
+            </div>
+
+            <div className="morcegos-time-stats-row">
+              <div className="morcegos-time-stat-pill">
+                <span className="morcegos-time-stat-label">
+                  {gameStatus !== "PLAYING" ? "tempo da partida" : "última partida"}
+                </span>
+                <span className="morcegos-time-stat-value">
+                  {formatMatchTime(matchTimeToShow)}
+                </span>
+              </div>
+              <div className="morcegos-time-stat-pill">
+                <span className="morcegos-time-stat-label">melhor tempo</span>
+                <span className="morcegos-time-stat-value">
+                  {formatMatchTime(currentStats.bestTime ?? null)}
                 </span>
               </div>
             </div>

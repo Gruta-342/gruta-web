@@ -94,15 +94,114 @@
 .mobile-profile-item {
   display: none !important; /* O !important garante que NUNCA apareçam no PC */
 }
-.mobile-profile-left { /* <--- Nova classe adicionada aqui! */
+.mobile-profile-left {
   display: none !important; 
 }
 
+/* ======================================================== */
+/* 2.1 ELEMENTOS EXCLUSIVOS DA PÁGINA JOGOS (WEB)           */
+/* ======================================================== */
+.desktop-profile-left {
+  display: flex;
+  align-items: center;
+}
+
+.desktop-jogos-indicators {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gruta-ind-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(10, 33, 71, 0.78);
+  border: 1px solid rgba(0, 210, 255, 0.28);
+  border-radius: 999px;
+  padding: 5px 13px 5px 6px;
+  color: #e6f1ff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.gruta-ind-pill:hover {
+  border-color: #00d2ff;
+  background: rgba(0, 210, 255, 0.14);
+  transform: translateY(-1px);
+}
+
+.gruta-ind-icon-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ind-level .gruta-ind-icon-circle {
+  background: rgba(0, 210, 255, 0.18);
+  color: #00d2ff;
+}
+
+.ind-torch .gruta-ind-icon-circle {
+  background: rgba(148, 163, 184, 0.16);
+  color: #94a3b8;
+}
+
+.ind-torch.lit {
+  border-color: rgba(255, 145, 0, 0.55);
+  box-shadow: 0 0 12px rgba(255, 145, 0, 0.18);
+}
+
+.ind-torch.lit .gruta-ind-icon-circle {
+  background: rgba(255, 145, 0, 0.22);
+  color: #ff9100;
+}
+
+.ind-torch.lit .gruta-ind-value {
+  color: #ffb703;
+}
+
+.ind-coins .gruta-ind-icon-circle {
+  background: rgba(250, 204, 21, 0.18);
+  color: #facc15;
+}
+
+.gruta-ind-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.3px;
+}
+
+/* Toast rápido do cabeçalho */
+.gruta-header-toast {
+  position: fixed;
+  top: 86px;
+  right: 40px;
+  background: #00d2ff;
+  color: #051329;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  z-index: 99999;
+  box-shadow: 0 8px 24px rgba(0, 210, 255, 0.35);
+  pointer-events: none;
+}
 
 /* ======================================================== */
 /* 3. MENU INFERIOR - SOMENTE COMPUTADOR (ACIMA DE 769px)   */
 /* ======================================================== */
 @media (min-width: 769px) {
+  /* Na página /jogos, o menu inferior não aparece na visualização Web */
+  .header-container.is-jogos-page .bottom-nav {
+    display: none !important;
+  }
+
   .bottom-nav {
     display: flex;
     justify-content: center;
@@ -178,7 +277,11 @@
   .top-bar { padding: 15px 20px; }
   
   /* Inverte a Visibilidade: Desliga PC, Liga Mobile */
-  .desktop-slogan, .desktop-logo, .desktop-profile {
+  .desktop-slogan,
+  .desktop-logo,
+  .desktop-profile,
+  .desktop-profile-left,
+  .desktop-jogos-indicators {
     display: none !important; 
   }
 
@@ -231,7 +334,6 @@
   .bottom-nav.open { 
     max-height: 450px; 
     padding: 10px 0 20px;
-    /* Removido o border-top antigo, pois a linha divisória original voltou */
   }
   
   .bottom-nav ul {
@@ -247,7 +349,7 @@
 
   /* --- BOTÕES DO MENU BASE --- */
   .bottom-nav a {
-    position: relative; /* Necessário para ancorar os efeitos de luz */
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -261,46 +363,41 @@
     transition: color 0.3s ease;
     background: transparent;
     border: none;
-    z-index: 1; /* Garante que o texto fique acima do brilho */
+    z-index: 1;
   }
 
-  /* O fundo base transparente para receber o brilho (Tamanho Fixo) */
   .bottom-nav a::before {
     content: "";
     position: absolute;
     top: 0;
     left: 50%;
-    transform: translateX(-50%); /* Centraliza perfeitamente */
-    width: 280px; /* TAMANHO PADRÃO FIXO (Aprox. dobro de CALENDÁRIO) */
+    transform: translateX(-50%);
+    width: 280px;
     height: 100%;
     background: transparent;
     transition: background 0.3s ease;
-    z-index: -1; /* Joga o brilho para trás do texto */
+    z-index: -1;
   }
 
-  /* --- O ESTADO ATIVO --- */
   .bottom-nav a.active {
     color: #ffffff;
   }
 
-  /* Brilho azul envolvendo o botão ativo */
   .bottom-nav a.active::before {
     background: linear-gradient(90deg, transparent 0%, rgba(0, 150, 255, 0.35) 50%, transparent 100%);
   }
 
-  /* A linha azul clara vívida no centro do botão ativo */
   .bottom-nav a.active::after {
     content: "";
     position: absolute;
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 280px; /* MESMO TAMANHO PADRÃO FIXO DA LUZ */
+    width: 280px;
     height: 2px;
     background: linear-gradient(90deg, transparent 0%, #00d2ff 50%, transparent 100%);
   }
 
-  /* --- O EFEITO HOVER (Passar o mouse - Sem a linha base) --- */
   .bottom-nav a:not(.active):hover {
     color: #ffffff; 
   }
@@ -309,7 +406,6 @@
     background: linear-gradient(90deg, transparent 0%, rgba(0, 150, 255, 0.15) 50%, transparent 100%);
   }
 
-  /* Botão de Perfil extra no menu */
   .mobile-profile-item {
     display: flex !important; 
     justify-content: center;
@@ -346,13 +442,202 @@
 /* 5. COMPORTAMENTO ESPECÍFICO - PÁGINA SOBRE               */
 /* ======================================================== */
 .header-container.is-sobre-page {
-  /* Transforma em um elemento de fluxo normal da página */
   position: absolute !important; 
-  /* Opcional: Um leve degradê de fundo para a transição com o céu do parallax ficar mais elegante */
   background: linear-gradient(180deg, rgba(5, 19, 41, 1) 70%, rgba(5, 19, 41, 0) 100%);
   border-bottom: none;
 }
 
-/* Como inibimos a classe .scrolled via Javascript, o submenu da página sobre 
-   já ficará permanentemente aberto e estático abaixo do header! */
+/* ======================================================== */
+/* 6. MODAL DA TOCHA (DETALHES)                             */
+/* ======================================================== */
+.gruta-torch-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 8, 18, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 16px;
+}
 
+.gruta-torch-modal {
+  background: #071731;
+  border: 1px solid rgba(0, 210, 255, 0.35);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.75);
+  border-radius: 14px;
+  width: 92%;
+  max-width: 400px;
+  padding: 24px 20px;
+  color: #ffffff;
+  position: relative;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.gruta-torch-close-btn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #8a9fc4;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.gruta-torch-close-btn:hover {
+  color: #ffffff;
+}
+
+.gruta-torch-modal-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.gruta-torch-big-flame {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: rgba(148, 163, 184, 0.14);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.gruta-torch-big-flame.lit {
+  background: rgba(255, 145, 0, 0.18);
+  color: #ff9100;
+  border-color: rgba(255, 145, 0, 0.55);
+  box-shadow: 0 0 22px rgba(255, 145, 0, 0.35);
+}
+
+.gruta-torch-modal-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #ffffff;
+}
+
+.gruta-torch-status-tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.16);
+  color: #94a3b8;
+}
+
+.gruta-torch-status-tag.lit {
+  background: rgba(255, 145, 0, 0.2);
+  color: #ffb703;
+  border: 1px solid rgba(255, 145, 0, 0.4);
+}
+
+.gruta-torch-stats-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.gruta-torch-stat-card {
+  background: rgba(14, 38, 77, 0.6);
+  border: 1px solid rgba(0, 210, 255, 0.22);
+  border-radius: 10px;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+}
+
+.gruta-torch-stat-num {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.gruta-torch-stat-label {
+  font-size: 11px;
+  color: #8a9fc4;
+  line-height: 1.2;
+}
+
+.gruta-torch-strength-box {
+  background: rgba(10, 28, 59, 0.75);
+  border: 1px solid rgba(0, 210, 255, 0.22);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.gruta-torch-strength-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.gruta-torch-strength-title {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.7px;
+  color: #8a9fc4;
+}
+
+.gruta-torch-strength-badge {
+  font-size: 12px;
+  font-weight: 900;
+  color: #ffb703;
+}
+
+.gruta-torch-strength-segments {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.gruta-torch-segment {
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.gruta-torch-segment.active {
+  background: linear-gradient(90deg, #ff9100, #ffb703);
+  box-shadow: 0 0 10px rgba(255, 145, 0, 0.45);
+}
+
+.gruta-torch-progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.gruta-torch-progress-fill {
+  height: 100%;
+  background: #00d2ff;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.gruta-torch-milestone-text {
+  margin: 0;
+  font-size: 11px;
+  color: #9fb3d1;
+  line-height: 1.35;
+}

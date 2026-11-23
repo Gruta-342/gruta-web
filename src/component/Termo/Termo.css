@@ -406,7 +406,7 @@
   justify-content: center;
 }
 
-/* -------------------- MODAL DE ESTATÍSTICAS E AJUDA -------------------- */
+/* -------------------- MODAL DE ESTATÍSTICAS E AJUDA (PADRÃO CAÇA MORCEGOS) -------------------- */
 .termo-stats-modal {
   background: #071731;
   border: 1px solid rgba(0, 210, 255, 0.3);
@@ -418,8 +418,14 @@
   position: relative;
   max-height: 85dvh;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   font-family: system-ui, -apple-system, sans-serif;
   box-sizing: border-box;
+}
+
+.termo-stats-modal::-webkit-scrollbar {
+  display: none;
 }
 
 .termo-modal-close-btn {
@@ -437,8 +443,10 @@
   text-align: center;
   font-size: 15px;
   font-weight: 800;
+  margin-top: 0;
   margin-bottom: 20px;
   text-transform: uppercase;
+  color: white;
 }
 
 .termo-dist-title {
@@ -454,7 +462,7 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .termo-stat-box {
@@ -476,6 +484,41 @@
   line-height: 1.2;
 }
 
+.termo-time-stats-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.termo-time-stat-pill {
+  background: rgba(14, 38, 77, 0.55);
+  border: 1px solid rgba(0, 210, 255, 0.22);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.termo-time-stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #8a9fc4;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.termo-time-stat-value {
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1.1;
+  color: #00d2ff;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Gráfico de Distribuição */
 .termo-dist-section {
   width: 100%;
@@ -485,7 +528,7 @@
 .termo-dist-graph {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .termo-dist-row {
